@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Kesk — Créez votre pièce unique</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cream:#F7F3EE;--ink:#1A1714;--warm:#C8A87A;--warm-light:#E8D9C0;
+  --accent:#B85C38;--surface:#FFFFFF;--muted:#8A8078;--border:#E2DAD0;
+  --radius:16px;--shadow:0 8px 40px rgba(26,23,20,0.08);
+}
+html{background:var(--cream);min-height:100vh}
+body{font-family:'DM Sans',sans-serif;color:var(--ink);background:var(--cream);min-height:100vh}
+
+/* ── HEADER ── */
+.header{
+  padding:28px 48px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--cream);
+  border-bottom:1px solid var(--border);
+}
+.logo{font-family:'Playfair Display',serif;font-size:24px;letter-spacing:.04em;color:var(--ink);text-decoration:none}
+.logo span{color:var(--accent)}
+.header-tagline{font-size:12px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+
+/* ── HERO ── */
+.hero{
+  padding:72px 48px 56px;
+  max-width:1100px;margin:0 auto;
+  text-align:center;
+}
+.hero-label{
+  display:inline-block;
+  font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--accent);background:rgba(184,92,56,.08);
+  padding:5px 14px;border-radius:99px;margin-bottom:20px;
+}
+.hero-title{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(36px,5vw,58px);font-weight:400;line-height:1.15;
+  margin-bottom:16px;color:var(--ink);
+}
+.hero-title em{font-style:italic;color:var(--accent)}
+.hero-sub{
+  font-size:16px;color:var(--muted);line-height:1.7;
+  max-width:520px;margin:0 auto 48px;
+}
+
+/* ── GRID ── */
+.modules-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:20px;
+  max-width:1100px;margin:0 auto;
+  padding:0 48px 80px;
+}
+
+.module-card{
+  background:var(--surface);
+  border:1.5px solid var(--border);
+  border-radius:var(--radius);
+  overflow:hidden;
+  cursor:pointer;
+  transition:all .3s;
+  text-decoration:none;
+  color:var(--ink);
+  display:flex;flex-direction:column;
+  position:relative;
+}
+.module-card:hover{
+  border-color:var(--warm);
+  transform:translateY(-4px);
+  box-shadow:var(--shadow);
+}
+.module-card.featured{
+  border-color:var(--accent);
+  grid-column:span 1;
+}
+.module-card.featured::before{
+  content:'Disponible maintenant';
+  position:absolute;top:14px;right:14px;
+  font-size:10px;font-weight:500;letter-spacing:.06em;
+  background:var(--accent);color:#fff;
+  padding:3px 10px;border-radius:99px;
+  text-transform:uppercase;
+}
+.module-card.soon::before{
+  content:'Bientôt';
+  position:absolute;top:14px;right:14px;
+  font-size:10px;font-weight:500;letter-spacing:.06em;
+  background:var(--warm-light);color:var(--warm);
+  padding:3px 10px;border-radius:99px;
+  text-transform:uppercase;
+}
+
+.module-visual{
+  height:180px;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+  font-size:56px;
+}
+.module-visual.art{background:linear-gradient(135deg,#2B5EA7 0%,#E8A234 100%)}
+.module-visual.vase{background:linear-gradient(135deg,#4A7C59 0%,#A8C5A0 100%)}
+.module-visual.luminaire{background:linear-gradient(135deg,#1C1C2E 0%,#F5C842 100%)}
+.module-visual.chaise{background:linear-gradient(135deg,#6B3A2A 0%,#D4A574 100%)}
+.module-visual.etagere{background:linear-gradient(135deg,#2C3E50 0%,#BDC3C7 100%)}
+.module-visual.mur{background:linear-gradient(135deg,#1A1A2E 0%,#E94560 100%)}
+
+.module-shine{
+  position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.15) 0%,transparent 60%);
+  pointer-events:none;
+}
+
+.module-body{padding:20px 22px 22px;flex:1;display:flex;flex-direction:column}
+.module-name{
+  font-family:'Playfair Display',serif;
+  font-size:20px;font-weight:400;margin-bottom:6px;
+}
+.module-desc{font-size:13px;color:var(--muted);line-height:1.6;flex:1;margin-bottom:16px}
+.module-footer{
+  display:flex;align-items:center;justify-content:space-between;
+  padding-top:14px;border-top:1px solid var(--border);
+}
+.module-price{font-size:13px;color:var(--muted)}
+.module-price strong{font-size:16px;color:var(--ink);font-weight:500}
+.module-cta{
+  font-size:12px;font-weight:500;color:var(--accent);
+  display:flex;align-items:center;gap:4px;
+  transition:gap .2s;
+}
+.module-card:hover .module-cta{gap:8px}
+
+/* ── BADGE SUISSE ── */
+.swiss-badge{
+  display:flex;align-items:center;justify-content:center;gap:32px;
+  max-width:700px;margin:0 auto 64px;
+  padding:20px 32px;
+  background:var(--surface);border:1px solid var(--border);border-radius:12px;
+}
+.swiss-item{text-align:center}
+.swiss-item-icon{font-size:20px;margin-bottom:4px}
+.swiss-item-label{font-size:11px;color:var(--muted);letter-spacing:.04em}
+
+/* ── FOOTER ── */
+.footer{
+  border-top:1px solid var(--border);
+  padding:28px 48px;
+  display:flex;align-items:center;justify-content:space-between;
+  font-size:12px;color:var(--muted);
+}
+.footer a{color:var(--muted);text-decoration:none}
+.footer a:hover{color:var(--ink)}
+
+/* ── MODAL BIENTÔT ── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(26,23,20,.5);
+  display:none;align-items:center;justify-content:center;
+  z-index:200;backdrop-filter:blur(4px);padding:20px;
+}
+.modal-overlay.visible{display:flex}
+.modal{
+  background:var(--surface);border-radius:var(--radius);
+  padding:40px;max-width:440px;width:100%;
+  box-shadow:0 20px 60px rgba(26,23,20,.2);
+  text-align:center;
+}
+.modal-icon{font-size:48px;margin-bottom:16px}
+.modal-title{font-family:'Playfair Display',serif;font-size:24px;margin-bottom:8px}
+.modal-sub{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:24px}
+.modal-input{
+  width:100%;border:1.5px solid var(--border);border-radius:8px;
+  padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:14px;
+  color:var(--ink);margin-bottom:12px;transition:border-color .2s;
+}
+.modal-input:focus{outline:none;border-color:var(--warm)}
+.modal-btn{
+  width:100%;padding:13px;background:var(--ink);color:var(--cream);
+  border:none;border-radius:8px;font-family:'DM Sans',sans-serif;
+  font-size:14px;font-weight:500;cursor:pointer;transition:background .2s;
+}
+.modal-btn:hover{background:var(--accent)}
+.modal-close{
+  margin-top:12px;font-size:13px;color:var(--muted);
+  cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif;
+}
+.modal-close:hover{color:var(--ink)}
+.modal-success{display:none}
+.modal-success.visible{display:block}
+.modal-form.hidden{display:none}
+
+@media(max-width:768px){
+  .header{padding:20px 20px}
+  .hero{padding:48px 20px 36px}
+  .modules-grid{grid-template-columns:1fr;padding:0 20px 48px;gap:16px}
+  .module-card.featured{grid-column:span 1}
+  .swiss-badge{flex-wrap:wrap;gap:20px;margin:0 20px 48px}
+  .footer{flex-direction:column;gap:8px;padding:20px;text-align:center}
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <a href="https://kesk.ch" class="logo">Kesk<span>.</span></a>
+  <div class="header-tagline">Fabrication suisse · Sur mesure</div>
+</header>
+
+<section class="hero">
+  <div class="hero-label">Configurateur en ligne</div>
+  <h1 class="hero-title">
+    Créez votre pièce<br>
+    <em>unique</em>
+  </h1>
+  <p class="hero-sub">
+    Choisissez votre création, personnalisez chaque détail,
+    et recevez votre devis ou commandez directement en ligne.
+    Tout est fabriqué en Suisse.
+  </p>
+</section>
+
+<div class="swiss-badge">
+  <div class="swiss-item">
+    <div class="swiss-item-icon">🇨🇭</div>
+    <div class="swiss-item-label">Fabriqué en Suisse</div>
+  </div>
+  <div class="swiss-item">
+    <div class="swiss-item-icon">♻️</div>
+    <div class="swiss-item-label">Matériaux recyclés</div>
+  </div>
+  <div class="swiss-item">
+    <div class="swiss-item-icon">✦</div>
+    <div class="swiss-item-label">Relief UV unique</div>
+  </div>
+  <div class="swiss-item">
+    <div class="swiss-item-icon">📦</div>
+    <div class="swiss-item-label">Livraison offerte</div>
+  </div>
+  <div class="swiss-item">
+    <div class="swiss-item-icon">🎨</div>
+    <div class="swiss-item-label">Génération IA</div>
+  </div>
+</div>
+
+<div class="modules-grid">
+
+  <!-- 1. ART / TABLEAU -->
+  <a class="module-card featured" href="https://kesk-configurateur.vercel.app">
+    <div class="module-visual art">
+      <span>🖼️</span>
+      <div class="module-shine"></div>
+    </div>
+    <div class="module-body">
+      <div class="module-name">Tableau & Art UV</div>
+      <div class="module-desc">
+        Générez une image IA unique dans 6 styles artistiques.
+        Imprimée avec relief UV sur toile, bois, métal, tasse, magnet ou coaster.
+      </div>
+      <div class="module-footer">
+        <div class="module-price">Dès <strong>15 CHF</strong></div>
+        <div class="module-cta">Commander →</div>
+      </div>
+    </div>
+  </a>
+
+  <!-- 2. VASE / PIED DE TABLE -->
+  <a class="module-card featured" href="https://kesk.ch/configurateur/vase">
+    <div class="module-visual vase">
+      <span>🏺</span>
+      <div class="module-shine"></div>
+    </div>
+    <div class="module-body">
+      <div class="module-name">Vase & Pied de table</div>
+      <div class="module-desc">
+        Concevez votre vase ou pied de table sur mesure.
+        Dimensions, forme, matière — imprimé en 3D dans notre atelier.
+      </div>
+      <div class="module-footer">
+        <div class="module-price">Devis <strong>gratuit</strong></div>
+        <div class="module-cta">Configurer →</div>
+      </div>
+    </div>
+  </a>
+
+  <!-- 3. LUMINAIRE -->
+  <div class="module-card soon" onclick="openModal('luminaire')">
+    <div class="module-visual luminaire">
+      <span>💡</span>
+      <div class="module-shine"></div>
+    </div>
+    <div class="module-body">
+      <div class="module-name">Luminaire</div>
+      <div class="module-desc">
+        Abat-jour, lampe de table ou suspension — créez votre luminaire
+        avec des motifs uniques imprimés en 3D.
+      </div>
+      <div class="module-footer">
+        <div class="module-price">Devis <strong>gratuit</strong></div>
+        <div class="module-cta">Demander →</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. CHAISE / BANC -->
+  <div class="module-card soon" onclick="openModal('chaise')">
+    <div class="module-visual chaise">
+      <span>🪑</span>
+      <div class="module-shine"></div>
+    </div>
+    <div class="module-body">
+      <div class="module-name">Chaise & Banc</div>
+      <div class="module-desc">
+        Assise personnalisée aux dimensions exactes de votre espace.
+        Structure solide, finition soignée, made in Valais.
+      </div>
+      <div class="module-footer">
+        <div class="module-price">Devis <strong>gratuit</strong></div>
+        <div class="module-cta">Demander →</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. ÉTAGÈRE -->
+  <div class="module-card soon" onclick="openModal('etagere')">
+    <div class="module-visual etagere">
+      <span>📚</span>
+      <div class="module-shine"></div>
+    </div>
+    <div class="module-body">
+      <div class="module-name">Étagère sur mesure</div>
+      <div class="module-desc">
+        Étagère murale ou autoportante aux dimensions de votre espace.
+        Design minimaliste ou organique, impression 3D grande dimension.
+      </div>
+      <div class="module-footer">
+        <div class="module-price">Devis <strong>gratuit</strong></div>
+        <div class="module-cta">Demander →</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. DÉCO MUR 3D -->
+  <div class="module-card soon" onclick="openModal('mur')">
+    <div class="module-visual mur">
+      <span>🧱</span>
+      <div class="module-shine"></div>
+    </div>
+    <div class="module-body">
+      <div class="module-name">Déco mur 3D</div>
+      <div class="module-desc">
+        Panneaux muraux 3D avec motifs géométriques ou organiques.
+        Effet sculptural unique, installation facile, Kesk exclusif.
+      </div>
+      <div class="module-footer">
+        <div class="module-price">Devis <strong>gratuit</strong></div>
+        <div class="module-cta">Demander →</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div>© 2026 Kesk · Vétroz, Valais · Suisse</div>
+  <div style="display:flex;gap:24px">
+    <a href="https://kesk.ch">kesk.ch</a>
+    <a href="/cdn-cgi/l/email-protection#8ce4e9e0e0e3cce7e9ffe7a2efe4"><span class="__cf_email__" data-cfemail="80e8e5ececefc0ebe5f3ebaee3e8">[email&#160;protected]</span></a>
+  </div>
+</footer>
+
+<!-- MODAL BIENTÔT -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalDirect()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div id="modalForm">
+      <div class="modal-icon" id="modalIcon">⏳</div>
+      <div class="modal-title" id="modalTitle">Bientôt disponible</div>
+      <div class="modal-sub" id="modalSub">
+        Ce configurateur est en cours de développement.
+        Laissez votre email pour être notifié en avant-première.
+      </div>
+      <input class="modal-input" id="modalEmail" type="email" placeholder="votre@email.ch"/>
+      <button class="modal-btn" onclick="submitModal()">Me notifier dès l'ouverture</button>
+      <button class="modal-close" onclick="closeModalDirect()">Non merci</button>
+    </div>
+    <div class="modal-success" id="modalSuccess">
+      <div class="modal-icon">✦</div>
+      <div class="modal-title">Parfait !</div>
+      <div class="modal-sub">
+        Vous serez parmi les premiers informés dès l'ouverture de ce configurateur.
+      </div>
+      <button class="modal-close" onclick="closeModalDirect()">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+const MODULES = {
+  vase:      { icon:'🏺', title:'Vase & Pied de table', sub:'Ce configurateur arrive très bientôt. Laissez votre email pour être notifié en avant-première.' },
+  luminaire: { icon:'💡', title:'Luminaire sur mesure',  sub:'Créez votre luminaire personnalisé. Laissez votre email pour être notifié dès l\'ouverture.' },
+  chaise:    { icon:'🪑', title:'Chaise & Banc',         sub:'Configurateur d\'assises sur mesure bientôt disponible. Laissez votre email.' },
+  etagere:   { icon:'📚', title:'Étagère sur mesure',    sub:'Votre étagère aux dimensions exactes. Laissez votre email pour être notifié.' },
+  mur:       { icon:'🧱', title:'Déco mur 3D',           sub:'Panneaux muraux 3D exclusifs. Laissez votre email pour être parmi les premiers.' },
+};
+
+function openModal(type){
+  const m = MODULES[type];
+  if(!m) return;
+  document.getElementById('modalIcon').textContent  = m.icon;
+  document.getElementById('modalTitle').textContent = m.title;
+  document.getElementById('modalSub').textContent   = m.sub;
+  document.getElementById('modalEmail').value       = '';
+  document.getElementById('modalForm').classList.remove('hidden');
+  document.getElementById('modalSuccess').classList.remove('visible');
+  document.getElementById('modalOverlay').classList.add('visible');
+}
+
+function closeModal(e){
+  if(e.target === document.getElementById('modalOverlay')) closeModalDirect();
+}
+function closeModalDirect(){
+  document.getElementById('modalOverlay').classList.remove('visible');
+}
+
+async function submitModal(){
+  var email = document.getElementById('modalEmail').value.trim();
+  var type  = document.getElementById('modalTitle').textContent;
+  if(!email || !email.includes('@')){
+    document.getElementById('modalEmail').style.borderColor='#B85C38';
+    return;
+  }
+  document.getElementById('modalEmail').style.borderColor='';
+  var btn = document.querySelector('.modal-submit');
+  if(btn){ btn.disabled=true; btn.textContent='Envoi…'; }
+
+  fetch('/api/waitlist', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({email: email, type: type})
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(){ showSuccess(); })
+  .catch(function(){
+    // Fallback mailto
+    var sub = encodeURIComponent('[Kesk] Inscription liste attente – ' + type);
+    var body = encodeURIComponent('Email: ' + email + '
+Produit: ' + type);
+    window.open('mailto:hello@kesk.ch?subject=' + sub + '&body=' + body, '_blank');
+    showSuccess();
+  })
+  .finally(function(){
+    if(btn){ btn.disabled=false; btn.textContent='Me notifier dès l'ouverture'; }
+  });
+}
+
+function showSuccess(){
+  document.getElementById('modalForm').classList.add('hidden');
+  document.getElementById('modalSuccess').classList.add('visible');
+  var btn = document.querySelector('.modal-submit');
+  if(btn){ btn.disabled=false; btn.textContent='Je veux être notifié →'; }
+}
+
+function openModal(type){
+  var m = MODULES[type];
+  if(!m) return;
+  document.getElementById('modalIcon').textContent  = m.icon;
+  document.getElementById('modalTitle').textContent = m.title;
+  document.getElementById('modalSub').textContent   = m.sub;
+  document.getElementById('modalEmail').value       = '';
+  document.getElementById('modalEmail').style.borderColor = '';
+  document.getElementById('modalForm').classList.remove('hidden');
+  document.getElementById('modalSuccess').classList.remove('visible');
+  document.getElementById('modalOverlay').classList.add('visible');
+}
+
+function closeModal(){
+  document.getElementById('modalOverlay').classList.remove('visible');
+}
+
+
+</script>
+</body>
+</html>
