@@ -112,7 +112,11 @@ export default async function handler(req, res) {
             <div style="color:#9a948c;font-size:12px;margin-top:6px">Réf. <strong style="color:#B85C38">${ref}</strong></div>
           </div>
           <div style="padding:20px 24px;background:#fff">
-            ${imageUrl && imageUrl.startsWith('http') ? `<img src="${imageUrl}" style="width:100%;max-height:280px;object-fit:cover;border-radius:8px;margin-bottom:16px"/>` : ''}
+            ${imageUrl && imageUrl.startsWith('http') ? `
+        <a href="${imageUrl}" download target="_blank" style="display:block;margin-bottom:16px">
+          <img src="${imageUrl}" style="width:100%;max-height:280px;object-fit:cover;border-radius:8px;display:block"/>
+          <div style="text-align:center;margin-top:6px;font-size:11px;color:#9a948c;letter-spacing:.06em">↓ Cliquer pour télécharger l'image</div>
+        </a>` : ''}
             <table style="width:100%;border-collapse:collapse;font-size:13px">
               <tr><td style="padding:5px 0;color:#9a948c;width:130px">Client</td><td style="color:#1c1916;font-weight:600">${customerName}</td></tr>
               <tr><td style="padding:5px 0;color:#9a948c">Email</td><td><a href="mailto:${customerEmail}" style="color:#B85C38">${customerEmail}</a></td></tr>
