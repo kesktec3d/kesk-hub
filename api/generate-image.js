@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -5,7 +7,7 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).end();
 
-  const { prompt, style } = req.body;
+  const { prompt } = req.body;
   if (!prompt) return res.status(400).json({ error: 'Prompt manquant' });
 
   try {
@@ -35,7 +37,6 @@ export default async function handler(req, res) {
 
     let imageUrl = Array.isArray(prediction.output) ? prediction.output[0] : prediction.output;
 
-    // Polling si pas encore terminé
     if (!imageUrl && prediction.id) {
       for (let i = 0; i < 30; i++) {
         await new Promise(r => setTimeout(r, 2000));
@@ -50,22 +51,21 @@ export default async function handler(req, res) {
 
     if (!imageUrl) throw new Error('Image non générée');
 
-    // 2. Upload Cloudinary
+    // 2. Upload Cloudinary — signature SHA1 correcte
     const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
     const apiKey = process.env.CLOUDINARY_API_KEY;
     const apiSecret = process.env.CLOUDINARY_API_SECRET;
     const timestamp = Math.floor(Date.now() / 1000);
     const folder = 'kesk-uv';
 
-    const enc = new TextEncoder();
-    const ck = await crypto.subtle.importKey('raw', enc.encode(apiSecret), { name: 'HMAC', hash: 'SHA-1' }, false, ['sign']);
-    const sig = await crypto.subtle.sign('HMAC', ck, enc.encode(`folder=${folder}&timestamp=${timestamp}`));
-    const signature = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2,'0')).join('');
+    // Signature = SHA1(params_string + api_secret)
+    const paramsString = `folder=${folder}&timestamp=${timestamp}${apiSecret}`;
+    const signature = crypto.createHash('sha1').update(paramsString).digest('hex');
 
     const fd = new FormData();
     fd.append('file', imageUrl);
     fd.append('api_key', apiKey);
-    fd.append('timestamp', timestamp);
+    fd.append('timestamp', String(timestamp));
     fd.append('signature', signature);
     fd.append('folder', folder);
 
