@@ -467,8 +467,10 @@ function isMobile(){return window.innerWidth < 600}
 
 function getPetalPositions(n, mobile){
   if(mobile){
-    const d = Math.min(148, window.innerWidth * 0.3);
-    const angles = [-72,-144,144,72,0];
+    const d = Math.min(140, window.innerWidth * 0.28);
+    const angles6 = [-60,-120,180,120,60,0];
+    const angles5 = [-72,-144,144,72,0];
+    const angles = n<=5 ? angles5 : angles6;
     return angles.slice(0,n).map(a=>({angle:a, dist:d}));
   }
   const d = 200;
