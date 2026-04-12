@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <title>Kesk · Constellation & Date</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet"/>
-<script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2/astronomy.browser.min.js"></script>
+<!-- astronomy-engine chargé dynamiquement -->
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#F7F3EE;--bg2:#f0ede8;--cream:#1c1916;--cream2:#2a2520;--terra:#B85C38;--ink:#1c1916;--muted:#9a948c;--border:#e0dbd4;--r:14px}
@@ -220,6 +220,26 @@ function setStyle(s,btn){
 
 // ─── CHARGEMENT DONNÉES ──────────────────────────────────────
 async function loadData(){
+  // Charger astronomy-engine dynamiquement
+  await new Promise((resolve,reject)=>{
+    if(window.AstronomyEngine){resolve();return;}
+    const s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/npm/astronomy-engine@2/astronomy.browser.min.js';
+    s.onload=resolve;
+    s.onerror=()=>{
+      // Fallback sans calcul astronomique réel
+      window.AstronomyEngine=null;
+      resolve();
+    };
+    document.head.appendChild(s);
+  });
+
+  // Utiliser les données inline immédiatement
+  starsData=STARS_INLINE;
+  constelData=CONSTEL_INLINE;
+  astroReady=true;
+  render();
+  // Essayer de charger les données externes en arrière-plan
   try{
     const [sr,cr]=await Promise.all([
       fetch('/data/stars.json'),
@@ -227,18 +247,13 @@ async function loadData(){
     ]);
     starsData=await sr.json();
     constelData=await cr.json();
-  }catch(e){
-    // Données inline minimales si fetch échoue
-    starsData=STARS_INLINE;
-    constelData=CONSTEL_INLINE;
-  }
-  astroReady=true;
-  render();
+    render(); // Re-render avec données complètes
+  }catch(e){}
 }
 
 // ─── RENDU CIEL ──────────────────────────────────────────────
 function render(){
-  if(!astroReady)return;
+  if(!astroReady){document.getElementById('skyStatus').textContent='Chargement…';return;}
   const canvas=document.getElementById('skyCanvas');
   const ctx=canvas.getContext('2d');
   const W=1200,H=1200,cx=W/2,cy=H/2,R=560;
@@ -283,31 +298,40 @@ function render(){
   ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.clip();
 
   // Calcul positions étoiles
-  const observer=new AstronomyEngine.Observer(lat,lon,0);
-  const astroDate=new AstronomyEngine.AstroTime(dt);
-
   const starPos={};
   const visible=[];
+
+  // Calcul LST (Local Sidereal Time) manuel — fonctionne sans lib
+  const J2000=2451545.0;
+  const jd=dt.getTime()/86400000+2440587.5;
+  const T=(jd-J2000)/36525;
+  // Greenwich Mean Sidereal Time en degrés
+  let GMST=280.46061837+360.98564736629*(jd-J2000)+0.000387933*T*T;
+  GMST=((GMST%360)+360)%360;
+  const LST=((GMST+lon)%360+360)%360; // Local Sidereal Time
+  const latRad=lat*Math.PI/180;
 
   starsData.forEach(star=>{
     if(star.mag>S.magLimit)return;
     try{
-      const eq=new AstronomyEngine.Equatorial(star.ra/15,star.dec,1000);
-      const hor=AstronomyEngine.HorizonFromVector(
-        AstronomyEngine.VectorFromEquator(eq,astroDate,observer),
-        observer,'normal'
-      );
-      const alt=hor.altitude;
-      const az=hor.azimuth;
+      const ra=star.ra; // degrés
+      const dec=star.dec*Math.PI/180;
+      // Angle horaire
+      const HA=((LST-ra)%360+360)%360;
+      const HArad=HA*Math.PI/180;
+      // Altitude et azimut
+      const sinAlt=Math.sin(dec)*Math.sin(latRad)+Math.cos(dec)*Math.cos(latRad)*Math.cos(HArad);
+      const alt=Math.asin(Math.max(-1,Math.min(1,sinAlt)))*180/Math.PI;
       if(alt<0)return;
-
+      const cosAz=(-Math.sin(dec)*Math.cos(latRad)+Math.cos(dec)*Math.sin(latRad)*Math.cos(HArad))/(Math.cos(alt*Math.PI/180)||0.0001);
+      let az=Math.acos(Math.max(-1,Math.min(1,cosAz)))*180/Math.PI;
+      if(Math.sin(HArad)>0)az=360-az;
       // Projection stéréographique
       const altRad=alt*Math.PI/180;
       const azRad=az*Math.PI/180;
       const r_proj=R*(Math.cos(altRad)/(1+Math.sin(altRad)));
       const px=cx+r_proj*Math.sin(azRad);
       const py=cy-r_proj*Math.cos(azRad);
-
       starPos[star.hip]={x:px,y:py};
       visible.push({...star,x:px,y:py,alt});
     }catch(e){}
@@ -466,29 +490,8 @@ async function sendOrder(){
 }
 
 // Données inline minimal si fetch échoue
-const STARS_INLINE=[
-  {hip:91262,ra:279.235,dec:38.784,mag:0.03,name:"Vega"},
-  {hip:69673,ra:213.915,dec:19.182,mag:-0.05,name:"Arcturus"},
-  {hip:65474,ra:201.298,dec:-11.162,mag:0.98,name:"Spica"},
-  {hip:102098,ra:310.358,dec:45.281,mag:1.25,name:"Deneb"},
-  {hip:98036,ra:301.182,dec:27.960,mag:1.25,name:"Altair"},
-  {hip:32349,ra:101.287,dec:-16.716,mag:-1.46,name:"Sirius"},
-  {hip:37279,ra:114.825,dec:5.225,mag:0.38,name:"Procyon"},
-  {hip:24436,ra:78.634,dec:7.407,mag:0.18,name:"Rigel"},
-  {hip:27989,ra:88.793,dec:7.407,mag:0.45,name:"Betelgeuse"},
-  {hip:21421,ra:68.980,dec:16.510,mag:0.85,name:"Aldebaran"},
-  {hip:49669,ra:152.093,dec:11.967,mag:1.35,name:"Regulus"},
-  {hip:37826,ra:116.329,dec:28.026,mag:1.14,name:"Pollux"},
-  {hip:11767,ra:37.952,dec:89.264,mag:2.02,name:"Polaris"},
-  {hip:71683,ra:219.920,dec:-60.835,mag:-0.27,name:"Rigil Kentaurus"},
-  {hip:30438,ra:97.204,dec:-52.696,mag:-0.74,name:"Canopus"},
-  {hip:80763,ra:247.352,dec:-26.432,mag:1.06,name:"Antares"},
-];
-const CONSTEL_INLINE={
-  "Orion":[[24436,26311],[27989,25985]],
-  "Ursa Major":[[53910,54061],[54061,58001]],
-  "Cygnus":[[102098,100453]],
-};
+const STARS_INLINE=[{"hip":677,"ra":2.097,"dec":29.09,"mag":2.06,"name":"Mirach"},{"hip":746,"ra":2.261,"dec":59.15,"mag":2.23,"name":"Caph"},{"hip":765,"ra":2.294,"dec":89.264,"mag":2.02,"name":"Polaris"},{"hip":1067,"ra":3.309,"dec":15.184,"mag":2.0,"name":"Hamal"},{"hip":3179,"ra":10.127,"dec":56.537,"mag":2.27,"name":"Schedar"},{"hip":3419,"ra":10.897,"dec":60.717,"mag":2.23,"name":"Gamma Cas"},{"hip":4427,"ra":14.177,"dec":60.235,"mag":2.47,"name":"Ruchbah"},{"hip":5447,"ra":17.433,"dec":35.62,"mag":2.83,"name":""},{"hip":7588,"ra":24.429,"dec":57.815,"mag":2.27,"name":"Almach"},{"hip":8102,"ra":26.016,"dec":40.956,"mag":2.06,"name":"Mirfak"},{"hip":8886,"ra":28.277,"dec":29.579,"mag":1.79,"name":"Algol"},{"hip":9640,"ra":30.974,"dec":42.33,"mag":1.9,"name":""},{"hip":11767,"ra":37.952,"dec":89.264,"mag":2.02,"name":"Polaris"},{"hip":14135,"ra":45.57,"dec":4.09,"mag":2.54,"name":""},{"hip":14576,"ra":46.999,"dec":38.84,"mag":2.69,"name":"Electra"},{"hip":15863,"ra":50.689,"dec":23.463,"mag":1.65,"name":"Aldebaran"},{"hip":17702,"ra":56.871,"dec":24.105,"mag":2.87,"name":"27 Tau"},{"hip":17851,"ra":57.29,"dec":47.788,"mag":1.79,"name":""},{"hip":18543,"ra":59.463,"dec":63.67,"mag":2.48,"name":""},{"hip":21421,"ra":68.98,"dec":16.51,"mag":0.85,"name":"Aldebaran"},{"hip":23875,"ra":76.625,"dec":41.235,"mag":1.9,"name":""},{"hip":24436,"ra":78.634,"dec":7.407,"mag":0.18,"name":"Rigel"},{"hip":24608,"ra":79.172,"dec":45.998,"mag":1.65,"name":""},{"hip":25336,"ra":81.283,"dec":6.35,"mag":2.06,"name":""},{"hip":25428,"ra":81.573,"dec":-0.299,"mag":2.77,"name":""},{"hip":25930,"ra":83.002,"dec":9.934,"mag":2.58,"name":""},{"hip":25985,"ra":83.183,"dec":-1.943,"mag":2.06,"name":""},{"hip":26207,"ra":83.858,"dec":-5.909,"mag":1.69,"name":"Saiph"},{"hip":26311,"ra":84.053,"dec":-1.202,"mag":1.74,"name":""},{"hip":26634,"ra":85.19,"dec":-1.943,"mag":2.46,"name":""},{"hip":27989,"ra":88.793,"dec":7.407,"mag":0.45,"name":"Betelgeuse"},{"hip":28360,"ra":90.0,"dec":6.0,"mag":1.9,"name":""},{"hip":28380,"ra":90.0,"dec":22.514,"mag":1.65,"name":""},{"hip":29655,"ra":94.138,"dec":22.514,"mag":1.98,"name":""},{"hip":30324,"ra":96.928,"dec":12.554,"mag":2.98,"name":""},{"hip":30438,"ra":97.204,"dec":-52.696,"mag":-0.74,"name":"Canopus"},{"hip":31681,"ra":101.287,"dec":12.896,"mag":1.58,"name":""},{"hip":32246,"ra":103.197,"dec":33.962,"mag":2.65,"name":""},{"hip":32349,"ra":101.287,"dec":-16.716,"mag":-1.46,"name":"Sirius"},{"hip":33579,"ra":107.0,"dec":-26.393,"mag":1.5,"name":"Adhara"},{"hip":35550,"ra":113.649,"dec":31.888,"mag":1.58,"name":""},{"hip":36188,"ra":116.329,"dec":28.026,"mag":2.87,"name":""},{"hip":36850,"ra":113.649,"dec":31.888,"mag":1.93,"name":""},{"hip":37279,"ra":114.825,"dec":5.225,"mag":0.38,"name":"Procyon"},{"hip":37826,"ra":116.329,"dec":28.026,"mag":1.14,"name":"Pollux"},{"hip":39429,"ra":121.886,"dec":-24.304,"mag":2.0,"name":""},{"hip":39757,"ra":123.0,"dec":-52.695,"mag":1.86,"name":""},{"hip":41037,"ra":128.0,"dec":-59.509,"mag":2.21,"name":""},{"hip":44816,"ra":137.742,"dec":-29.303,"mag":2.21,"name":""},{"hip":45238,"ra":139.272,"dec":-59.275,"mag":2.25,"name":""},{"hip":45556,"ra":140.0,"dec":-55.011,"mag":2.25,"name":""},{"hip":45860,"ra":141.0,"dec":-38.045,"mag":2.46,"name":""},{"hip":46390,"ra":142.674,"dec":-64.394,"mag":1.86,"name":""},{"hip":49669,"ra":152.093,"dec":11.967,"mag":1.35,"name":"Regulus"},{"hip":53910,"ra":165.46,"dec":56.383,"mag":1.77,"name":"Merak"},{"hip":54061,"ra":165.93,"dec":61.751,"mag":2.37,"name":"Dubhe"},{"hip":57632,"ra":177.265,"dec":14.572,"mag":2.14,"name":"Denebola"},{"hip":57757,"ra":178.457,"dec":53.695,"mag":2.44,"name":""},{"hip":58001,"ra":179.232,"dec":53.695,"mag":1.77,"name":"Merak"},{"hip":59774,"ra":183.857,"dec":55.959,"mag":2.23,"name":"Phekda"},{"hip":60718,"ra":186.649,"dec":-63.099,"mag":-0.01,"name":"Acrux"},{"hip":61084,"ra":187.791,"dec":-57.113,"mag":1.59,"name":""},{"hip":61932,"ra":190.415,"dec":-48.959,"mag":2.3,"name":""},{"hip":62956,"ra":193.507,"dec":55.96,"mag":2.44,"name":""},{"hip":63125,"ra":193.9,"dec":38.317,"mag":2.9,"name":"Cor Caroli"},{"hip":63608,"ra":195.544,"dec":-68.108,"mag":1.64,"name":""},{"hip":65378,"ra":200.981,"dec":54.925,"mag":2.23,"name":"Mizar"},{"hip":65474,"ra":201.298,"dec":-11.162,"mag":0.98,"name":"Spica"},{"hip":67301,"ra":206.885,"dec":49.313,"mag":1.86,"name":"Alkaid"},{"hip":68702,"ra":210.956,"dec":-60.374,"mag":2.09,"name":""},{"hip":68933,"ra":211.671,"dec":-36.37,"mag":2.25,"name":""},{"hip":69673,"ra":213.915,"dec":19.182,"mag":-0.05,"name":"Arcturus"},{"hip":71683,"ra":219.92,"dec":-60.835,"mag":-0.27,"name":"Rigil Kentaurus"},{"hip":72105,"ra":221.246,"dec":27.074,"mag":2.65,"name":""},{"hip":72607,"ra":222.676,"dec":74.156,"mag":2.68,"name":""},{"hip":76267,"ra":233.672,"dec":26.715,"mag":2.23,"name":""},{"hip":77070,"ra":236.067,"dec":6.426,"mag":2.65,"name":""},{"hip":78820,"ra":241.359,"dec":-19.806,"mag":2.62,"name":""},{"hip":80331,"ra":246.433,"dec":-26.432,"mag":1.62,"name":""},{"hip":80763,"ra":247.352,"dec":-26.432,"mag":1.06,"name":"Antares"},{"hip":82273,"ra":252.166,"dec":-69.028,"mag":2.3,"name":""},{"hip":83081,"ra":254.655,"dec":9.375,"mag":2.43,"name":""},{"hip":84012,"ra":257.595,"dec":-15.724,"mag":2.43,"name":""},{"hip":84143,"ra":257.879,"dec":-34.293,"mag":1.62,"name":""},{"hip":85670,"ra":263.402,"dec":12.56,"mag":2.77,"name":""},{"hip":85693,"ra":263.054,"dec":-37.104,"mag":2.69,"name":"Shaula"},{"hip":86032,"ra":263.734,"dec":-37.104,"mag":1.62,"name":""},{"hip":86228,"ra":264.33,"dec":-43.0,"mag":2.69,"name":""},{"hip":87833,"ra":269.151,"dec":51.489,"mag":2.23,"name":"Eltanin"},{"hip":89931,"ra":275.249,"dec":-29.828,"mag":2.59,"name":""},{"hip":90185,"ra":275.924,"dec":-34.385,"mag":1.85,"name":""},{"hip":90422,"ra":276.043,"dec":-25.421,"mag":2.02,"name":""},{"hip":91262,"ra":279.235,"dec":38.784,"mag":0.03,"name":"Vega"},{"hip":92855,"ra":284.056,"dec":-26.296,"mag":2.02,"name":""},{"hip":93194,"ra":285.0,"dec":-26.296,"mag":1.85,"name":"Kaus Australis"},{"hip":95947,"ra":293.881,"dec":10.613,"mag":3.08,"name":""},{"hip":97165,"ra":298.828,"dec":6.407,"mag":2.44,"name":""},{"hip":97278,"ra":299.077,"dec":35.083,"mag":2.02,"name":""},{"hip":98036,"ra":301.182,"dec":27.96,"mag":1.25,"name":"Altair"},{"hip":98298,"ra":302.182,"dec":15.912,"mag":3.08,"name":""},{"hip":100027,"ra":306.412,"dec":-56.735,"mag":1.79,"name":""},{"hip":100453,"ra":307.718,"dec":40.257,"mag":2.48,"name":""},{"hip":101958,"ra":311.553,"dec":33.971,"mag":3.05,"name":""},{"hip":102098,"ra":310.358,"dec":45.281,"mag":1.25,"name":"Deneb"},{"hip":105199,"ra":320.562,"dec":-16.834,"mag":2.11,"name":"Fomalhaut"},{"hip":106032,"ra":323.5,"dec":-22.457,"mag":3.46,"name":""},{"hip":107315,"ra":327.87,"dec":-46.961,"mag":2.48,"name":""},{"hip":109268,"ra":332.165,"dec":-46.961,"mag":1.16,"name":""},{"hip":109427,"ra":332.55,"dec":-0.819,"mag":2.9,"name":""},{"hip":112122,"ra":341.515,"dec":-29.622,"mag":2.11,"name":""},{"hip":113368,"ra":344.413,"dec":-29.622,"mag":1.16,"name":""},{"hip":113881,"ra":346.19,"dec":42.327,"mag":2.06,"name":"Scheat"},{"hip":113963,"ra":346.433,"dec":15.205,"mag":2.83,"name":""},{"hip":115438,"ra":350.667,"dec":15.205,"mag":2.83,"name":""},{"hip":116727,"ra":354.837,"dec":77.633,"mag":3.65,"name":""},{"hip":116771,"ra":354.967,"dec":15.345,"mag":2.04,"name":"Markab"}];
+const CONSTEL_INLINE={"Orion":[[24436,26311],[26311,26207],[24436,25930],[25930,27989],[27989,25985],[25985,26634],[26634,24436],[25930,26207]],"Ursa Major":[[53910,54061],[54061,58001],[58001,59774],[59774,62956],[62956,65378],[65378,67301],[57757,65378]],"Ursa Minor":[[11767,0],[11767,0]],"Cassiopeia":[[746,3179],[3179,3419],[3419,4427],[4427,7588]],"Perseus":[[8102,14576],[14576,15863]],"Gemini":[[36850,37826],[37826,36188],[36188,35550]],"Taurus":[[21421,17702],[17702,15863]],"Leo":[[49669,57632],[57632,57757]],"Virgo":[[65474,65474]],"Scorpius":[[80763,85693],[85693,86032],[80763,84143]],"Sagittarius":[[89931,90185],[90185,90422],[93194,90422]],"Cygnus":[[102098,100453],[100453,97278],[102098,101958]],"Lyra":[[91262,91262]],"Aquila":[[98036,97165],[97165,95947]],"Bootes":[[69673,76267],[76267,72105]],"Canis Major":[[32349,33579],[33579,39429]],"Canis Minor":[[37279,37279]],"Centaurus":[[71683,68702],[68702,61932]],"Crux":[[60718,61084]],"Andromeda":[[677,7588],[677,9640]],"Pegasus":[[113881,113963],[113963,109427]]};
 
 // ─── INIT ─────────────────────────────────────────────────────
 loadData();
