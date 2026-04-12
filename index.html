@@ -559,8 +559,6 @@ async function submitWaitlist(){
 }
 
 // ── PROMPT TO 3D (Meshy) ──
-const MESHY_KEY = 'YOUR_MESHY_API_KEY'; // → remplacer dans Vercel env
-
 function open3dModal(){
   closeMenu();
   model3dUrl=null;
@@ -589,27 +587,20 @@ async function generate3d(){
   setStatus('Envoi du prompt à Meshy…');
 
   try{
-    // 1. Créer la tâche Meshy
-    const createRes=await fetch('https://api.meshy.ai/v2/text-to-3d',{
+    // 1. Créer la tâche via proxy
+    const createRes=await fetch('/api/meshy',{
       method:'POST',
-      headers:{'Authorization':'Bearer '+MESHY_KEY,'Content-Type':'application/json'},
-      body:JSON.stringify({
-        mode:'preview',
-        prompt: prompt+'. Objet imprimable en 3D, parois épaisses, pas de parties flottantes.',
-        art_style:'realistic',
-        negative_prompt:'low quality, thin walls, floating parts'
-      })
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ prompt })
     });
     const {result:taskId}=await createRes.json();
     setStatus('Modèle en cours de génération…');
 
-    // 2. Polling jusqu'à completion
+    // 2. Polling via proxy
     let glbUrl=null;
     for(let i=0;i<40;i++){
       await sleep(4000);
-      const pollRes=await fetch(`https://api.meshy.ai/v2/text-to-3d/${taskId}`,{
-        headers:{'Authorization':'Bearer '+MESHY_KEY}
-      });
+      const pollRes=await fetch(`/api/meshy-poll?taskId=${taskId}`);
       const task=await pollRes.json();
       setStatus(statusMsg(task.status,task.progress));
       if(task.status==='SUCCEEDED'){
