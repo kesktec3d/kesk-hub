@@ -170,11 +170,11 @@ if(window.self!==window.top){
 <script>
 const CONFIG={STRIPE_PUBLIC_KEY:'pk_live_51S52CbKHykPIIFiGXsJW5zPitq3GkmD6dMxp5YPdIguhj5oLlFtRSepvgjHOwMEH7RyCoxCmyUAORaGIaAOkfCmG00ySYyZaA1',API_BASE:'',RELIEF_MM:0.65,MAX_GENERATIONS:5};
 const PROMO_CODES={'KESK2025':{discount:100,label:'Offert par Kesk 🎁'},'FRIEND50':{discount:50,label:'-50% — ami(e) de la maison'},'BIENVENUE':{discount:20,label:'-20% bienvenue'},'LAUNCH10':{discount:10,label:'-10% lancement'}};
-const SUPPORTS=[{id:'toile',name:'Tableau toile',dims:'30 × 40 cm',icon:'🖼️',price:89},{id:'bois',name:'Bois (Wood Art)',dims:'30 × 40 cm',icon:'🪵',price:109},{id:'metal',name:'Métal (Metal Art)',dims:'30 × 40 cm',icon:'⚙️',price:119},{id:'tasse',name:'Tasse',dims:'330 ml',icon:'☕',price:49},{id:'coaster',name:'Dessous de verre',dims:'10 × 10 cm',icon:'🔵',price:19},{id:'magnet',name:'Magnet',dims:'8 × 8 cm',icon:'🧲',price:0.51}];
+const SUPPORTS=[{id:'toile',name:'Tableau toile',dims:'30 × 40 cm',icon:'🖼️',price:89},{id:'bois',name:'Bois (Wood Art)',dims:'30 × 40 cm',icon:'🪵',price:109},{id:'metal',name:'Métal (Metal Art)',dims:'30 × 40 cm',icon:'⚙️',price:119},{id:'tasse',name:'Tasse',dims:'330 ml',icon:'☕',price:49},{id:'coaster',name:'Dessous de verre',dims:'10 × 10 cm',icon:'🔵',price:19},{id:'magnet',name:'Magnet',dims:'8 × 8 cm',icon:'🧲',price:15}];
 const STYLES=[{id:'van-gogh',name:'Van Gogh',desc:'Tourbillons expressifs',emoji:'🌻',bg:'linear-gradient(135deg,#2B5EA7,#E8A234)',relief:'0.7–0.8mm',prompt:'in the style of Van Gogh, swirling impasto brushstrokes, vibrant post-impressionist colors, thick textured paint'},{id:'manga',name:'Manga',desc:'Contours nets, cel-shading',emoji:'⚡',bg:'linear-gradient(135deg,#1a1a2e,#e94560)',relief:'0.6mm',prompt:'manga illustration style, clean ink outlines, cel shading, high contrast, anime art'},{id:'minimaliste',name:'Minimaliste',desc:'Épuré, géométrique',emoji:'◻',bg:'linear-gradient(135deg,#F0EDE8,#C8C0B8)',relief:'0.5mm',prompt:'minimalist art, clean geometric forms, negative space, muted palette, Bauhaus inspired'},{id:'huile',name:"Peinture à l'huile",desc:'Coups de pinceau épais',emoji:'🎨',bg:'linear-gradient(135deg,#8B4513,#D4891A)',relief:'0.7–0.8mm',prompt:'oil painting, thick impasto brushstrokes, old masters technique, dramatic chiaroscuro lighting'},{id:'aquarelle',name:'Aquarelle',desc:'Doux, translucide',emoji:'💧',bg:'linear-gradient(135deg,#7bbde8,#b8daf5)',relief:'0.5mm',prompt:'watercolor painting, soft color washes, delicate edges, wet-on-wet technique, paper texture'},{id:'cinematique',name:'Cinématique',desc:'Lumière dorée, profondeur',emoji:'🎬',bg:'linear-gradient(135deg,#1C1C1C,#B8A070)',relief:'0.6mm',prompt:'cinematic photography, dramatic golden hour lighting, ultra detailed, shallow depth of field, 8K'}];
 const THEMES=[{id:'nature',label:'Paysages suisses',emoji:'🏔'},{id:'animaux',label:'Animaux',emoji:'🐾'},{id:'famille',label:'Famille',emoji:'👨‍👩‍👧'},{id:'architecture',label:'Architecture',emoji:'🏛'},{id:'fleurs',label:'Fleurs',emoji:'🌸'},{id:'fantasy',label:'Fantasy',emoji:'✨'}];
 
-let state={step:1,selectedSupport:null,selectedStyle:null,selectedTheme:null,suggestions:null,suggestionsLoading:false,prompt:'',generatedImage:null,generatedImageUrl:null,generationsUsed:0,promoCode:'',promoData:null,customer:{nom:'',prenom:'',email:'',adresse:'',ville:'',npa:''}};
+let state={step:1,selectedSupport:null,selectedStyle:null,selectedTheme:null,suggestions:null,suggestionsLoading:false,prompt:'',generatedImage:null,generatedImageUrl:null,generationsUsed:0,promoCode:'',promoData:null,ownImage:false,ownImagePreview:null,ownImageData:null,customer:{nom:'',prenom:'',email:'',adresse:'',ville:'',npa:''}};
 
 const getSupport=()=>SUPPORTS.find(s=>s.id===state.selectedSupport);
 const getStyle=()=>STYLES.find(s=>s.id===state.selectedStyle);
@@ -304,11 +304,33 @@ function renderStep2(){
     <div class="theme-grid">${THEMES.map(t=>`<div class="theme-card${state.selectedTheme===t.id?' selected':''}" onclick="selectTheme('${t.id}')"><div style="font-size:22px;margin-bottom:4px">${t.emoji}</div><div style="font-size:12px;font-weight:500">${t.label}</div></div>`).join('')}</div>
     ${state.selectedTheme&&state.selectedStyle?`<div style="margin-bottom:20px"><div class="section-label" style="margin-bottom:10px">Idées de création <span style="font-size:10px;background:rgba(184,92,56,.1);color:var(--accent);padding:2px 8px;border-radius:99px;margin-left:6px;text-transform:none;letter-spacing:0">IA</span></div><div id="suggestionsList">${suggestionsHtml}</div></div>`:state.selectedStyle&&!state.selectedTheme?`<div style="font-size:13px;color:var(--muted);margin-bottom:20px;padding:12px;background:rgba(200,168,122,.1);border-radius:8px">👆 Choisissez un thème pour recevoir des idées générées par IA</div>`:''}
     <label style="font-size:13px;font-weight:500;display:block;margin-bottom:8px">Votre description <span style="font-size:11px;color:var(--muted);font-weight:400"> — modifiez ou écrivez librement</span></label>
-    <textarea id="promptField" placeholder="Ex: un lac suisse au coucher du soleil, tons chauds et dorés…" oninput="state.prompt=this.value">${state.prompt}</textarea>
+    <textarea id="promptField" placeholder="Ex: un lac suisse au coucher du soleil, tons chauds et dorés…" oninput="state.prompt=this.value" ${state.ownImage?'disabled style="opacity:.4"':''}>${state.prompt}</textarea>
     <div style="font-size:11px;color:var(--muted);margin-top:6px">${genLeft} génération${genLeft>1?'s':''} restante${genLeft>1?'s':''} sur ${CONFIG.MAX_GENERATIONS}</div>
+
+    <!-- Case image existante -->
+    <div style="margin-top:16px;padding:14px;border:1.5px solid var(--border);border-radius:10px;background:var(--surface)">
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px;font-weight:500;margin-bottom:0">
+        <input type="checkbox" id="ownImageCheck" ${state.ownImage?'checked':''} onchange="toggleOwnImage(this.checked)" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer"/>
+        J'ai déjà mon image
+      </label>
+      ${state.ownImage ? `
+      <div style="margin-top:12px">
+        <input type="file" id="ownImageFile" accept="image/*" onchange="handleOwnImage(this)" style="display:none"/>
+        <div onclick="document.getElementById('ownImageFile').click()" style="border:2px dashed var(--border);border-radius:8px;padding:20px;text-align:center;cursor:pointer;transition:all .2s;background:var(--cream)" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+          ${state.ownImagePreview
+            ? `<img src="${state.ownImagePreview}" style="max-height:120px;max-width:100%;border-radius:6px;object-fit:contain"/><div style="font-size:11px;color:var(--muted);margin-top:8px">Cliquer pour changer</div>`
+            : `<div style="font-size:24px;margin-bottom:8px">🖼️</div><div style="font-size:13px;color:var(--muted)">Cliquer pour choisir une image</div><div style="font-size:11px;color:var(--border);margin-top:4px">JPG, PNG, WEBP</div>`
+          }
+        </div>
+      </div>` : ''}
+    </div>
+
     <div style="margin-top:18px;display:flex;gap:12px">
       <button class="btn-secondary" style="margin:0" onclick="state.step=1;render()">← Retour</button>
-      <button class="btn-primary" style="margin:0" onclick="generateImage()" ${!state.selectedStyle||genLeft<=0?'disabled':''}>${genLeft<=0?'Limite atteinte':'✦ Générer l\'image IA'}</button>
+      ${state.ownImage
+        ? `<button class="btn-primary" style="margin:0" onclick="useOwnImage()" ${!state.ownImageData?'disabled':''}>Utiliser cette image →</button>`
+        : `<button class="btn-primary" style="margin:0" onclick="generateImage()" ${!state.selectedStyle||genLeft<=0?'disabled':''}>${genLeft<=0?'Limite atteinte':'✦ Générer l\'image IA'}</button>`
+      }
     </div>
   </div><div>${renderPreviewPanel()}</div></div>`;
 }
@@ -385,7 +407,32 @@ function renderSuccess(){
   </div>`;
 }
 
-function resetApp(){state={step:1,selectedSupport:null,selectedStyle:null,selectedTheme:null,suggestions:null,suggestionsLoading:false,prompt:'',generatedImage:null,generatedImageUrl:null,generationsUsed:0,promoCode:'',promoData:null,customer:{nom:'',prenom:'',email:'',adresse:'',ville:'',npa:''}};document.getElementById('progressBar').style.display='flex';render();}
+function toggleOwnImage(checked){
+  state.ownImage=checked;
+  if(!checked){state.ownImagePreview=null;state.ownImageData=null;}
+  render();
+}
+
+function handleOwnImage(input){
+  const file=input.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    state.ownImagePreview=e.target.result;
+    state.ownImageData=e.target.result;
+    render();
+  };
+  reader.readAsDataURL(file);
+}
+
+function useOwnImage(){
+  if(!state.ownImageData)return;
+  state.generatedImage=state.ownImageData;
+  state.generatedImageUrl=state.ownImageData;
+  nextStep();
+}
+
+function resetApp(){state={step:1,selectedSupport:null,selectedStyle:null,selectedTheme:null,suggestions:null,suggestionsLoading:false,prompt:'',generatedImage:null,generatedImageUrl:null,generationsUsed:0,promoCode:'',promoData:null,ownImage:false,ownImagePreview:null,ownImageData:null,customer:{nom:'',prenom:'',email:'',adresse:'',ville:'',npa:''}};document.getElementById('progressBar').style.display='flex';render();}
 
 function render(){
   updateProgress();
