@@ -162,7 +162,7 @@ body::before{
 .backdrop.show{opacity:1;pointer-events:auto}
 
 /* ── PETALS ── */
-.petals{position:absolute;inset:0;pointer-events:none;z-index:5}
+.petals{position:fixed;inset:0;pointer-events:none;z-index:5}
 .petal{
   position:absolute;top:50%;left:50%;
   width:138px;pointer-events:none;opacity:0;
@@ -461,15 +461,15 @@ const PETALS = [
 function isMobile(){return window.innerWidth < 600}
 
 function getPetalPositions(n, mobile){
-  // Sur mobile avec 5 pétales : étoile légèrement aplatie
   if(mobile){
-    const d = 148;
-    const angles = [-72,-144,144,72,0]; // étoile
-    return angles.slice(0,n).map(a=>({angle:a,dist:d}));
+    // Distance basée sur le viewport pour rester dans l'écran
+    const d = Math.min(window.innerWidth, window.innerHeight) * 0.34;
+    const angles = [-72, -144, 144, 72, 0];
+    return angles.slice(0,n).map(a=>({angle:a, dist:d}));
   }
-  const d = 200;
-  const offset = -90; // partir du haut
-  return Array.from({length:n},(_,i)=>({angle:offset+(360/n)*i,dist:d}));
+  const d = Math.min(200, window.innerWidth * 0.18);
+  const offset = -90;
+  return Array.from({length:n},(_,i)=>({angle:offset+(360/n)*i, dist:d}));
 }
 
 let menuOpen=false, currentModal=null, model3dUrl=null;
@@ -730,9 +730,10 @@ async function generate3d(){
     }
 
     if(glbUrl){
-      model3dUrl=glbUrl;
+      model3dUrl=task.model_urls?.stl||glbUrl;
+      const proxiedUrl=`/api/proxy-glb?url=${encodeURIComponent(glbUrl)}`;
       document.getElementById('promptResultLabel').textContent='Votre modèle 3D';
-      initThreeViewer(glbUrl);
+      initThreeViewer(proxiedUrl);
       document.getElementById('promptDlBtn').style.display='block';
       document.getElementById('promptOrderBtn').style.display='block';
     } else {
