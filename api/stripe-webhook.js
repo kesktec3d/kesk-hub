@@ -12,7 +12,7 @@ async function getRawBody(req) {
 }
 
 async function sendEmail(to, subject, html) {
-  // Brevo SMTP via fetch (pas de nodemailer)
+  const senderEmail = process.env.BREVO_SENDER || 'hello@kesk.ch';
   const res = await fetch('https://api.brevo.com/v3/smtp/email', {
     method: 'POST',
     headers: {
@@ -20,7 +20,7 @@ async function sendEmail(to, subject, html) {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      sender: { name: 'Kesk Studio', email: process.env.SMTP_USER || 'hello@kesk.ch' },
+      sender: { name: 'Kesk Studio', email: senderEmail },
       to: [{ email: to }],
       subject,
       htmlContent: html
@@ -62,7 +62,7 @@ export default async function handler(req, res) {
     const session = event.data.object;
     console.log('Session:', JSON.stringify({ id: session.id, email: session.customer_email, customer_details: session.customer_details }));
 
-    const customerEmail = session.customer_details?.email || session.customer_email;
+    const customerEmail = session.metadata?.customer_email || session.customer_details?.email || session.customer_email;
     const customerName = session.metadata?.customer_name || session.customer_details?.name || 'Client';
     const support = session.metadata?.support || '';
     const style = session.metadata?.style || '';
