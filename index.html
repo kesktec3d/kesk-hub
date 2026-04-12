@@ -7,10 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script>
-// GLTFLoader minimal pour r128
-THREE.GLTFLoader=(function(){function e(){this.crossOrigin='anonymous'}e.prototype={constructor:e,load:function(e,t,n,r){var i=this;fetch(e).then(function(e){return e.arrayBuffer()}).then(function(e){i.parse(e,'',t,r)}).catch(r||console.error)},parse:function(b,p,t,e){var d=new DataView(b);if(1179937895!==d.getUint32(0,true))return void(e&&e(new Error('Not GLB')));var n=d.getUint32(12,true),r=new Uint8Array(b,20,n),json=JSON.parse(new TextDecoder().decode(r)),o=d.getUint32(20+n+4,true),bin=b.slice(20+n+8,20+n+8+o),s=new THREE.Scene(),g=new THREE.Group();s.add(g);(json.meshes||[]).forEach(function(m){(m.primitives||[]).forEach(function(pr){var acc=json.accessors,bvs=json.bufferViews,pos=acc[pr.attributes.POSITION],bv=bvs[pos.bufferView],arr=new Float32Array(bin,bv.byteOffset||0,bv.byteLength/4),geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(arr,3));if(pr.indices!=null){var ia=acc[pr.indices],ibv=bvs[ia.bufferView],iarr=ia.componentType===5123?new Uint16Array(bin,ibv.byteOffset||0,ibv.byteLength/2):new Uint32Array(bin,ibv.byteOffset||0,ibv.byteLength/4);geo.setIndex(new THREE.BufferAttribute(iarr,1));}geo.computeVertexNormals();var mat=new THREE.MeshStandardMaterial({color:0x8877cc,roughness:.6,metalness:.1});g.add(new THREE.Mesh(geo,mat));});});t({scene:s});} };return e;})();
-</script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -630,21 +627,23 @@ function initThreeViewer(glbUrl){
 
   threeGroup=new THREE.Group();scene.add(threeGroup);
 
-  // Charger GLB
-  fetch(glbUrl).then(r=>r.arrayBuffer()).then(buf=>{
-    if(THREE.GLTFLoader){
-      const loader=new THREE.GLTFLoader();
-      loader.parse(buf,'',gltf=>{
-        const box=new THREE.Box3().setFromObject(gltf.scene);
-        const sz=box.getSize(new THREE.Vector3());
-        const s=2/Math.max(sz.x,sz.y,sz.z);
-        gltf.scene.scale.setScalar(s);
-        const c=box.getCenter(new THREE.Vector3());
-        gltf.scene.position.sub(c.multiplyScalar(s));
-        threeGroup.add(gltf.scene);
-      },()=>addFallback(threeGroup));
-    } else { addFallback(threeGroup); }
-  }).catch(()=>addFallback(threeGroup));
+  // Charger GLB via GLTFLoader direct (gère le CORS)
+  const loader=new THREE.GLTFLoader();
+  loader.load(glbUrl, gltf=>{
+    const box=new THREE.Box3().setFromObject(gltf.scene);
+    const sz=box.getSize(new THREE.Vector3());
+    const s=2/Math.max(sz.x,sz.y,sz.z);
+    gltf.scene.scale.setScalar(s);
+    const c=box.getCenter(new THREE.Vector3());
+    gltf.scene.position.sub(c.multiplyScalar(s));
+    threeGroup.add(gltf.scene);
+    console.log('GLB loaded OK');
+  }, xhr=>{
+    console.log('GLB loading:', Math.round(xhr.loaded/xhr.total*100)+'%');
+  }, err=>{
+    console.error('GLB load error:', err);
+    addFallback(threeGroup);
+  });
 
   function addFallback(g){
     const geo=new THREE.CylinderGeometry(0.5,0.6,1.5,32);
