@@ -454,7 +454,7 @@ iframe{flex:1;border:none;width:100%;background:var(--bg)}
 <script>
 // ── PÉTALES ──
 const PETALS = [
-  {id:'uv',      name:'Tableau & Art UV',   desc:'Image IA avec relief UV. Toile, bois, métal, magnet.',    tag:'Disponible', cta:'Configurer →',  active:true,  url:'https://kesk-configurateur.vercel.app'},
+  {id:'uv',      name:'Tableau & Art UV',   desc:'Image IA avec relief UV. Toile, bois, métal, magnet.',    tag:'Disponible', cta:'Configurer →',  active:true,  url:'https://kesk-hub.vercel.app/uv'},
   {id:'vase',    name:'Vase & Pied de table',desc:'Forme, couleur, texture : imprimé 3D à Saillon.',        tag:'Disponible', cta:'Configurer →',  active:true,  url:'https://kesk-hub.vercel.app/vase'},
   {id:'3d',      name:'Prompt → 3D',         desc:'Décrivez un objet, l\'IA génère un modèle imprimable.',   tag:'Beta',       cta:'Essayer →',     active:'3d'},
   {id:'luminaire',name:'Luminaire',           desc:'Abat-jour, suspension ou lampe de table sur mesure.',    tag:'Bientôt',    cta:'Être notifié',  active:false},
@@ -540,20 +540,30 @@ function closeMenu(){
 }
 
 function handlePetal(p){
-  if(p.active===true) openIframe(p.url);
-  else if(p.active==='3d') open3dModal();
-  else openModalFor(p);
+  closeMenu();
+  if(p.active===true){
+    if(p.newTab){
+      setTimeout(()=>window.open(p.url,'_blank'),280);
+    } else {
+      openIframe(p.url);
+    }
+  }
+  else if(p.active==='3d') setTimeout(()=>open3dModal(),280);
+  else setTimeout(()=>openModalFor(p),280);
 }
 
 // ── IFRAME ──
+let iframeOpen=false;
 function openIframe(url){
-  closeMenu();
+  if(iframeOpen) return;
+  iframeOpen=true;
   setTimeout(()=>{
     document.getElementById('mainIframe').src=url;
     document.getElementById('iframeOverlay').classList.add('visible');
   },280);
 }
 function closeIframe(){
+  iframeOpen=false;
   document.getElementById('iframeOverlay').classList.remove('visible');
   setTimeout(()=>document.getElementById('mainIframe').src='',400);
 }
