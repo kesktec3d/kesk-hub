@@ -1,5 +1,3 @@
-import Stripe from 'stripe';
-
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -9,48 +7,43 @@ export default async function handler(req, res) {
 
   const { price_chf, is_free, promo_code, promo_label, customer, support, style, prompt, image_url } = req.body;
 
-  // Commande gratuite
-  if (is_free) {
-    return res.status(200).json({ free: true });
-  }
-
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+  if (is_free) return res.status(200).json({ free: true });
 
   try {
-    const amountCents = Math.round(price_chf * 100);
     const appUrl = process.env.APP_URL || 'https://kesk-hub.vercel.app';
+    const amountCents = Math.round(Number(price_chf) * 100);
 
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      mode: 'payment',
-      currency: 'chf',
-      line_items: [{
-        price_data: {
-          currency: 'chf',
-          unit_amount: amountCents,
-          product_data: {
-            name: `Kesk — ${support || 'Création UV'} · Style ${style || ''}`,
-            description: prompt ? prompt.substring(0, 100) : 'Impression UV relief · Suisse',
-            images: image_url ? [image_url] : [],
-          },
-        },
-        quantity: 1,
-      }],
-      customer_email: customer?.email,
-      metadata: {
-        support: support || '',
-        style: style || '',
-        prompt: (prompt || '').substring(0, 500),
-        image_url: image_url || '',
-        customer_name: `${customer?.prenom || ''} ${customer?.nom || ''}`.trim(),
-        customer_address: `${customer?.adresse || ''}, ${customer?.npa || ''} ${customer?.ville || ''}`.trim(),
-        promo_code: promo_code || '',
-        promo_label: promo_label || '',
+    // Appel API Stripe en fetch direct — pas de SDK
+    const params = new URLSearchParams();
+    params.append('mode', 'payment');
+    params.append('currency', 'chf');
+    params.append('line_items[0][quantity]', '1');
+    params.append('line_items[0][price_data][currency]', 'chf');
+    params.append('line_items[0][price_data][unit_amount]', String(amountCents));
+    params.append('line_items[0][price_data][product_data][name]', `Kesk — ${support || 'Création UV'} · Style ${style || ''}`);
+    params.append('line_items[0][price_data][product_data][description]', (prompt || 'Impression UV relief · Suisse').substring(0, 100));
+    if (image_url && image_url.startsWith('http')) {
+      params.append('line_items[0][price_data][product_data][images][0]', image_url);
+    }
+    if (customer?.email) params.append('customer_email', customer.email);
+    params.append('metadata[support]', support || '');
+    params.append('metadata[style]', style || '');
+    params.append('metadata[customer_name]', `${customer?.prenom || ''} ${customer?.nom || ''}`.trim());
+    params.append('metadata[promo_code]', promo_code || '');
+    params.append('success_url', `${appUrl}/uv?success=1`);
+    params.append('cancel_url', `${appUrl}/uv`);
+
+    const stripeRes = await fetch('https://api.stripe.com/v1/checkout/sessions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.STRIPE_SECRET_KEY}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
-      success_url: `${appUrl}/uv?success=1`,
-      cancel_url: `${appUrl}/uv`,
+      body: params.toString()
     });
 
+    const session = await stripeRes.json();
+    if (session.error) throw new Error(session.error.message);
     return res.status(200).json({ url: session.url });
 
   } catch (e) {
