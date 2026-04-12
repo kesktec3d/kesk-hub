@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -8,7 +10,7 @@ export default async function handler(req, res) {
   const {
     name, company, email, phone, address, message,
     shape, texture, texamp, dims, color, lh, layers, wall, bottom,
-    filename, stl_url
+    filename, stl_base64
   } = req.body;
 
   if (!name || !email || !email.includes('@'))
@@ -17,6 +19,35 @@ export default async function handler(req, res) {
   const ref = 'JAR-' + Date.now();
   const senderEmail = process.env.BREVO_SENDER || 'hello@kesk.ch';
 
+  // Upload STL vers Cloudinary
+  let stl_url = '';
+  if (stl_base64) {
+    try {
+      const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+      const apiKey = process.env.CLOUDINARY_API_KEY;
+      const apiSecret = process.env.CLOUDINARY_API_SECRET;
+      const timestamp = Math.floor(Date.now() / 1000);
+      const folder = 'kesk-stl';
+      const publicId = ref;
+      const paramsString = `folder=${folder}&public_id=${publicId}&timestamp=${timestamp}${apiSecret}`;
+      const signature = crypto.createHash('sha1').update(paramsString).digest('hex');
+
+      const fd = new FormData();
+      fd.append('file', `data:application/octet-stream;base64,${stl_base64}`);
+      fd.append('api_key', apiKey);
+      fd.append('timestamp', String(timestamp));
+      fd.append('signature', signature);
+      fd.append('folder', folder);
+      fd.append('public_id', publicId);
+      fd.append('resource_type', 'raw');
+
+      const cloudRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/raw/upload`, { method: 'POST', body: fd });
+      const cloudData = await cloudRes.json();
+      if (cloudData.secure_url) stl_url = cloudData.secure_url;
+      console.log('STL upload:', cloudData.secure_url || cloudData.error?.message);
+    } catch(e) { console.log('STL upload error:', e.message); }
+  }
+
   const swatches = { blanc:'#eeeae4', white:'#eeeae4', gris:'#909088', grey:'#909088',
     noir:'#28272a', black:'#28272a', rouge:'#b02015', red:'#b02015',
     bleu:'#182f80', blue:'#182f80', vert:'#165e22', green:'#165e22' };
@@ -24,7 +55,7 @@ export default async function handler(req, res) {
   const sw = `<span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${hex};border:1px solid #ccc;vertical-align:middle;margin-right:5px"></span>`;
 
   async function sendEmail(to, subject, html) {
-    const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+    const r = await fetch('https://api.brevo.com/v3/smtp/email', {
       method: 'POST',
       headers: { 'api-key': process.env.BREVO_API_KEY, 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -34,12 +65,11 @@ export default async function handler(req, res) {
         htmlContent: html
       })
     });
-    const data = await res.json();
+    const data = await r.json();
     console.log('Brevo:', JSON.stringify(data));
     return data;
   }
 
-  // Email admin
   const adminHtml = `<div style="font-family:Arial,sans-serif;max-width:580px;margin:0 auto">
     <div style="background:#0e0d0c;padding:18px 24px;border-bottom:3px solid #B85C38">
       <span style="background:#B85C38;padding:5px 14px;border-radius:5px;font-weight:700;color:#fff">Kesk</span>
@@ -67,7 +97,7 @@ export default async function handler(req, res) {
         ${phone ? `<tr><td style="padding:4px 0;color:#9a948c">Tél.</td><td style="color:#1c1916">${phone}</td></tr>` : ''}
         ${address ? `<tr><td style="padding:4px 0;color:#9a948c">Adresse</td><td style="color:#1c1916">${address}</td></tr>` : ''}
       </table>
-      ${message ? `<div style="margin-top:10px;padding:10px 12px;background:#f8f6f3;border-left:3px solid #B85C38;border-radius:0 6px 6px 0"><div style="font-size:11px;color:#B85C38;text-transform:uppercase;margin-bottom:4px">Message</div><div style="color:#1c1916;font-size:13px;line-height:1.6">${message.replace(/\n/g,'<br>')}</div></div>` : ''}
+      ${message ? `<div style="margin-top:10px;padding:10px 12px;background:#f8f6f3;border-left:3px solid #B85C38"><div style="font-size:11px;color:#B85C38;text-transform:uppercase;margin-bottom:4px">Message</div><div style="color:#1c1916;font-size:13px;line-height:1.6">${message.replace(/\n/g,'<br>')}</div></div>` : ''}
       <div style="margin-top:16px">
         <a href="mailto:${email}" style="display:inline-block;padding:10px 20px;background:#B85C38;color:#fff;border-radius:7px;font-weight:700;font-size:13px;text-decoration:none">Répondre au client →</a>
       </div>
@@ -77,7 +107,6 @@ export default async function handler(req, res) {
     </div>
   </div>`;
 
-  // Email client
   const clientHtml = `<div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto">
     <div style="background:#0e0d0c;padding:18px 24px">
       <h1 style="color:#F7F3EE;margin:0;font-size:18px;font-family:Georgia,serif">Kesk<span style="color:#B85C38">.</span></h1>
