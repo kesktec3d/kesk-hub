@@ -1,5 +1,3 @@
-import crypto from 'crypto';
-
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -10,7 +8,7 @@ export default async function handler(req, res) {
   const {
     name, company, email, phone, address, message,
     shape, texture, texamp, dims, color, lh, layers, wall, bottom,
-    filename, stl_base64
+    filename, stl_url
   } = req.body;
 
   if (!name || !email || !email.includes('@'))
@@ -18,35 +16,6 @@ export default async function handler(req, res) {
 
   const ref = 'JAR-' + Date.now();
   const senderEmail = process.env.BREVO_SENDER || 'hello@kesk.ch';
-
-  // Upload STL vers Cloudinary
-  let stl_url = '';
-  if (stl_base64) {
-    try {
-      const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
-      const apiKey = process.env.CLOUDINARY_API_KEY;
-      const apiSecret = process.env.CLOUDINARY_API_SECRET;
-      const timestamp = Math.floor(Date.now() / 1000);
-      const folder = 'kesk-stl';
-      const publicId = ref;
-      const paramsString = `folder=${folder}&public_id=${publicId}&timestamp=${timestamp}${apiSecret}`;
-      const signature = crypto.createHash('sha1').update(paramsString).digest('hex');
-
-      const fd = new FormData();
-      fd.append('file', `data:application/octet-stream;base64,${stl_base64}`);
-      fd.append('api_key', apiKey);
-      fd.append('timestamp', String(timestamp));
-      fd.append('signature', signature);
-      fd.append('folder', folder);
-      fd.append('public_id', publicId);
-      fd.append('resource_type', 'raw');
-
-      const cloudRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/raw/upload`, { method: 'POST', body: fd });
-      const cloudData = await cloudRes.json();
-      if (cloudData.secure_url) stl_url = cloudData.secure_url;
-      console.log('STL upload:', cloudData.secure_url || cloudData.error?.message);
-    } catch(e) { console.log('STL upload error:', e.message); }
-  }
 
   const swatches = { blanc:'#eeeae4', white:'#eeeae4', gris:'#909088', grey:'#909088',
     noir:'#28272a', black:'#28272a', rouge:'#b02015', red:'#b02015',
