@@ -28,6 +28,7 @@ html,body{
   color:var(--cream);
   font-family:'DM Sans',sans-serif;
   overflow:hidden;
+  max-width:100vw;
   user-select:none;
 }
 
@@ -43,6 +44,7 @@ body::before{
   position:fixed;inset:0;
   display:flex;flex-direction:column;
   align-items:center;justify-content:center;
+  height:100dvh;
 }
 
 /* ── ENTRÉE GLOBALE ── */
@@ -68,7 +70,7 @@ body::before{
 .circular-text-wrap{
   position:fixed;
   width:260px;height:260px;
-  top:50%;left:50%;
+  top:50dvh;left:50%;
   margin-top:-130px;margin-left:-130px;
   pointer-events:none;
   z-index:1;
@@ -334,6 +336,8 @@ iframe{flex:1;border:none;width:100%;background:var(--bg)}
   .k-ring{width:98px;height:98px}
   .k-ring.r2{width:144px;height:144px}
   .share-btn{bottom:90px;right:20px}
+  .k-wrap{margin-left:0}
+  .stage{overflow:hidden}
 }
 </style>
 </head>
@@ -453,7 +457,7 @@ iframe{flex:1;border:none;width:100%;background:var(--bg)}
 const PETALS = [
   {id:'uv',      name:'Tableau & Art UV',   desc:'Image IA avec relief UV. Toile, bois, métal, magnet.',    tag:'Disponible', cta:'Configurer →',  active:true,  url:'https://kesk-hub.vercel.app/uv'},
   {id:'vase',    name:'Vase & Pied de table',desc:'Forme, couleur, texture : imprimé 3D à Saillon.',        tag:'Disponible', cta:'Configurer →',  active:true,  url:'https://kesk-hub.vercel.app/vase'},
-  {id:'3d',      name:'Prompt → 3D',         desc:'Décrivez un objet, l\'IA génère un modèle imprimable.',   tag:'Beta',       cta:'Essayer →',     active:'3d'},
+  {id:'texte',   name:'Texte 3D',           desc:'Votre texte en lettres 3D imprimées, toutes fusionnées.',  tag:'Nouveau',    cta:'Configurer →',  active:true,  url:'https://kesk-hub.vercel.app/texte'},
   {id:'luminaire',name:'Luminaire',           desc:'Abat-jour, suspension ou lampe de table sur mesure.',    tag:'Bientôt',    cta:'Être notifié',  active:false},
   {id:'assises', name:'Chaise & Banc',        desc:'Assise aux dimensions exactes de votre espace.',         tag:'Bientôt',    cta:'Être notifié',  active:false},
 ];
@@ -462,12 +466,11 @@ function isMobile(){return window.innerWidth < 600}
 
 function getPetalPositions(n, mobile){
   if(mobile){
-    // Distance basée sur le viewport pour rester dans l'écran
-    const d = Math.min(window.innerWidth, window.innerHeight) * 0.34;
-    const angles = [-72, -144, 144, 72, 0];
+    const d = Math.min(148, window.innerWidth * 0.3);
+    const angles = [-72,-144,144,72,0];
     return angles.slice(0,n).map(a=>({angle:a, dist:d}));
   }
-  const d = Math.min(200, window.innerWidth * 0.18);
+  const d = 200;
   const offset = -90;
   return Array.from({length:n},(_,i)=>({angle:offset+(360/n)*i, dist:d}));
 }
@@ -497,7 +500,7 @@ function openMenu(){
 
     const el=document.createElement('div');
     el.className='petal';
-    el.style.cssText=`top:50%;left:50%;width:${mobile?118:138}px;position:absolute;opacity:0;pointer-events:none;transform:translate(calc(-50% + ${tx}px),calc(-50% + ${ty}px)) scale(0)`;
+    el.style.cssText=`top:50%;left:50%;width:${mobile?108:138}px;position:absolute;opacity:0;pointer-events:none;transform:translate(calc(-50% + ${tx}px),calc(-50% + ${ty}px)) scale(0)`;
 
     const isAi=p.active==='3d';
     const cardClass=p.active===true?'active-card':isAi?'ai-card':'soon-card';
@@ -692,6 +695,19 @@ function close3dModal(){
 document.getElementById('modal3dOverlay').addEventListener('click',function(e){if(e.target===this)close3dModal()});
 
 async function generate3d(){
+  // Limite 2 essais par appareil
+  const MAX_TRIES = 2;
+  const storageKey = 'kesk_3d_tries';
+  const tries = parseInt(localStorage.getItem(storageKey)||'0');
+  if(tries >= MAX_TRIES){
+    document.getElementById('promptSpinnerWrap').innerHTML=
+      `<div style="color:#9d8fcc;font-size:12px;font-family:'DM Mono',monospace;padding:8px;text-align:center">
+        Limite de ${MAX_TRIES} générations atteinte.<br>
+        <a href="mailto:hello@kesk.ch" style="color:#9d8fcc;text-decoration:underline;margin-top:6px;display:inline-block">Contactez-nous pour plus</a>
+      </div>`;
+    document.getElementById('promptResult').classList.add('visible');
+    return;
+  }
   const prompt=document.getElementById('prompt3dInput').value.trim();
   if(!prompt){document.getElementById('prompt3dInput').style.borderColor='#9d8fcc';return;}
   document.getElementById('prompt3dInput').style.borderColor='';
@@ -714,23 +730,26 @@ async function generate3d(){
     console.log('Meshy create:',createData);
     const taskId=createData.result;
     if(!taskId) throw new Error('Pas de taskId : '+JSON.stringify(createData));
+    // Incrémenter compteur essais
+    localStorage.setItem(storageKey, String(tries+1));
 
     let glbUrl=null;
+    let lastTask=null;
     for(let i=0;i<50;i++){
       await sleep(4000);
       const pollRes=await fetch(`/api/meshy-poll?taskId=${taskId}`);
-      const task=await pollRes.json();
-      console.log('Poll:',task.status,task.progress,task.model_urls);
-      setStatus(statusMsg(task.status,task.progress));
-      if(task.status==='SUCCEEDED'||(task.progress>=99&&task.model_urls?.glb)){
-        glbUrl=task.model_urls?.glb||task.model_urls?.obj||task.model_urls?.fbx||null;
+      lastTask=await pollRes.json();
+      console.log('Poll:',lastTask.status,lastTask.progress,lastTask.model_urls);
+      setStatus(statusMsg(lastTask.status,lastTask.progress));
+      if(lastTask.status==='SUCCEEDED'||(lastTask.progress>=99&&lastTask.model_urls?.glb)){
+        glbUrl=lastTask.model_urls?.glb||lastTask.model_urls?.obj||lastTask.model_urls?.fbx||null;
         break;
       }
-      if(task.status==='FAILED') throw new Error('Génération échouée par Meshy');
+      if(lastTask.status==='FAILED') throw new Error('Génération échouée par Meshy');
     }
 
     if(glbUrl){
-      model3dUrl=task.model_urls?.stl||glbUrl;
+      model3dUrl=lastTask.model_urls?.stl||glbUrl;
       const proxiedUrl=`/api/proxy-glb?url=${encodeURIComponent(glbUrl)}`;
       document.getElementById('promptResultLabel').textContent='Votre modèle 3D';
       initThreeViewer(proxiedUrl);
