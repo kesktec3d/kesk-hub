@@ -6,6 +6,11 @@
 <title>Kesk · Créateur sur mesure</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// GLTFLoader minimal pour r128
+THREE.GLTFLoader=(function(){function e(){this.crossOrigin='anonymous'}e.prototype={constructor:e,load:function(e,t,n,r){var i=this;fetch(e).then(function(e){return e.arrayBuffer()}).then(function(e){i.parse(e,'',t,r)}).catch(r||console.error)},parse:function(b,p,t,e){var d=new DataView(b);if(1179937895!==d.getUint32(0,true))return void(e&&e(new Error('Not GLB')));var n=d.getUint32(12,true),r=new Uint8Array(b,20,n),json=JSON.parse(new TextDecoder().decode(r)),o=d.getUint32(20+n+4,true),bin=b.slice(20+n+8,20+n+8+o),s=new THREE.Scene(),g=new THREE.Group();s.add(g);(json.meshes||[]).forEach(function(m){(m.primitives||[]).forEach(function(pr){var acc=json.accessors,bvs=json.bufferViews,pos=acc[pr.attributes.POSITION],bv=bvs[pos.bufferView],arr=new Float32Array(bin,bv.byteOffset||0,bv.byteLength/4),geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(arr,3));if(pr.indices!=null){var ia=acc[pr.indices],ibv=bvs[ia.bufferView],iarr=ia.componentType===5123?new Uint16Array(bin,ibv.byteOffset||0,ibv.byteLength/2):new Uint32Array(bin,ibv.byteOffset||0,ibv.byteLength/4);geo.setIndex(new THREE.BufferAttribute(iarr,1));}geo.computeVertexNormals();var mat=new THREE.MeshStandardMaterial({color:0x8877cc,roughness:.6,metalness:.1});g.add(new THREE.Mesh(geo,mat));});});t({scene:s});} };return e;})();
+</script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -254,7 +259,17 @@ body::before{
   border-radius:10px;overflow:hidden;background:#1c1a2e;
   border:1px solid #3a3460;
   display:flex;align-items:center;justify-content:center;
-  min-height:120px;padding:16px;text-align:center;
+  min-height:200px;padding:16px;text-align:center;
+  position:relative;
+}
+#threeCanvas{
+  width:100%;height:200px;display:none;
+  border-radius:8px;touch-action:none;
+}
+.viewer-hint{
+  position:absolute;bottom:8px;left:50%;transform:translateX(-50%);
+  font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.1em;
+  color:var(--muted);white-space:nowrap;pointer-events:none;
 }
 .prompt-spinner{
   width:32px;height:32px;border-radius:50%;
@@ -271,6 +286,14 @@ body::before{
   transition:all .2s;
 }
 .prompt-dl-btn:hover{background:#9d8fcc;color:#fff}
+.prompt-order-btn{
+  width:100%;margin-top:8px;padding:11px;
+  background:#7c6eb5;border:none;
+  border-radius:8px;color:#fff;font-family:'DM Sans',sans-serif;
+  font-size:13px;font-weight:500;cursor:pointer;
+  transition:all .2s;
+}
+.prompt-order-btn:hover{background:#9d8fcc}
 
 /* ── IFRAME OVERLAY ── */
 .iframe-overlay{
@@ -283,15 +306,14 @@ body::before{
   background:var(--bg);border-bottom:1px solid var(--border);
   padding:10px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
 }
-.iframe-bar-logo{font-family:'Playfair Display',serif;font-size:16px;letter-spacing:.06em;color:var(--cream)}
-.iframe-bar-logo span{color:var(--terracotta)}
+.iframe-bar-logo{display:flex;align-items:center}
 .iframe-back{
-  font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--muted);background:none;border:none;cursor:pointer;
-  display:flex;align-items:center;gap:6px;transition:color .2s;
+  font-family:'DM Mono',monospace;font-size:13px;letter-spacing:.16em;text-transform:uppercase;
+  color:#ffffff;background:none;border:none;cursor:pointer;
+  display:flex;align-items:center;gap:8px;transition:opacity .2s;opacity:.8;
 }
-.iframe-back:hover{color:var(--cream)}
-.iframe-back::before{content:'←';font-size:14px}
+.iframe-back:hover{opacity:1}
+.iframe-back::before{content:'←';font-size:16px}
 iframe{flex:1;border:none;width:100%;background:var(--bg)}
 
 /* ── FOOTER ── */
@@ -394,14 +416,17 @@ iframe{flex:1;border:none;width:100%;background:var(--bg)}
       style="resize:none;font-size:13px;line-height:1.5"></textarea>
     <button class="modal-btn" id="btn3d" onclick="generate3d()">Générer le modèle 3D →</button>
     <div class="prompt-result" id="promptResult">
-      <div class="prompt-result-label">Génération en cours</div>
+      <div class="prompt-result-label" id="promptResultLabel">Génération en cours</div>
       <div class="prompt-result-preview" id="promptPreview">
-        <div>
+        <div id="promptSpinnerWrap">
           <div class="prompt-spinner"></div>
           <div class="prompt-status" id="promptStatus">Analyse du prompt…</div>
         </div>
+        <canvas id="threeCanvas"></canvas>
+        <div class="viewer-hint" id="viewerHint" style="display:none">Glisser pour tourner</div>
       </div>
-      <button class="prompt-dl-btn" id="promptDlBtn" style="display:none" onclick="download3d()">Télécharger le fichier 3D →</button>
+      <button class="prompt-dl-btn" id="promptDlBtn" style="display:none" onclick="download3d()">Télécharger le fichier GLB →</button>
+      <button class="prompt-order-btn" id="promptOrderBtn" style="display:none" onclick="order3d()">Commander cette pièce →</button>
     </div>
     <button class="modal-close-btn" onclick="close3dModal()">Fermer</button>
   </div>
@@ -410,7 +435,17 @@ iframe{flex:1;border:none;width:100%;background:var(--bg)}
 <!-- IFRAME -->
 <div class="iframe-overlay" id="iframeOverlay">
   <div class="iframe-bar">
-    <div class="iframe-bar-logo">Kesk<span>.</span></div>
+    <div class="iframe-bar-logo">
+      <a href="https://kesk.ch/configurateur/" style="display:flex;align-items:center;text-decoration:none">
+        <svg viewBox="0 0 595.28 287.23" style="height:24px;width:auto" xmlns="http://www.w3.org/2000/svg">
+          <path fill="#F7F3EE" d="M209.66,181.94l-17.63-36.98c-.09-.19-.17-.38-.25-.57-28.81.04-59.17.08-90.81.13v42.57c0,6.61,5.36,11.97,11.97,11.97h21.7c6.61,0,11.97-5.36,11.97-11.97v-40.1l.31-.16,16.69,44.46c1.75,4.67,6.21,7.77,11.2,7.77h24.05c8.8,0,14.59-9.18,10.8-17.12ZM192.17,134.38l14.65-28.8c4.06-7.97-1.73-17.4-10.66-17.4h-22.35c-4.87,0-9.25,2.95-11.09,7.47l-15.8,38.93-.31-.15v-34.28c0-6.61-5.36-11.97-11.97-11.97h-21.7c-6.61,0-11.97,5.36-11.97,11.97v43.15c30.14-.15,60.2-.4,90.22-.77-.65-2.72-.32-5.61.98-8.15Z"/>
+          <path fill="#F7F3EE" d="M510.28,88.18h-22.35c-4.87,0-9.25,2.95-11.09,7.47l-15.8,38.93-.31-.15v-34.28c0-6.61-5.36-11.97-11.97-11.97h-21.7c-6.61,0-11.96,5.36-11.96,11.97v37.72c28.14-.84,56.27-1.76,84.4-2.78.82-.03,4.56.41,7.07-1.88.27-.25.5-.51.71-.77l1.25-2.46,12.42-24.4c4.05-7.97-1.74-17.4-10.67-17.4ZM523.78,181.94l-12.47-26.15h0c-1.91-2.82-4.95-6.41-9.6-8.95-6.63-3.62-13.19-3.28-15.02-3.22-4.53.15-29.93.27-71.59.38v43.09c0,6.61,5.35,11.97,11.96,11.97h21.7c6.61,0,11.97-5.36,11.97-11.97v-40.1l.31-.16,16.69,44.46c1.75,4.67,6.21,7.77,11.2,7.77h24.05c8.8,0,14.59-9.18,10.8-17.12Z"/>
+          <path fill="#F7F3EE" d="M299.14,163.83h-24.42c-1.65,0-2.99-1.33-2.99-2.98v-.31c0-1.65,1.34-2.99,2.99-2.99h15.69c4.91,0,8.89-3.98,8.89-8.89v-4.43c-22.79.03-47.27.07-73.21.11v45.82c0,4.92,3.99,8.9,8.9,8.9h64.15c4.91,0,8.89-3.98,8.89-8.9v-17.44c0-4.91-3.98-8.89-8.89-8.89ZM296.99,88.18h-62c-4.91,0-8.9,3.98-8.9,8.89v45c24.4-.37,48.79-.8,73.21-1.3v-.66c0-4.92-3.98-8.9-8.89-8.9h-15.69c-.82,0-1.57-.33-2.11-.87-.55-.54-.88-1.28-.88-2.11,0-1.65,1.34-2.99,2.99-2.99h22.27c4.91,0,8.89-3.98,8.89-8.89v-19.28c0-4.91-3.98-8.89-8.89-8.89Z"/>
+          <path fill="#F7F3EE" d="M399.79,144.04c-21.94.05-47.54.1-76.29.15.86,1,1.78,1.93,2.76,2.8,11.33,9.95,26.79,11.64,32.16,13.01,1.98.46,3.36,1.38,3.36,3.53,0,1.83-1.07,3.67-5.66,3.67-3.71,0-10.08-1.11-17.58-3.8-9.21-3.3-18.87,3.71-18.87,13.49v5.32c0,6.11,3.87,11.58,9.68,13.48,9.82,3.23,21.57,5.05,31.82,5.05,29.1,0,46.25-14.85,46.25-36.14,0-8.24-2.51-15-7.63-20.56ZM391.51,91.3c-9.17-2.97-20.16-4.81-29.88-4.81-28.02,0-45.18,15.16-45.18,37.37,0,6.75,1.58,12.11,4.2,16.45l72.47-1.82c-10.49-6.7-23.49-8.33-27.66-9.58-1.84-.61-3.52-1.53-3.52-3.82,0-1.69,1.22-3.37,5.66-3.37,3.16,0,8.74.81,15.56,2.77,9.01,2.59,17.98-4.26,17.98-13.64v-6.09c0-6.08-3.84-11.58-9.63-13.46Z"/>
+          <path fill="#F7F3EE" d="M100.97,143.3v1.22c-11.39.02-19.73.26-21.52.41-.74.06-1.33.09-2.11.32-.8.23-1.13.47-2.05.69-.31.07-.94.22-1.51.21-1.48-.02-3.46-1.08-3.47-2.31,0-1.23,1.98-2.28,3.47-2.31.67-.02,1.28.16,1.5.23,1.01.31,1.31.75,2.22,1.12.73.31,1.33.35,2.06.41,1.72.13,10.05.12,21.41.01Z"/>
+        </svg>
+      </a>
+    </div>
     <button class="iframe-back" onclick="closeIframe()">Retour</button>
   </div>
   <iframe id="mainIframe" src="" title="Configurateur Kesk" allow="clipboard-write"></iframe>
@@ -558,97 +593,171 @@ async function submitWaitlist(){
   document.getElementById('modalSuccess').classList.add('visible');
 }
 
-// ── PROMPT TO 3D (Meshy) ──
+// ── THREE.JS VIEWER ──
+let threeRenderer=null,threeAnimId=null,threeGroup=null,isDragging=false,prevX=0,prevY=0;
+
+function initThreeViewer(glbUrl){
+  const canvas=document.getElementById('threeCanvas');
+  canvas.style.display='block';
+  document.getElementById('viewerHint').style.display='block';
+  document.getElementById('promptSpinnerWrap').style.display='none';
+  if(threeRenderer){cancelAnimationFrame(threeAnimId);threeRenderer.dispose();}
+
+  const w=canvas.parentElement.offsetWidth-32||300, h=200;
+  canvas.width=w;canvas.height=h;
+
+  const scene=new THREE.Scene();
+  scene.background=new THREE.Color(0x1c1a2e);
+  const camera=new THREE.PerspectiveCamera(45,w/h,0.01,1000);
+  camera.position.set(0,1,3);
+  threeRenderer=new THREE.WebGLRenderer({canvas,antialias:true});
+  threeRenderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  threeRenderer.setSize(w,h);
+
+  scene.add(new THREE.AmbientLight(0xffffff,0.7));
+  const d=new THREE.DirectionalLight(0xffffff,1.2);d.position.set(3,5,3);scene.add(d);
+  const f=new THREE.DirectionalLight(0x9d8fcc,0.5);f.position.set(-3,-2,-3);scene.add(f);
+
+  threeGroup=new THREE.Group();scene.add(threeGroup);
+
+  // Charger GLB
+  fetch(glbUrl).then(r=>r.arrayBuffer()).then(buf=>{
+    if(THREE.GLTFLoader){
+      const loader=new THREE.GLTFLoader();
+      loader.parse(buf,'',gltf=>{
+        const box=new THREE.Box3().setFromObject(gltf.scene);
+        const sz=box.getSize(new THREE.Vector3());
+        const s=2/Math.max(sz.x,sz.y,sz.z);
+        gltf.scene.scale.setScalar(s);
+        const c=box.getCenter(new THREE.Vector3());
+        gltf.scene.position.sub(c.multiplyScalar(s));
+        threeGroup.add(gltf.scene);
+      },()=>addFallback(threeGroup));
+    } else { addFallback(threeGroup); }
+  }).catch(()=>addFallback(threeGroup));
+
+  function addFallback(g){
+    const geo=new THREE.CylinderGeometry(0.5,0.6,1.5,32);
+    const mat=new THREE.MeshStandardMaterial({color:0x7c6eb5,roughness:.6,metalness:.15});
+    g.add(new THREE.Mesh(geo,mat));
+  }
+
+  function animate(){
+    threeAnimId=requestAnimationFrame(animate);
+    if(threeGroup&&!isDragging)threeGroup.rotation.y+=0.006;
+    threeRenderer.render(scene,camera);
+  }
+  animate();
+
+  // Controls
+  canvas.addEventListener('mousedown',e=>{isDragging=true;prevX=e.clientX;prevY=e.clientY});
+  window.addEventListener('mousemove',e=>{if(!isDragging||!threeGroup)return;threeGroup.rotation.y+=(e.clientX-prevX)*.012;threeGroup.rotation.x+=(e.clientY-prevY)*.006;prevX=e.clientX;prevY=e.clientY;});
+  window.addEventListener('mouseup',()=>isDragging=false);
+  canvas.addEventListener('touchstart',e=>{isDragging=true;prevX=e.touches[0].clientX;prevY=e.touches[0].clientY},{passive:true});
+  canvas.addEventListener('touchmove',e=>{if(!isDragging||!threeGroup)return;threeGroup.rotation.y+=(e.touches[0].clientX-prevX)*.014;threeGroup.rotation.x+=(e.touches[0].clientY-prevY)*.007;prevX=e.touches[0].clientX;prevY=e.touches[0].clientY;},{passive:true});
+  canvas.addEventListener('touchend',()=>isDragging=false);
+}
+
+// ── PROMPT TO 3D ──
+let currentPrompt='';
+
 function open3dModal(){
   closeMenu();
-  model3dUrl=null;
+  model3dUrl=null;currentPrompt='';
   document.getElementById('prompt3dInput').value='';
   document.getElementById('promptResult').classList.remove('visible');
   document.getElementById('promptDlBtn').style.display='none';
+  document.getElementById('promptOrderBtn').style.display='none';
+  document.getElementById('threeCanvas').style.display='none';
+  document.getElementById('viewerHint').style.display='none';
+  document.getElementById('promptSpinnerWrap').style.display='block';
   document.getElementById('btn3d').disabled=false;
   document.getElementById('btn3d').textContent='Générer le modèle 3D →';
   document.getElementById('modal3dOverlay').classList.add('visible');
+  if(threeRenderer){cancelAnimationFrame(threeAnimId);threeRenderer.dispose();threeRenderer=null;}
 }
 function close3dModal(){
   document.getElementById('modal3dOverlay').classList.remove('visible');
+  if(threeRenderer){cancelAnimationFrame(threeAnimId);threeRenderer.dispose();threeRenderer=null;}
 }
 document.getElementById('modal3dOverlay').addEventListener('click',function(e){if(e.target===this)close3dModal()});
 
 async function generate3d(){
   const prompt=document.getElementById('prompt3dInput').value.trim();
-  if(!prompt){document.getElementById('prompt3dInput').style.borderColor='#c8845a';return}
+  if(!prompt){document.getElementById('prompt3dInput').style.borderColor='#9d8fcc';return;}
   document.getElementById('prompt3dInput').style.borderColor='';
+  currentPrompt=prompt;
 
   const btn=document.getElementById('btn3d');
   btn.disabled=true;btn.textContent='Génération…';
-
   document.getElementById('promptResult').classList.add('visible');
+  document.getElementById('promptResultLabel').textContent='Génération en cours';
   document.getElementById('promptDlBtn').style.display='none';
-  setStatus('Envoi du prompt à Meshy…');
+  document.getElementById('promptOrderBtn').style.display='none';
+  document.getElementById('threeCanvas').style.display='none';
+  document.getElementById('viewerHint').style.display='none';
+  document.getElementById('promptSpinnerWrap').style.display='block';
+  setStatus('Envoi du prompt…');
 
   try{
-    // 1. Créer la tâche via proxy
-    const createRes=await fetch('/api/meshy',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({ prompt })
-    });
-    const {result:taskId}=await createRes.json();
-    setStatus('Modèle en cours de génération…');
+    const createRes=await fetch('/api/meshy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt})});
+    const createData=await createRes.json();
+    console.log('Meshy create:',createData);
+    const taskId=createData.result;
+    if(!taskId) throw new Error('Pas de taskId : '+JSON.stringify(createData));
 
-    // 2. Polling via proxy
     let glbUrl=null;
-    for(let i=0;i<40;i++){
+    for(let i=0;i<50;i++){
       await sleep(4000);
       const pollRes=await fetch(`/api/meshy-poll?taskId=${taskId}`);
       const task=await pollRes.json();
+      console.log('Poll:',task.status,task.progress,task.model_urls);
       setStatus(statusMsg(task.status,task.progress));
-      if(task.status==='SUCCEEDED'){
-        glbUrl=task.model_urls?.glb||task.model_urls?.fbx||null;
+      if(task.status==='SUCCEEDED'||(task.progress>=99&&task.model_urls?.glb)){
+        glbUrl=task.model_urls?.glb||task.model_urls?.obj||task.model_urls?.fbx||null;
         break;
       }
-      if(task.status==='FAILED'){throw new Error('Génération échouée')}
+      if(task.status==='FAILED') throw new Error('Génération échouée par Meshy');
     }
 
     if(glbUrl){
       model3dUrl=glbUrl;
-      document.getElementById('promptPreview').innerHTML=
-        `<div style="text-align:center">
-          <div style="font-size:28px;margin-bottom:8px">✦</div>
-          <div style="font-family:\'DM Mono\',monospace;font-size:11px;color:#9d8fcc;letter-spacing:.1em">Modèle généré</div>
-          <div style="font-size:11px;color:#5a5550;margin-top:6px;line-height:1.5">Notre équipe à Saillon vérifie<br>l\'imprimabilité avant production.</div>
-        </div>`;
+      document.getElementById('promptResultLabel').textContent='Votre modèle 3D';
+      initThreeViewer(glbUrl);
       document.getElementById('promptDlBtn').style.display='block';
-      setStatus('');
+      document.getElementById('promptOrderBtn').style.display='block';
+    } else {
+      throw new Error('URL du modèle non disponible');
     }
   }catch(err){
-    document.getElementById('promptPreview').innerHTML=
-      `<div style="text-align:center;color:#9d8fcc">
-        <div style="font-size:20px;margin-bottom:8px">!</div>
-        <div style="font-size:12px">${err.message||'Erreur de génération'}</div>
-      </div>`;
+    console.error(err);
+    document.getElementById('promptSpinnerWrap').innerHTML=
+      `<div style="color:#9d8fcc;font-size:12px;font-family:'DM Mono',monospace;padding:8px">${err.message||'Erreur'}</div>`;
   }
-  btn.disabled=false;btn.textContent='Générer le modèle 3D →';
+  btn.disabled=false;btn.textContent='Réessayer →';
 }
 
 function statusMsg(status,progress){
-  if(status==='PENDING') return 'En attente…';
+  if(status==='PENDING') return 'En file d\'attente…';
   if(status==='IN_PROGRESS') return `Génération : ${Math.round(progress||0)} %`;
   if(status==='SUCCEEDED') return 'Terminé !';
-  return status;
+  return status||'…';
 }
-function setStatus(msg){
-  const el=document.getElementById('promptStatus');
-  if(el)el.textContent=msg;
-}
+function setStatus(msg){const el=document.getElementById('promptStatus');if(el)el.textContent=msg;}
 function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
 
 function download3d(){
   if(!model3dUrl)return;
-  const a=document.createElement('a');
-  a.href=model3dUrl;a.download='kesk-modele-3d.glb';a.target='_blank';
-  a.click();
+  const a=document.createElement('a');a.href=model3dUrl;a.download='kesk-modele-3d.glb';a.target='_blank';a.click();
 }
+
+function order3d(){
+  if(!model3dUrl)return;
+  const sub=encodeURIComponent('[Kesk] Commande modèle 3D');
+  const body=encodeURIComponent('Bonjour,\n\nJe souhaite commander cette pièce.\n\nDescription : '+currentPrompt+'\nFichier GLB : '+model3dUrl+'\n\nMerci !');
+  window.open('mailto:hello@kesk.ch?subject='+sub+'&body='+body,'_blank');
+}
+
 
 // ── SHARE ──
 function shareHub(){
