@@ -9,7 +9,7 @@ export default async function handler(req, res) {
   if (!prompt) return res.status(400).json({ error: 'Prompt manquant' });
 
   try {
-    const r = await fetch('https://api.meshy.ai/v2/text-to-3d', {
+    const r = await fetch('https://api.meshy.ai/openapi/v2/text-to-3d', {
       method: 'POST',
       headers: {
         'Authorization': 'Bearer ' + process.env.MESHY_API_KEY,
@@ -19,6 +19,7 @@ export default async function handler(req, res) {
         mode: 'preview',
         prompt: prompt + '. Objet imprimable en 3D, parois épaisses minimum 2mm, pas de parties flottantes.',
         art_style: 'realistic',
+        should_remesh: true,
         negative_prompt: 'thin walls, floating parts, low quality, broken mesh'
       })
     });
