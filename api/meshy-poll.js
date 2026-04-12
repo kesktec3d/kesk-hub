@@ -9,7 +9,7 @@ export default async function handler(req, res) {
   if (!taskId) return res.status(400).json({ error: 'taskId manquant' });
 
   try {
-    const r = await fetch(`https://api.meshy.ai/v2/text-to-3d/${taskId}`, {
+    const r = await fetch(`https://api.meshy.ai/openapi/v2/text-to-3d/${taskId}`, {
       headers: {
         'Authorization': 'Bearer ' + process.env.MESHY_API_KEY
       }
