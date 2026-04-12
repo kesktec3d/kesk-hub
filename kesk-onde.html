@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>Kesk · Son & Onde</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0e0d0c;
+  --bg2:#161412;
+  --cream:#F7F3EE;
+  --cream2:#ede8e1;
+  --terracotta:#B85C38;
+  --ink:#0e0d0c;
+  --muted:#5a5550;
+  --border:#2a2520;
+  --radius:14px;
+}
+
+html,body{
+  min-height:100%;width:100%;
+  background:var(--bg);
+  color:var(--cream);
+  font-family:'DM Sans',sans-serif;
+}
+
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:1000;opacity:.5;
+}
+
+/* NAV */
+.nav{
+  position:fixed;top:0;left:0;right:0;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 24px;
+  z-index:50;
+  background:linear-gradient(to bottom,rgba(14,13,12,0.95),transparent);
+}
+.nav-logo{
+  font-family:'Playfair Display',serif;
+  font-size:22px;color:var(--cream);
+  text-decoration:none;letter-spacing:.02em;
+}
+.nav-logo span{color:var(--terracotta)}
+.nav-back{
+  font-size:12px;color:var(--muted);
+  text-decoration:none;letter-spacing:.06em;
+  text-transform:uppercase;
+  transition:color .2s;
+}
+.nav-back:hover{color:var(--cream)}
+
+/* MAIN */
+.main{
+  max-width:680px;margin:0 auto;
+  padding:100px 20px 80px;
+}
+
+.page-title{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(28px,5vw,42px);
+  font-weight:400;line-height:1.15;
+  margin-bottom:8px;
+}
+.page-title em{font-style:italic;color:var(--terracotta)}
+.page-sub{
+  font-size:14px;color:var(--muted);
+  margin-bottom:40px;line-height:1.6;
+}
+
+/* SECTION */
+.section{margin-bottom:32px}
+.section-label{
+  font-size:11px;font-weight:500;
+  color:var(--muted);text-transform:uppercase;
+  letter-spacing:.1em;margin-bottom:12px;
+}
+
+/* SOURCE AUDIO */
+.source-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn-source{
+  display:flex;align-items:center;gap:8px;
+  font-size:13px;padding:10px 18px;
+  border-radius:99px;
+  border:1px solid var(--border);
+  background:transparent;color:var(--cream2);
+  cursor:pointer;transition:all .2s;
+  font-family:'DM Sans',sans-serif;
+}
+.btn-source:hover{border-color:var(--muted);color:var(--cream)}
+.btn-source.recording{border-color:var(--terracotta);color:var(--terracotta)}
+.rec-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--terracotta);
+  animation:pulse-rec 1s ease-in-out infinite;
+}
+@keyframes pulse-rec{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.rec-dot.idle{animation:none;background:var(--muted)}
+
+.audio-status{
+  font-size:12px;color:var(--muted);
+  font-family:'DM Mono',monospace;
+  margin-top:8px;min-height:16px;
+}
+
+/* WAVEFORM PREVIEW */
+.preview-wrap{
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:24px 20px 20px;
+  position:relative;
+}
+
+/* SVG preview */
+#wave-svg{
+  width:100%;height:auto;
+  display:block;
+  border-radius:8px;
+  overflow:hidden;
+}
+
+/* MODE TABS */
+.mode-tabs{
+  display:flex;gap:6px;margin-bottom:20px;
+}
+.mode-tab{
+  flex:1;padding:9px;text-align:center;
+  font-size:12px;font-weight:500;
+  border-radius:8px;border:1px solid var(--border);
+  background:transparent;color:var(--muted);
+  cursor:pointer;transition:all .2s;
+  font-family:'DM Sans',sans-serif;
+  letter-spacing:.03em;
+}
+.mode-tab.active{
+  background:var(--cream);color:var(--ink);
+  border-color:var(--cream);
+}
+
+/* COULEURS */
+.color-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));
+  gap:8px;
+}
+.color-option{
+  border-radius:8px;border:1px solid var(--border);
+  padding:10px 8px;text-align:center;cursor:pointer;
+  transition:all .2s;position:relative;
+}
+.color-option:hover{border-color:var(--muted)}
+.color-option.active{border-color:var(--cream)}
+.color-option.active::after{
+  content:'✓';position:absolute;top:4px;right:6px;
+  font-size:10px;color:var(--cream);opacity:.7;
+}
+.color-swatch{
+  width:28px;height:28px;border-radius:50%;
+  margin:0 auto 6px;
+}
+.color-name{font-size:11px;color:var(--muted);line-height:1.2}
+
+/* TEXTE */
+.text-inp{
+  width:100%;padding:12px 14px;
+  background:transparent;border:1px solid var(--border);
+  border-radius:8px;color:var(--cream);
+  font-size:13px;font-family:'DM Sans',sans-serif;
+  transition:border-color .2s;
+  outline:none;
+}
+.text-inp:focus{border-color:var(--muted)}
+.text-inp::placeholder{color:var(--muted)}
+
+/* SUPPORT */
+.support-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sup-card{
+  border:1px solid var(--border);border-radius:10px;
+  padding:14px 12px;cursor:pointer;transition:all .2s;
+}
+.sup-card:hover{border-color:var(--muted)}
+.sup-card.active{border-color:var(--terracotta)}
+.sup-name{font-size:13px;font-weight:500;margin-bottom:2px}
+.sup-desc{font-size:11px;color:var(--muted);line-height:1.4}
+.sup-price{font-size:13px;color:var(--terracotta);margin-top:6px;font-weight:500}
+
+/* TOTAL */
+.total-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:16px 0;border-top:1px solid var(--border);
+  margin-top:8px;
+}
+.total-label{font-size:13px;color:var(--muted)}
+.total-val{font-size:22px;font-weight:500;font-family:'Playfair Display',serif}
+
+/* EXPORT BTNS */
+.export-row{display:flex;gap:10px;flex-wrap:wrap}
+.btn-export{
+  flex:1;min-width:140px;
+  padding:13px 16px;border-radius:10px;
+  font-size:13px;font-weight:500;
+  cursor:pointer;transition:all .2s;
+  font-family:'DM Sans',sans-serif;
+  text-align:center;border:1px solid;
+}
+.btn-svg{
+  background:transparent;
+  border-color:var(--border);
+  color:var(--cream2);
+}
+.btn-svg:hover{border-color:var(--muted)}
+.btn-stl{
+  background:var(--terracotta);
+  border-color:var(--terracotta);
+  color:#fff;
+}
+.btn-stl:hover{opacity:.88}
+.btn-commande{
+  width:100%;
+  background:var(--cream);border-color:var(--cream);
+  color:var(--ink);margin-top:6px;
+  padding:15px;font-size:15px;border-radius:10px;
+}
+.btn-commande:hover{background:var(--cream2);border-color:var(--cream2)}
+
+/* SPECS */
+.specs{
+  font-size:11px;color:var(--muted);
+  font-family:'DM Mono',monospace;
+  line-height:1.8;margin-top:20px;
+  border-top:1px solid var(--border);
+  padding-top:16px;
+}
+.specs span{color:var(--cream);opacity:.6}
+
+/* MODALE */
+.modal-overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(14,13,12,.92);z-index:200;
+  align-items:center;justify-content:center;padding:20px;
+}
+.modal-overlay.open{display:flex}
+.modal-box{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--radius);padding:28px 24px;
+  width:100%;max-width:420px;
+  animation:fade-up .3s ease;
+}
+@keyframes fade-up{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.modal-title{
+  font-family:'Playfair Display',serif;font-size:22px;
+  margin-bottom:6px;
+}
+.modal-sub{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.5}
+.modal-field{margin-bottom:14px}
+.modal-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.modal-inp{
+  width:100%;padding:11px 14px;
+  background:var(--bg);border:1px solid var(--border);
+  border-radius:8px;color:var(--cream);
+  font-size:13px;font-family:'DM Sans',sans-serif;
+  outline:none;transition:border-color .2s;
+}
+.modal-inp:focus{border-color:var(--muted)}
+.modal-btns{display:flex;gap:8px;margin-top:20px}
+.modal-send{
+  flex:1;padding:12px;border-radius:8px;
+  background:var(--terracotta);border:none;
+  color:#fff;font-size:14px;font-weight:500;
+  cursor:pointer;font-family:'DM Sans',sans-serif;
+  transition:opacity .2s;
+}
+.modal-send:hover{opacity:.85}
+.modal-cancel{
+  padding:12px 16px;border-radius:8px;
+  background:transparent;border:1px solid var(--border);
+  color:var(--muted);font-size:14px;cursor:pointer;
+  font-family:'DM Sans',sans-serif;
+  transition:border-color .2s;
+}
+.modal-cancel:hover{border-color:var(--muted)}
+.modal-success{display:none;text-align:center;padding:10px 0}
+.modal-success-icon{font-size:32px;margin-bottom:10px}
+.modal-success-title{font-family:'Playfair Display',serif;font-size:20px;margin-bottom:6px}
+.modal-success-sub{font-size:13px;color:var(--muted);line-height:1.5}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a class="nav-logo" href="/kesk-hub-v3.html">Kesk<span>.</span></a>
+  <a class="nav-back" href="/kesk-hub-v3.html">← Retour au hub</a>
+</nav>
+
+<main class="main">
+
+  <h1 class="page-title">Son &amp; <em>Onde</em></h1>
+  <p class="page-sub">Transformez un son, une voix ou une musique en objet physique.<br>Imprimé en filament bi-couleur ou en UV — fabriqué à Saillon, Valais.</p>
+
+  <!-- STEP 1 : MODE -->
+  <div class="section">
+    <div class="section-label">Mode de production</div>
+    <div class="mode-tabs">
+      <button class="mode-tab active" id="tab-filament" onclick="setMode('filament')">Filament 3D bi-couleur</button>
+      <button class="mode-tab" id="tab-uv" onclick="setMode('uv')">Impression UV</button>
+    </div>
+  </div>
+
+  <!-- STEP 2 : SOURCE AUDIO -->
+  <div class="section">
+    <div class="section-label">Source audio</div>
+    <div class="source-row">
+      <button class="btn-source" id="recBtn" onclick="toggleRec()">
+        <span class="rec-dot idle" id="recDot"></span>
+        <span id="recLabel">Enregistrer</span>
+      </button>
+      <label class="btn-source" style="cursor:pointer">
+        Charger un fichier
+        <input type="file" accept="audio/*" style="display:none" onchange="loadFile(this)">
+      </label>
+      <button class="btn-source" onclick="loadDemo()">Démo</button>
+    </div>
+    <div class="audio-status" id="audioStatus">Aucun son chargé — lancez la démo pour voir</div>
+  </div>
+
+  <!-- PREVIEW -->
+  <div class="section preview-wrap">
+    <svg id="wave-svg" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+      <!-- fond -->
+      <rect id="svg-bg" width="800" height="400" rx="12" fill="#1a1614"/>
+      <!-- barres waveform générées par JS -->
+      <g id="svg-bars"></g>
+      <!-- texte gravé -->
+      <text id="svg-text"
+        x="400" y="370"
+        text-anchor="middle"
+        font-family="DM Sans, sans-serif"
+        font-size="18"
+        fill="#F7F3EE"
+        opacity="0.45"
+        letter-spacing="3"></text>
+    </svg>
+  </div>
+
+  <!-- STEP 3 : COULEURS -->
+  <div class="section">
+    <div class="section-label" id="color-label">Couleur des barres</div>
+    <div class="color-grid" id="colorGrid"></div>
+
+    <div style="margin-top:14px" id="bg-color-wrap">
+      <div class="section-label">Couleur du fond</div>
+      <div class="color-grid" id="bgColorGrid"></div>
+    </div>
+  </div>
+
+  <!-- STEP 4 : TEXTE -->
+  <div class="section">
+    <div class="section-label">Texte gravé (optionnel)</div>
+    <input class="text-inp" id="captionInp" placeholder="Ex : Pour toujours — 12.06.2023" maxlength="60" oninput="updateSVG()">
+  </div>
+
+  <!-- STEP 5 : SUPPORT -->
+  <div class="section">
+    <div class="section-label">Support</div>
+    <div class="support-grid" id="supportGrid"></div>
+  </div>
+
+  <!-- TOTAL -->
+  <div class="total-row">
+    <span class="total-label">Prix estimé</span>
+    <span class="total-val" id="totalVal">45 CHF</span>
+  </div>
+
+  <!-- EXPORT -->
+  <div class="export-row">
+    <button class="btn-export btn-svg" onclick="exportSVG()">Télécharger SVG</button>
+    <button class="btn-export btn-stl" id="btnSTL" onclick="exportSTL()">Générer STL</button>
+  </div>
+  <button class="btn-export btn-commande" onclick="openModal()">Commander cette onde →</button>
+
+  <!-- SPECS -->
+  <div class="specs">
+    Format plaquette : <span>200 × 100 mm</span><br>
+    Épaisseur fond : <span>3 mm</span> / Hauteur max barres : <span>5 mm</span><br>
+    Barres : <span>60</span> / Résolution STL : <span>1 triangle/face</span><br>
+    Matière : <span>rPETG recyclé — Saillon, Valais</span>
+  </div>
+
+</main>
+
+<!-- MODALE COMMANDE -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+  <div class="modal-box">
+    <div id="modalForm">
+      <div class="modal-title">Commander cette onde</div>
+      <div class="modal-sub">Nous vous contactons sous 24h pour confirmer votre commande et les détails de livraison.</div>
+      <div class="modal-field">
+        <div class="modal-label">Votre prénom</div>
+        <input class="modal-inp" id="mName" type="text" placeholder="Marie">
+      </div>
+      <div class="modal-field">
+        <div class="modal-label">Email</div>
+        <input class="modal-inp" id="mEmail" type="email" placeholder="marie@example.ch">
+      </div>
+      <div class="modal-field">
+        <div class="modal-label">Message (optionnel)</div>
+        <input class="modal-inp" id="mMsg" type="text" placeholder="Livraison avant le 24 décembre…">
+      </div>
+      <div class="modal-btns">
+        <button class="modal-cancel" onclick="closeModal()">Annuler</button>
+        <button class="modal-send" onclick="sendOrder()">Envoyer la commande</button>
+      </div>
+    </div>
+    <div class="modal-success" id="modalSuccess">
+      <div class="modal-success-icon">✦</div>
+      <div class="modal-success-title">Commande reçue</div>
+      <div class="modal-success-sub">Vous allez recevoir un email de confirmation.<br>Nous vous contactons sous 24h depuis Saillon.</div>
+      <button class="modal-cancel" style="margin-top:20px;width:100%" onclick="closeModal()">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── CONFIG ────────────────────────────────────────────────
+const N_BARS = 60;
+const PLATE_W = 200; // mm
+const PLATE_H = 100; // mm
+const PLATE_D = 3;   // mm fond
+const BAR_MAX_H = 5; // mm hauteur max des barres
+
+const COLORS_BARS = [
+  { id:'cream',  hex:'#F7F3EE', name:'Crème' },
+  { id:'terra',  hex:'#B85C38', name:'Terracotta' },
+  { id:'teal',   hex:'#1D9E75', name:'Teal' },
+  { id:'gold',   hex:'#E8A234', name:'Doré' },
+  { id:'blue',   hex:'#378ADD', name:'Bleu' },
+  { id:'coral',  hex:'#E24B4A', name:'Corail' },
+];
+const COLORS_BG = [
+  { id:'dark',   hex:'#1a1614', name:'Anthracite' },
+  { id:'black',  hex:'#0e0d0c', name:'Noir' },
+  { id:'navy',   hex:'#0d1929', name:'Marine' },
+  { id:'forest', hex:'#0d2016', name:'Forêt' },
+  { id:'wine',   hex:'#1a0d12', name:'Bordeaux' },
+  { id:'stone',  hex:'#2a2520', name:'Pierre' },
+];
+const SUPPORTS = [
+  { id:'filament-std', label:'Plaquette filament', desc:'20×10 cm · bi-couleur · relief 5mm', price:55, mode:'filament' },
+  { id:'filament-prem',label:'Plaquette + cadre', desc:'20×10 cm · cadre bois intégré', price:75, mode:'filament' },
+  { id:'uv-tableau',   label:'Tableau UV', desc:'30×10 cm · relief UV · toile', price:45, mode:'uv' },
+  { id:'uv-metal',     label:'Métal UV', desc:'30×10 cm · aluminium brossé', price:55, mode:'uv' },
+];
+
+// ─── STATE ─────────────────────────────────────────────────
+let waveAmps = null; // 60 valeurs [0..1]
+let activeBarColor = COLORS_BARS[0];
+let activeBgColor  = COLORS_BG[0];
+let activeMode     = 'filament';
+let activeSupport  = SUPPORTS[0];
+let isRecording    = false;
+let mediaRecorder  = null;
+let audioChunks    = [];
+
+// ─── INIT ──────────────────────────────────────────────────
+buildColorGrid('colorGrid', COLORS_BARS, 'bar');
+buildColorGrid('bgColorGrid', COLORS_BG, 'bg');
+buildSupportGrid();
+loadDemo();
+
+// ─── MODE ──────────────────────────────────────────────────
+function setMode(mode) {
+  activeMode = mode;
+  document.getElementById('tab-filament').classList.toggle('active', mode === 'filament');
+  document.getElementById('tab-uv').classList.toggle('active', mode === 'uv');
+  document.getElementById('bg-color-wrap').style.display = mode === 'filament' ? '' : 'none';
+  document.getElementById('btnSTL').style.display = mode === 'filament' ? '' : 'none';
+  // Filtrer supports
+  buildSupportGrid();
+  updateSVG();
+}
+
+// ─── GRILLES COULEUR ───────────────────────────────────────
+function buildColorGrid(containerId, palette, type) {
+  const grid = document.getElementById(containerId);
+  grid.innerHTML = '';
+  palette.forEach(c => {
+    const d = document.createElement('div');
+    const isActive = type === 'bar'
+      ? c.id === activeBarColor.id
+      : c.id === activeBgColor.id;
+    d.className = 'color-option' + (isActive ? ' active' : '');
+    d.innerHTML = `<div class="color-swatch" style="background:${c.hex}"></div><div class="color-name">${c.name}</div>`;
+    d.onclick = () => {
+      if (type === 'bar') activeBarColor = c;
+      else activeBgColor = c;
+      buildColorGrid(containerId, palette, type);
+      updateSVG();
+    };
+    grid.appendChild(d);
+  });
+}
+
+// ─── SUPPORTS ──────────────────────────────────────────────
+function buildSupportGrid() {
+  const grid = document.getElementById('supportGrid');
+  grid.innerHTML = '';
+  const filtered = SUPPORTS.filter(s => s.mode === activeMode);
+  if (!filtered.find(s => s.id === activeSupport.id)) activeSupport = filtered[0];
+  filtered.forEach(s => {
+    const d = document.createElement('div');
+    d.className = 'sup-card' + (s.id === activeSupport.id ? ' active' : '');
+    d.innerHTML = `<div class="sup-name">${s.label}</div><div class="sup-desc">${s.desc}</div><div class="sup-price">${s.price} CHF</div>`;
+    d.onclick = () => { activeSupport = s; buildSupportGrid(); document.getElementById('totalVal').textContent = s.price + ' CHF'; };
+    grid.appendChild(d);
+  });
+  document.getElementById('totalVal').textContent = activeSupport.price + ' CHF';
+}
+
+// ─── AUDIO ─────────────────────────────────────────────────
+function loadDemo() {
+  // Génération d'une waveform demo réaliste (simulée)
+  const seed = 42;
+  const rng = lcg(seed);
+  const raw = Array.from({ length: 600 }, () => (rng() - 0.5) * 2);
+  // Enveloppe ADSR simplifiée
+  const env = raw.map((v, i) => {
+    const t = i / raw.length;
+    const att = Math.min(t / 0.08, 1);
+    const rel = Math.min((1 - t) / 0.15, 1);
+    return v * att * rel;
+  });
+  waveAmps = reduceToN(env, N_BARS);
+  document.getElementById('audioStatus').textContent = 'Démo chargée — enregistrez ou uploadez votre propre son';
+  updateSVG();
+}
+
+async function toggleRec() {
+  if (!isRecording) {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder = new MediaRecorder(stream);
+      audioChunks = [];
+      mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+      mediaRecorder.onstop = async () => {
+        const blob = new Blob(audioChunks, { type: 'audio/webm' });
+        await processAudioBlob(blob);
+        stream.getTracks().forEach(t => t.stop());
+      };
+      mediaRecorder.start();
+      isRecording = true;
+      document.getElementById('recBtn').classList.add('recording');
+      document.getElementById('recDot').classList.remove('idle');
+      document.getElementById('recLabel').textContent = 'Arrêter';
+      document.getElementById('audioStatus').textContent = 'Enregistrement en cours…';
+    } catch (e) {
+      document.getElementById('audioStatus').textContent = 'Accès micro refusé — utilisez le mode démo';
+    }
+  } else {
+    mediaRecorder.stop();
+    isRecording = false;
+    document.getElementById('recBtn').classList.remove('recording');
+    document.getElementById('recDot').classList.add('idle');
+    document.getElementById('recLabel').textContent = 'Enregistrer';
+    document.getElementById('audioStatus').textContent = 'Traitement…';
+  }
+}
+
+function loadFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  document.getElementById('audioStatus').textContent = 'Lecture de ' + file.name + '…';
+  processAudioBlob(file);
+}
+
+async function processAudioBlob(blob) {
+  try {
+    const arrayBuffer = await blob.arrayBuffer();
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+    const raw = Array.from(audioBuffer.getChannelData(0));
+    waveAmps = reduceToN(raw.map(Math.abs), N_BARS);
+    document.getElementById('audioStatus').textContent = 'Son chargé — ' + Math.round(audioBuffer.duration) + 's';
+    updateSVG();
+  } catch (e) {
+    document.getElementById('audioStatus').textContent = 'Format non supporté — essayez MP3 ou WAV';
+  }
+}
+
+// ─── SVG ───────────────────────────────────────────────────
+function updateSVG() {
+  const amps = waveAmps || Array(N_BARS).fill(0.3);
+  const bgHex = activeMode === 'filament' ? activeBgColor.hex : '#F7F3EE';
+  const barHex = activeBarColor.hex;
+
+  // Fond SVG
+  document.getElementById('svg-bg').setAttribute('fill', bgHex);
+
+  // Dimensions zone barres
+  const svgW = 800, svgH = 400;
+  const marginX = 40, marginY = 40;
+  const barsAreaW = svgW - marginX * 2;
+  const barsAreaH = svgH - marginY * 2 - 40; // 40px pour texte bas
+  const barW = barsAreaW / N_BARS;
+  const gap = barW * 0.25;
+  const rectW = barW - gap;
+  const midY = marginY + barsAreaH / 2;
+
+  const g = document.getElementById('svg-bars');
+  g.innerHTML = '';
+
+  amps.forEach((amp, i) => {
+    const x = marginX + i * barW + gap / 2;
+    const hHalf = Math.max(2, amp * barsAreaH / 2);
+    const r = Math.min(rectW / 2, 3);
+
+    // Barre symétrique (haut et bas)
+    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    rect.setAttribute('x', x);
+    rect.setAttribute('y', midY - hHalf);
+    rect.setAttribute('width', rectW);
+    rect.setAttribute('height', hHalf * 2);
+    rect.setAttribute('rx', r);
+    rect.setAttribute('fill', barHex);
+    rect.setAttribute('opacity', 0.15 + amp * 0.85);
+    g.appendChild(rect);
+  });
+
+  // Ligne centrale fine
+  const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  line.setAttribute('x1', marginX);
+  line.setAttribute('y1', midY);
+  line.setAttribute('x2', svgW - marginX);
+  line.setAttribute('y2', midY);
+  line.setAttribute('stroke', barHex);
+  line.setAttribute('stroke-width', '0.5');
+  line.setAttribute('opacity', '0.2');
+  g.appendChild(line);
+
+  // Texte
+  const cap = document.getElementById('captionInp').value;
+  const textEl = document.getElementById('svg-text');
+  textEl.textContent = cap.toUpperCase();
+  textEl.setAttribute('fill', barHex);
+  textEl.setAttribute('opacity', cap ? '0.45' : '0');
+}
+
+// ─── EXPORT SVG ────────────────────────────────────────────
+function exportSVG() {
+  const svg = document.getElementById('wave-svg');
+  const serializer = new XMLSerializer();
+  let svgStr = serializer.serializeToString(svg);
+  // Ajouter namespace XML propre
+  svgStr = '<?xml version="1.0" encoding="UTF-8"?>\n' + svgStr;
+  const blob = new Blob([svgStr], { type: 'image/svg+xml' });
+  downloadBlob(blob, 'kesk-onde.svg');
+}
+
+// ─── EXPORT STL ────────────────────────────────────────────
+function exportSTL() {
+  const amps = waveAmps || Array(N_BARS).fill(0.3);
+
+  // Dimensions réelles en mm
+  const totalW = PLATE_W;
+  const totalH = PLATE_H;
+  const totalD = PLATE_D;
+  const barAreaW = totalW - 10; // 5mm marge chaque côté
+  const barAreaH = totalH * 0.6;
+  const barW_mm = barAreaW / N_BARS;
+  const barGap = barW_mm * 0.25;
+  const barRealW = barW_mm - barGap;
+  const offsetX = 5;
+  const offsetY = (totalH - barAreaH) / 2;
+  const midY_mm = totalH / 2;
+
+  const triangles = [];
+
+  // 1. Fond plat (2 triangles)
+  addBox(triangles,
+    0, 0, 0,
+    totalW, totalH, totalD
+  );
+
+  // 2. Barres waveform sur le dessus du fond
+  amps.forEach((amp, i) => {
+    const x = offsetX + i * barW_mm + barGap / 2;
+    const barH_mm = Math.max(0.5, amp * barAreaH / 2);
+    const y = midY_mm - barH_mm;
+    const h = barH_mm * 2;
+    addBox(triangles,
+      x, y, totalD,
+      barRealW, h, BAR_MAX_H * amp + 0.5
+    );
+  });
+
+  const stlStr = buildSTL(triangles, 'kesk-onde');
+  const blob = new Blob([stlStr], { type: 'application/octet-stream' });
+  downloadBlob(blob, 'kesk-onde.stl');
+}
+
+// ─── STL HELPERS ───────────────────────────────────────────
+function addBox(tris, x, y, z, w, h, d) {
+  // 6 faces × 2 triangles = 12 triangles par boîte
+  const v = [
+    [x,   y,   z  ], [x+w, y,   z  ], [x+w, y+h, z  ], [x,   y+h, z  ],
+    [x,   y,   z+d], [x+w, y,   z+d], [x+w, y+h, z+d], [x,   y+h, z+d],
+  ];
+  const faces = [
+    [0,1,2],[0,2,3], // bas
+    [4,6,5],[4,7,6], // haut
+    [0,4,5],[0,5,1], // avant
+    [2,6,7],[2,7,3], // arrière
+    [0,3,7],[0,7,4], // gauche
+    [1,5,6],[1,6,2], // droite
+  ];
+  faces.forEach(([a,b,c]) => {
+    const n = triNormal(v[a],v[b],v[c]);
+    tris.push({ n, v:[v[a],v[b],v[c]] });
+  });
+}
+
+function triNormal(a, b, c) {
+  const u = [b[0]-a[0],b[1]-a[1],b[2]-a[2]];
+  const w = [c[0]-a[0],c[1]-a[1],c[2]-a[2]];
+  const n = [
+    u[1]*w[2]-u[2]*w[1],
+    u[2]*w[0]-u[0]*w[2],
+    u[0]*w[1]-u[1]*w[0]
+  ];
+  const len = Math.sqrt(n[0]**2+n[1]**2+n[2]**2) || 1;
+  return n.map(x => x/len);
+}
+
+function buildSTL(triangles, name) {
+  // ASCII STL
+  let s = `solid ${name}\n`;
+  triangles.forEach(t => {
+    s += `  facet normal ${t.n[0].toFixed(6)} ${t.n[1].toFixed(6)} ${t.n[2].toFixed(6)}\n`;
+    s += `    outer loop\n`;
+    t.v.forEach(v => {
+      s += `      vertex ${v[0].toFixed(4)} ${v[1].toFixed(4)} ${v[2].toFixed(4)}\n`;
+    });
+    s += `    endloop\n  endfacet\n`;
+  });
+  s += `endsolid ${name}\n`;
+  return s;
+}
+
+// ─── UTILS ─────────────────────────────────────────────────
+function lcg(seed) {
+  let s = seed;
+  return function() {
+    s = (s * 1664525 + 1013904223) & 0xffffffff;
+    return ((s >>> 0) / 0xffffffff);
+  };
+}
+
+function reduceToN(arr, n) {
+  const step = Math.floor(arr.length / n);
+  const result = [];
+  for (let i = 0; i < n; i++) {
+    const chunk = arr.slice(i * step, (i + 1) * step);
+    const rms = Math.sqrt(chunk.reduce((s, v) => s + v * v, 0) / chunk.length);
+    result.push(Math.min(1, rms * 3));
+  }
+  // Normaliser
+  const max = Math.max(...result) || 1;
+  return result.map(v => v / max);
+}
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+// ─── MODALE ────────────────────────────────────────────────
+function openModal() {
+  document.getElementById('modalOverlay').classList.add('open');
+  document.getElementById('modalForm').style.display = '';
+  document.getElementById('modalSuccess').style.display = 'none';
+}
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+function closeModalOutside(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+}
+async function sendOrder() {
+  const name  = document.getElementById('mName').value.trim();
+  const email = document.getElementById('mEmail').value.trim();
+  const msg   = document.getElementById('mMsg').value.trim();
+  const cap   = document.getElementById('captionInp').value.trim();
+
+  if (!email || !email.includes('@')) {
+    document.getElementById('mEmail').style.borderColor = '#B85C38';
+    return;
+  }
+  document.getElementById('mEmail').style.borderColor = '';
+
+  // Construction du résumé commande
+  const summary = [
+    `Mode: ${activeMode === 'filament' ? 'Filament 3D bi-couleur' : 'Impression UV'}`,
+    `Support: ${activeSupport.label} — ${activeSupport.price} CHF`,
+    `Couleur barres: ${activeBarColor.name}`,
+    activeMode === 'filament' ? `Couleur fond: ${activeBgColor.name}` : '',
+    cap ? `Texte: ${cap}` : '',
+    msg ? `Message: ${msg}` : '',
+  ].filter(Boolean).join('\n');
+
+  // Envoi via mailto (fallback simple sans backend)
+  const mailBody = encodeURIComponent(
+    `Nouvelle commande Son & Onde\n\nClient: ${name}\nEmail: ${email}\n\n${summary}\n\nEnvoyé depuis kesk.ch/configurateur/onde`
+  );
+  window.location.href = `mailto:admin@tec3d.ch?subject=Commande Son & Onde — Kesk&body=${mailBody}`;
+
+  document.getElementById('modalForm').style.display = 'none';
+  document.getElementById('modalSuccess').style.display = 'block';
+}
+
+// Init mode
+setMode('filament');
+</script>
+
+</body>
+</html>
