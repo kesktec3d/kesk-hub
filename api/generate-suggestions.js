@@ -20,8 +20,8 @@ export default async function handler(req, res) {
         max_tokens: 300,
         messages: [{
           role: 'user',
-          content: `Génère 3 idées de descriptions courtes (max 12 mots chacune) pour une image à imprimer sur ${support} en style ${style} avec le thème "${theme}". 
-Réponds UNIQUEMENT avec un tableau JSON de 3 strings, sans aucun texte autour. Exemple: ["description 1", "description 2", "description 3"]`
+          content: `Tu es un assistant créatif francophone. Génère 3 idées de descriptions courtes en FRANÇAIS (max 12 mots chacune) pour une image à imprimer sur ${support} en style artistique "${style}" avec le thème "${theme}". 
+Réponds UNIQUEMENT avec un tableau JSON de 3 strings en français, sans aucun texte autour. Exemple: ["description 1", "description 2", "description 3"]`
         }]
       })
     });
@@ -32,7 +32,6 @@ Réponds UNIQUEMENT avec un tableau JSON de 3 strings, sans aucun texte autour. 
     return res.status(200).json({ suggestions });
 
   } catch (e) {
-    // Fallback suggestions
     return res.status(200).json({
       suggestions: [
         'Un paysage montagneux au coucher du soleil, tons chauds',
