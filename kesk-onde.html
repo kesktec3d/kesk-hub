@@ -661,6 +661,28 @@ function exportSVG() {
 }
 
 // ─── EXPORT STL ────────────────────────────────────────────
+function buildSTLString() {
+  const amps = waveAmps || Array(N_BARS).fill(0.3);
+  const totalW = PLATE_W, totalH = PLATE_H, totalD = PLATE_D;
+  const barAreaW = totalW - 10;
+  const barAreaH = totalH * 0.6;
+  const barW_mm = barAreaW / N_BARS;
+  const barGap = barW_mm * 0.25;
+  const barRealW = barW_mm - barGap;
+  const offsetX = 5;
+  const midY_mm = totalH / 2;
+  const triangles = [];
+  addBox(triangles, 0, 0, 0, totalW, totalH, totalD);
+  amps.forEach((amp, i) => {
+    const x = offsetX + i * barW_mm + barGap / 2;
+    const barH_mm = Math.max(0.5, amp * barAreaH / 2);
+    const y = midY_mm - barH_mm;
+    const h = barH_mm * 2;
+    addBox(triangles, x, y, totalD, barRealW, h, BAR_MAX_H * amp + 0.5);
+  });
+  return buildSTL(triangles, 'kesk-onde');
+}
+
 function exportSTL() {
   const amps = waveAmps || Array(N_BARS).fill(0.3);
 
@@ -804,22 +826,75 @@ async function sendOrder() {
   }
   document.getElementById('mEmail').style.borderColor = '';
 
-  // Construction du résumé commande
-  const summary = [
-    `Mode: ${activeMode === 'filament' ? 'Filament 3D bi-couleur' : 'Impression UV'}`,
-    `Support: ${activeSupport.label} — ${activeSupport.price} CHF`,
-    `Couleur barres: ${activeBarColor.name}`,
-    activeMode === 'filament' ? `Couleur fond: ${activeBgColor.name}` : '',
-    cap ? `Texte: ${cap}` : '',
-    msg ? `Message: ${msg}` : '',
-  ].filter(Boolean).join('\n');
+  const ref = 'KESK-ONDE-' + Date.now().toString().slice(-6);
+  const extra = [
+    'Mode: ' + (activeMode === 'filament' ? 'Filament 3D bi-couleur' : 'Impression UV'),
+    'Support: ' + activeSupport.label + ' — ' + activeSupport.price + ' CHF',
+    'Couleur barres: ' + activeBarColor.name,
+    activeMode === 'filament' ? 'Couleur fond: ' + activeBgColor.name : '',
+    cap ? 'Texte gravé: ' + cap : '',
+  ].filter(Boolean).join(' | ');
 
-  // Envoi via mailto (fallback simple sans backend)
-  const mailBody = encodeURIComponent(
-    `Nouvelle commande Son & Onde\n\nClient: ${name}\nEmail: ${email}\n\n${summary}\n\nEnvoyé depuis kesk.ch/configurateur/onde`
-  );
-  window.location.href = `mailto:admin@tec3d.ch?subject=Commande Son & Onde — Kesk&body=${mailBody}`;
+  const payload = {
+    name,
+    email,
+    message: msg,
+    ref,
+    shape: 'Son & Onde',
+    texture: activeMode === 'filament' ? 'Filament bi-couleur' : 'Impression UV',
+    dims: '200 × 100 × ' + (3 + BAR_MAX_H) + ' mm',
+    color: activeBarColor.name,
+    lh: 0.2,
+    layers: 25,
+    wall: '3',
+    bottom: '3',
+    texamp: '0',
+    stl_url: '',
+    filename: 'kesk-onde-' + ref + '.stl',
+    extra
+  };
 
+  const btn = document.querySelector('.modal-send');
+  btn.disabled = true;
+  btn.textContent = 'Envoi…';
+
+  // 1. SVG en base64 data URL
+  const svgEl = document.getElementById('wave-svg');
+  const svgStr = new XMLSerializer().serializeToString(svgEl);
+  const svgB64 = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgStr)));
+
+  // 2. Upload STL vers Cloudinary
+  let stl_url = '';
+  try {
+    const stlStr = buildSTLString();
+    const stlBlob = new Blob([stlStr], { type: 'application/octet-stream' });
+    const fd = new FormData();
+    fd.append('file', stlBlob, ref + '.stl');
+    fd.append('upload_preset', 'kesk-unsigned');
+    fd.append('folder', 'kesk-stl');
+    const cloudRes = await fetch('https://api.cloudinary.com/v1_1/dfdlipbae/raw/upload', { method: 'POST', body: fd });
+    const cloudData = await cloudRes.json();
+    if (cloudData.secure_url) stl_url = cloudData.secure_url;
+  } catch(e) { console.log('STL upload error:', e.message); }
+
+  payload.stl_url = stl_url;
+  payload.svg_preview = svgB64;
+
+  try {
+    const r = await fetch('/api/planter-quote', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const d = await r.json();
+    if (!d.success) throw new Error(d.error);
+  } catch(e) {
+    const body = encodeURIComponent('Réf: ' + ref + '\nNom: ' + name + '\nEmail: ' + email + '\n\n' + extra + '\n\n' + msg);
+    window.open('mailto:hello@kesk.ch?subject=Commande Son %26 Onde — ' + ref + '&body=' + body, '_blank');
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Envoyer la commande';
   document.getElementById('modalForm').style.display = 'none';
   document.getElementById('modalSuccess').style.display = 'block';
 }
