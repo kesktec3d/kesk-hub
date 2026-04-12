@@ -131,6 +131,14 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;heigh
 </style>
 </head>
 <body>
+<script>
+  if(window.self !== window.top){
+    document.addEventListener('DOMContentLoaded',function(){
+      const h=document.querySelector('.ph');
+      if(h)h.style.display='none';
+    });
+  }
+</script>
 <div class="app">
 <aside class="panel">
   <div class="ph">
@@ -1021,7 +1029,7 @@ function closeDevis(){
   document.getElementById('devisOverlay').style.display='none';
 }
 
-function submitDevis(){
+async function submitDevis(){
   const fname=document.getElementById('dv-fname').value.trim();
   const lname=document.getElementById('dv-lname').value.trim();
   const email=document.getElementById('dv-email').value.trim();
@@ -1053,6 +1061,14 @@ function submitDevis(){
   stlLink.href=stlUrl;stlLink.download=filename;stlLink.click();
   setTimeout(()=>URL.revokeObjectURL(stlUrl),3000);
 
+  // Convertir STL en base64 pour upload Cloudinary côté serveur
+  const stlBase64 = await new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result.split(',')[1]);
+    reader.onerror = () => resolve('');
+    reader.readAsDataURL(stlBlob);
+  });
+
   // Send via Vercel API
   const payload = {
     name:    fname+' '+lname,
@@ -1072,7 +1088,7 @@ function submitDevis(){
     wall:    WALL,
     bottom:  BOTTOM,
     texamp:  P.texAmp,
-    stl_url: '' // STL déjà téléchargé côté client
+    stl_base64: stlBase64
   };
 
   fetch('/api/planter-quote',{
