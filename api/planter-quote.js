@@ -8,13 +8,13 @@ export default async function handler(req, res) {
   const {
     name, company, email, phone, address, message,
     shape, texture, texamp, dims, color, lh, layers, wall, bottom,
-    filename, stl_url
+    filename, stl_url, svg_preview, extra, ref: clientRef
   } = req.body;
 
   if (!name || !email || !email.includes('@'))
     return res.status(400).json({ error: 'Données invalides.' });
 
-  const ref = 'JAR-' + Date.now();
+  const ref = clientRef || 'JAR-' + Date.now();
   const senderEmail = process.env.BREVO_SENDER || 'hello@kesk.ch';
 
   const swatches = { blanc:'#eeeae4', white:'#eeeae4', gris:'#909088', grey:'#909088',
@@ -42,18 +42,18 @@ export default async function handler(req, res) {
   const adminHtml = `<div style="font-family:Arial,sans-serif;max-width:580px;margin:0 auto">
     <div style="background:#0e0d0c;padding:18px 24px;border-bottom:3px solid #B85C38">
       <span style="background:#B85C38;padding:5px 14px;border-radius:5px;font-weight:700;color:#fff">Kesk</span>
-      &nbsp;<span style="color:#F7F3EE;font-size:15px;font-weight:600">Demande vase & pied de table</span>
+      &nbsp;<span style="color:#F7F3EE;font-size:15px;font-weight:600">${shape||'Demande'}</span>
       <div style="color:#9a948c;font-size:12px;margin-top:6px">Réf. <strong style="color:#B85C38">${ref}</strong></div>
     </div>
+    ${svg_preview ? `<div style="padding:16px 24px;background:#1a1614"><img src="${svg_preview}" style="width:100%;border-radius:8px;display:block"/></div>` : ''}
     <div style="padding:20px 24px;background:#f8f6f3">
       <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#9a948c;margin-bottom:10px;font-weight:600">Configuration</div>
       <table style="width:100%;border-collapse:collapse;font-size:13px">
-        <tr><td style="padding:4px 0;color:#9a948c;width:130px">Forme</td><td style="color:#1c1916;font-weight:600">${shape||'—'}</td></tr>
-        <tr><td style="padding:4px 0;color:#9a948c">Texture</td><td style="color:#1c1916">${texture||'—'} (amp. ${texamp||'—'} mm)</td></tr>
+        <tr><td style="padding:4px 0;color:#9a948c;width:130px">Type</td><td style="color:#1c1916;font-weight:600">${shape||'—'}</td></tr>
+        ${texture ? `<tr><td style="padding:4px 0;color:#9a948c">Mode</td><td style="color:#1c1916">${texture}</td></tr>` : ''}
         <tr><td style="padding:4px 0;color:#9a948c">Dimensions</td><td style="color:#1c1916;font-weight:600">${dims||'—'}</td></tr>
         <tr><td style="padding:4px 0;color:#9a948c">Couleur</td><td style="color:#1c1916">${sw}${color||'—'}</td></tr>
-        <tr><td style="padding:4px 0;color:#9a948c">Haut. couche</td><td style="color:#1c1916">${lh||'—'} mm (~${layers||'—'} couches)</td></tr>
-        <tr><td style="padding:4px 0;color:#9a948c">Paroi / Fond</td><td style="color:#1c1916">${wall||'10'} / ${bottom||'10'} mm</td></tr>
+        ${extra ? `<tr><td style="padding:4px 0;color:#9a948c">Détails</td><td style="color:#1c1916;font-size:12px">${extra}</td></tr>` : ''}
         ${stl_url ? `<tr><td style="padding:4px 0;color:#9a948c">Fichier STL</td><td><a href="${stl_url}" style="color:#B85C38;font-weight:700">${filename||'model.stl'} — Télécharger ↓</a></td></tr>` : ''}
       </table>
     </div>
