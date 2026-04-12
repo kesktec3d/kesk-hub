@@ -9,29 +9,25 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0e0d0c;
-  --bg2:#161412;
-  --cream:#F7F3EE;
-  --cream2:#ede8e1;
+  --bg:#F7F3EE;
+  --bg2:#f0ede8;
+  --cream:#1c1916;
+  --cream2:#2a2520;
   --terracotta:#B85C38;
-  --ink:#0e0d0c;
-  --muted:#5a5550;
-  --border:#2a2520;
+  --ink:#1c1916;
+  --muted:#9a948c;
+  --border:#e0dbd4;
   --radius:14px;
 }
 
 html,body{
   min-height:100%;width:100%;
   background:var(--bg);
-  color:var(--cream);
+  color:var(--ink);
   font-family:'DM Sans',sans-serif;
 }
 
-body::before{
-  content:'';position:fixed;inset:0;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-  pointer-events:none;z-index:1000;opacity:.5;
-}
+
 
 /* NAV */
 .nav{
@@ -39,7 +35,7 @@ body::before{
   display:flex;align-items:center;justify-content:space-between;
   padding:18px 24px;
   z-index:50;
-  background:linear-gradient(to bottom,rgba(14,13,12,0.95),transparent);
+  background:linear-gradient(to bottom,rgba(247,243,238,0.98),transparent);
 }
 .nav-logo{
   font-family:'Playfair Display',serif;
@@ -88,11 +84,11 @@ body::before{
   font-size:13px;padding:10px 18px;
   border-radius:99px;
   border:1px solid var(--border);
-  background:transparent;color:var(--cream2);
+  background:#fff;color:var(--ink);
   cursor:pointer;transition:all .2s;
   font-family:'DM Sans',sans-serif;
 }
-.btn-source:hover{border-color:var(--muted);color:var(--cream)}
+.btn-source:hover{border-color:var(--ink);color:var(--ink)}
 .btn-source.recording{border-color:var(--terracotta);color:var(--terracotta)}
 .rec-dot{
   width:8px;height:8px;border-radius:50%;
@@ -110,7 +106,7 @@ body::before{
 
 /* WAVEFORM PREVIEW */
 .preview-wrap{
-  background:var(--bg2);
+  background:#fff;
   border:1px solid var(--border);
   border-radius:var(--radius);
   padding:24px 20px 20px;
@@ -139,8 +135,8 @@ body::before{
   letter-spacing:.03em;
 }
 .mode-tab.active{
-  background:var(--cream);color:var(--ink);
-  border-color:var(--cream);
+  background:var(--ink);color:#F7F3EE;
+  border-color:var(--ink);
 }
 
 /* COULEURS */
@@ -168,8 +164,8 @@ body::before{
 /* TEXTE */
 .text-inp{
   width:100%;padding:12px 14px;
-  background:transparent;border:1px solid var(--border);
-  border-radius:8px;color:var(--cream);
+  background:#fff;border:1px solid var(--border);
+  border-radius:8px;color:var(--ink);
   font-size:13px;font-family:'DM Sans',sans-serif;
   transition:border-color .2s;
   outline:none;
@@ -184,7 +180,7 @@ body::before{
   padding:14px 12px;cursor:pointer;transition:all .2s;
 }
 .sup-card:hover{border-color:var(--muted)}
-.sup-card.active{border-color:var(--terracotta)}
+.sup-card.active{border-color:var(--terracotta);background:rgba(184,92,56,.05)}
 .sup-name{font-size:13px;font-weight:500;margin-bottom:2px}
 .sup-desc{font-size:11px;color:var(--muted);line-height:1.4}
 .sup-price{font-size:13px;color:var(--terracotta);margin-top:6px;font-weight:500}
@@ -209,9 +205,9 @@ body::before{
   text-align:center;border:1px solid;
 }
 .btn-svg{
-  background:transparent;
+  background:#fff;
   border-color:var(--border);
-  color:var(--cream2);
+  color:var(--ink);
 }
 .btn-svg:hover{border-color:var(--muted)}
 .btn-stl{
@@ -222,11 +218,11 @@ body::before{
 .btn-stl:hover{opacity:.88}
 .btn-commande{
   width:100%;
-  background:var(--cream);border-color:var(--cream);
-  color:var(--ink);margin-top:6px;
+  background:var(--ink);border-color:var(--ink);
+  color:#F7F3EE;margin-top:6px;
   padding:15px;font-size:15px;border-radius:10px;
 }
-.btn-commande:hover{background:var(--cream2);border-color:var(--cream2)}
+.btn-commande:hover{background:var(--terracotta);border-color:var(--terracotta)}
 
 /* SPECS */
 .specs{
@@ -241,12 +237,12 @@ body::before{
 /* MODALE */
 .modal-overlay{
   display:none;position:fixed;inset:0;
-  background:rgba(14,13,12,.92);z-index:200;
+  background:rgba(28,25,22,.5);backdrop-filter:blur(4px);z-index:200;
   align-items:center;justify-content:center;padding:20px;
 }
 .modal-overlay.open{display:flex}
 .modal-box{
-  background:var(--bg2);border:1px solid var(--border);
+  background:#fff;border:1px solid var(--border);
   border-radius:var(--radius);padding:28px 24px;
   width:100%;max-width:420px;
   animation:fade-up .3s ease;
@@ -261,8 +257,8 @@ body::before{
 .modal-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
 .modal-inp{
   width:100%;padding:11px 14px;
-  background:var(--bg);border:1px solid var(--border);
-  border-radius:8px;color:var(--cream);
+  background:#f8f6f3;border:1px solid var(--border);
+  border-radius:8px;color:var(--ink);
   font-size:13px;font-family:'DM Sans',sans-serif;
   outline:none;transition:border-color .2s;
 }
@@ -283,7 +279,7 @@ body::before{
   font-family:'DM Sans',sans-serif;
   transition:border-color .2s;
 }
-.modal-cancel:hover{border-color:var(--muted)}
+.modal-cancel:hover{border-color:var(--ink)}
 .modal-success{display:none;text-align:center;padding:10px 0}
 .modal-success-icon{font-size:32px;margin-bottom:10px}
 .modal-success-title{font-family:'Playfair Display',serif;font-size:20px;margin-bottom:6px}
@@ -293,8 +289,16 @@ body::before{
 <body>
 
 <nav class="nav">
-  <a class="nav-logo" href="/kesk-hub-v3.html">Kesk<span>.</span></a>
-  <a class="nav-back" href="/kesk-hub-v3.html">← Retour au hub</a>
+  <a class="nav-logo" href="/" style="display:flex;align-items:center;text-decoration:none">
+    <svg viewBox="0 0 595.28 287.23" style="height:24px;width:auto" xmlns="http://www.w3.org/2000/svg">
+      <path fill="#1c1916" d="M209.66,181.94l-17.63-36.98c-.09-.19-.17-.38-.25-.57-28.81.04-59.17.08-90.81.13v42.57c0,6.61,5.36,11.97,11.97,11.97h21.7c6.61,0,11.97-5.36,11.97-11.97v-40.1l.31-.16,16.69,44.46c1.75,4.67,6.21,7.77,11.2,7.77h24.05c8.8,0,14.59-9.18,10.8-17.12ZM192.17,134.38l14.65-28.8c4.06-7.97-1.73-17.4-10.66-17.4h-22.35c-4.87,0-9.25,2.95-11.09,7.47l-15.8,38.93-.31-.15v-34.28c0-6.61-5.36-11.97-11.97-11.97h-21.7c-6.61,0-11.97,5.36-11.97,11.97v43.15c30.14-.15,60.2-.4,90.22-.77-.65-2.72-.32-5.61.98-8.15Z"/>
+      <path fill="#1c1916" d="M510.28,88.18h-22.35c-4.87,0-9.25,2.95-11.09,7.47l-15.8,38.93-.31-.15v-34.28c0-6.61-5.36-11.97-11.97-11.97h-21.7c-6.61,0-11.96,5.36-11.96,11.97v37.72c28.14-.84,56.27-1.76,84.4-2.78.82-.03,4.56.41,7.07-1.88.27-.25.5-.51.71-.77l1.25-2.46,12.42-24.4c4.05-7.97-1.74-17.4-10.67-17.4ZM523.78,181.94l-12.47-26.15h0c-1.91-2.82-4.95-6.41-9.6-8.95-6.63-3.62-13.19-3.28-15.02-3.22-4.53.15-29.93.27-71.59.38v43.09c0,6.61,5.35,11.97,11.96,11.97h21.7c6.61,0,11.97-5.36,11.97-11.97v-40.1l.31-.16,16.69,44.46c1.75,4.67,6.21,7.77,11.2,7.77h24.05c8.8,0,14.59-9.18,10.8-17.12Z"/>
+      <path fill="#1c1916" d="M299.14,163.83h-24.42c-1.65,0-2.99-1.33-2.99-2.98v-.31c0-1.65,1.34-2.99,2.99-2.99h15.69c4.91,0,8.89-3.98,8.89-8.89v-4.43c-22.79.03-47.27.07-73.21.11v45.82c0,4.92,3.99,8.9,8.9,8.9h64.15c4.91,0,8.89-3.98,8.89-8.9v-17.44c0-4.91-3.98-8.89-8.89-8.89ZM296.99,88.18h-62c-4.91,0-8.9,3.98-8.9,8.89v45c24.4-.37,48.79-.8,73.21-1.3v-.66c0-4.92-3.98-8.9-8.89-8.9h-15.69c-.82,0-1.57-.33-2.11-.87-.55-.54-.88-1.28-.88-2.11,0-1.65,1.34-2.99,2.99-2.99h22.27c4.91,0,8.89-3.98,8.89-8.89v-19.28c0-4.91-3.98-8.89-8.89-8.89Z"/>
+      <path fill="#1c1916" d="M399.79,144.04c-21.94.05-47.54.1-76.29.15.86,1,1.78,1.93,2.76,2.8,11.33,9.95,26.79,11.64,32.16,13.01,1.98.46,3.36,1.38,3.36,3.53,0,1.83-1.07,3.67-5.66,3.67-3.71,0-10.08-1.11-17.58-3.8-9.21-3.3-18.87,3.71-18.87,13.49v5.32c0,6.11,3.87,11.58,9.68,13.48,9.82,3.23,21.57,5.05,31.82,5.05,29.1,0,46.25-14.85,46.25-36.14,0-8.24-2.51-15-7.63-20.56ZM391.51,91.3c-9.17-2.97-20.16-4.81-29.88-4.81-28.02,0-45.18,15.16-45.18,37.37,0,6.75,1.58,12.11,4.2,16.45l72.47-1.82c-10.49-6.7-23.49-8.33-27.66-9.58-1.84-.61-3.52-1.53-3.52-3.82,0-1.69,1.22-3.37,5.66-3.37,3.16,0,8.74.81,15.56,2.77,9.01,2.59,17.98-4.26,17.98-13.64v-6.09c0-6.08-3.84-11.58-9.63-13.46Z"/>
+      <path fill="#1c1916" d="M100.97,143.3v1.22c-11.39.02-19.73.26-21.52.41-.74.06-1.33.09-2.11.32-.8.23-1.13.47-2.05.69-.31.07-.94.22-1.51.21-1.48-.02-3.46-1.08-3.47-2.31,0-1.23,1.98-2.28,3.47-2.31.67-.02,1.28.16,1.5.23,1.01.31,1.31.75,2.22,1.12.73.31,1.33.35,2.06.41,1.72.13,10.05.12,21.41.01Z"/>
+    </svg>
+  </a>
+  <a class="nav-back" href="/">← Retour</a>
 </nav>
 
 <main class="main">
@@ -341,7 +345,7 @@ body::before{
         text-anchor="middle"
         font-family="DM Sans, sans-serif"
         font-size="18"
-        fill="#F7F3EE"
+        fill="#1c1916"
         opacity="0.45"
         letter-spacing="3"></text>
     </svg>
@@ -399,13 +403,27 @@ body::before{
     <div id="modalForm">
       <div class="modal-title">Commander cette onde</div>
       <div class="modal-sub">Nous vous contactons sous 24h pour confirmer votre commande et les détails de livraison.</div>
-      <div class="modal-field">
-        <div class="modal-label">Votre prénom</div>
-        <input class="modal-inp" id="mName" type="text" placeholder="Marie">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="modal-field">
+          <div class="modal-label">Prénom</div>
+          <input class="modal-inp" id="mPrenom" type="text" placeholder="Marie">
+        </div>
+        <div class="modal-field">
+          <div class="modal-label">Nom</div>
+          <input class="modal-inp" id="mNom" type="text" placeholder="Dupont">
+        </div>
       </div>
       <div class="modal-field">
         <div class="modal-label">Email</div>
-        <input class="modal-inp" id="mEmail" type="email" placeholder="marie@example.ch">
+        <input class="modal-inp" id="mEmail" type="email" placeholder="marie@exemple.ch">
+      </div>
+      <div class="modal-field">
+        <div class="modal-label">Téléphone</div>
+        <input class="modal-inp" id="mPhone" type="tel" placeholder="+41 79 000 00 00">
+      </div>
+      <div class="modal-field">
+        <div class="modal-label">Adresse</div>
+        <input class="modal-inp" id="mAddr" type="text" placeholder="Rue des Fleurs 12, 1950 Sion">
       </div>
       <div class="modal-field">
         <div class="modal-label">Message (optionnel)</div>
@@ -442,12 +460,12 @@ const COLORS_BARS = [
   { id:'coral',  hex:'#E24B4A', name:'Corail' },
 ];
 const COLORS_BG = [
-  { id:'dark',   hex:'#1a1614', name:'Anthracite' },
+  { id:'dark',   hex:'#2a2520', name:'Anthracite' },
   { id:'black',  hex:'#0e0d0c', name:'Noir' },
-  { id:'navy',   hex:'#0d1929', name:'Marine' },
-  { id:'forest', hex:'#0d2016', name:'Forêt' },
-  { id:'wine',   hex:'#1a0d12', name:'Bordeaux' },
-  { id:'stone',  hex:'#2a2520', name:'Pierre' },
+  { id:'navy',   hex:'#0d3b6e', name:'Marine' },
+  { id:'forest', hex:'#0d4a1f', name:'Forêt' },
+  { id:'wine',   hex:'#6b0f2a', name:'Bordeaux' },
+  { id:'stone',  hex:'#4a4238', name:'Pierre' },
 ];
 const SUPPORTS = [
   { id:'filament-std', label:'Plaquette filament', desc:'20×10 cm · bi-couleur · relief 5mm', price:55, mode:'filament' },
@@ -542,7 +560,13 @@ function loadDemo() {
 async function toggleRec() {
   if (!isRecording) {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: { 
+          echoCancellation: true, 
+          noiseSuppression: true,
+          sampleRate: 44100
+        } 
+      });
       mediaRecorder = new MediaRecorder(stream);
       audioChunks = [];
       mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
@@ -556,11 +580,24 @@ async function toggleRec() {
       document.getElementById('recBtn').classList.add('recording');
       document.getElementById('recDot').classList.remove('idle');
       document.getElementById('recLabel').textContent = 'Arrêter';
-      document.getElementById('audioStatus').textContent = 'Enregistrement en cours…';
+      
+      // Timer 30s max
+      let elapsed = 0;
+      window._recTimer = setInterval(() => {
+        elapsed++;
+        const remaining = 30 - elapsed;
+        document.getElementById('audioStatus').textContent = 
+          'Enregistrement en cours… ' + elapsed + 's / 30s max';
+        if (elapsed >= 30) {
+          clearInterval(window._recTimer);
+          if (isRecording) toggleRec();
+        }
+      }, 1000);
     } catch (e) {
       document.getElementById('audioStatus').textContent = 'Accès micro refusé — utilisez le mode démo';
     }
   } else {
+    clearInterval(window._recTimer);
     mediaRecorder.stop();
     isRecording = false;
     document.getElementById('recBtn').classList.remove('recording');
@@ -815,15 +852,21 @@ function closeModalOutside(e) {
   if (e.target === document.getElementById('modalOverlay')) closeModal();
 }
 async function sendOrder() {
-  const name  = document.getElementById('mName').value.trim();
-  const email = document.getElementById('mEmail').value.trim();
-  const msg   = document.getElementById('mMsg').value.trim();
-  const cap   = document.getElementById('captionInp').value.trim();
+  const prenom = document.getElementById('mPrenom').value.trim();
+  const nom    = document.getElementById('mNom').value.trim();
+  const name   = (prenom + ' ' + nom).trim();
+  const email  = document.getElementById('mEmail').value.trim();
+  const phone  = document.getElementById('mPhone').value.trim();
+  const addr   = document.getElementById('mAddr').value.trim();
+  const msg    = document.getElementById('mMsg').value.trim();
+  const cap    = document.getElementById('captionInp').value.trim();
 
+  if (!prenom) { document.getElementById('mPrenom').style.borderColor='#B85C38'; return; }
   if (!email || !email.includes('@')) {
     document.getElementById('mEmail').style.borderColor = '#B85C38';
     return;
   }
+  document.getElementById('mPrenom').style.borderColor = '';
   document.getElementById('mEmail').style.borderColor = '';
 
   const ref = 'KESK-ONDE-' + Date.now().toString().slice(-6);
@@ -838,6 +881,8 @@ async function sendOrder() {
   const payload = {
     name,
     email,
+    phone,
+    address: addr,
     message: msg,
     ref,
     shape: 'Son & Onde',
