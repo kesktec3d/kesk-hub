@@ -29,7 +29,13 @@ export default async function handler(req, res) {
     params.append('metadata[support]', support || '');
     params.append('metadata[style]', style || '');
     params.append('metadata[customer_name]', `${customer?.prenom || ''} ${customer?.nom || ''}`.trim());
+    params.append('metadata[customer_email]', customer?.email || '');
+    params.append('metadata[customer_phone]', customer?.phone || '');
+    params.append('metadata[customer_address]', `${customer?.adresse || ''}, ${customer?.npa || ''} ${customer?.ville || ''}`.trim());
     params.append('metadata[promo_code]', promo_code || '');
+    params.append('metadata[promo_label]', promo_label || '');
+    params.append('metadata[image_url]', (image_url || '').substring(0, 500));
+    params.append('metadata[prompt]', (prompt || '').substring(0, 400));
     params.append('success_url', `${appUrl}/uv?success=1`);
     params.append('cancel_url', `${appUrl}/uv`);
 
