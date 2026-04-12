@@ -1061,13 +1061,23 @@ async function submitDevis(){
   stlLink.href=stlUrl;stlLink.download=filename;stlLink.click();
   setTimeout(()=>URL.revokeObjectURL(stlUrl),3000);
 
-  // Convertir STL en base64 pour upload Cloudinary côté serveur
-  const stlBase64 = await new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onload = e => resolve(e.target.result.split(',')[1]);
-    reader.onerror = () => resolve('');
-    reader.readAsDataURL(stlBlob);
-  });
+  // Upload STL directement vers Cloudinary (unsigned)
+  let stl_url = '';
+  try {
+    const fd2 = new FormData();
+    fd2.append('file', stlBlob, filename);
+    fd2.append('upload_preset', 'kesk-unsigned');
+    fd2.append('folder', 'kesk-stl');
+    fd2.append('public_id', ref);
+    // On récupère le cloud name depuis une meta tag injectée ou on le hardcode
+    const cloudRes = await fetch(`https://api.cloudinary.com/v1_1/dfdlipbae/raw/upload`, {
+      method: 'POST',
+      body: fd2
+    });
+    const cloudData = await cloudRes.json();
+    if (cloudData.secure_url) stl_url = cloudData.secure_url;
+    console.log('STL uploaded:', stl_url);
+  } catch(e) { console.log('STL upload error:', e.message); }
 
   // Send via Vercel API
   const payload = {
@@ -1088,7 +1098,7 @@ async function submitDevis(){
     wall:    WALL,
     bottom:  BOTTOM,
     texamp:  P.texAmp,
-    stl_base64: stlBase64
+    stl_url: stl_url
   };
 
   fetch('/api/planter-quote',{
