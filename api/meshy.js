@@ -19,7 +19,8 @@ export default async function handler(req, res) {
         mode: 'preview',
         prompt: prompt + '. Objet imprimable en 3D, parois épaisses minimum 2mm, pas de parties flottantes.',
         art_style: 'realistic',
-        should_remesh: true,
+        topology: 'triangle',
+        target_formats: ['glb', 'stl'],
         negative_prompt: 'thin walls, floating parts, low quality, broken mesh'
       })
     });
