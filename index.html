@@ -449,7 +449,7 @@ iframe{flex:1;border:none;width:100%;background:var(--bg)}
     </div>
     <button class="iframe-back" onclick="closeIframe()">Retour</button>
   </div>
-  <iframe id="mainIframe" src="" title="Configurateur Kesk" allow="clipboard-write"></iframe>
+  <iframe id="mainIframe" src="" title="Configurateur Kesk" allow="microphone; clipboard-write" allowusermedia></iframe>
 </div>
 
 <script>
@@ -545,7 +545,9 @@ function closeMenu(){
 function handlePetal(p){
   closeMenu();
   if(p.active===true){
-    if(p.newTab){
+    // Onde nécessite le micro — ouvrir en onglet sur Safari iOS
+    const isSafariIOS = /iP(hone|ad|od)/.test(navigator.userAgent) && /Safari/.test(navigator.userAgent);
+    if(p.newTab || (p.id==='onde' && isSafariIOS)){
       setTimeout(()=>window.open(p.url,'_blank'),280);
     } else {
       openIframe(p.url);
