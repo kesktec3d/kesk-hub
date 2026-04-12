@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Kesk — Configurateur UV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cream:#F7F3EE;--ink:#1A1714;--warm:#C8A87A;--warm-light:#E8D9C0;
+  --accent:#B85C38;--surface:#FFFFFF;--muted:#8A8078;--border:#E2DAD0;
+  --radius:12px;--shadow:0 4px 24px rgba(26,23,20,0.08);--green:#2D7A4F;
+}
+html{background:var(--cream);min-height:100vh}
+body{font-family:'DM Sans',sans-serif;color:var(--ink);background:var(--cream);min-height:100vh}
+.header{padding:24px 40px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:var(--cream);position:sticky;top:0;z-index:100;}
+.header-sub{font-size:12px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.progress-bar{display:flex;padding:0 40px;background:var(--cream);border-bottom:1px solid var(--border);}
+.progress-step{flex:1;padding:14px 16px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);border-bottom:3px solid transparent;transition:all .3s;cursor:default;}
+.progress-step.active{color:var(--ink);border-bottom-color:var(--accent)}
+.progress-step.done{color:var(--warm);cursor:pointer}
+.step-num{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0;background:var(--border);color:var(--muted);transition:all .3s;}
+.progress-step.active .step-num{background:var(--accent);color:#fff}
+.progress-step.done .step-num{background:var(--warm);color:#fff}
+.main{max-width:1100px;margin:0 auto;padding:48px 40px}
+.section-title{font-family:'Playfair Display',serif;font-size:30px;font-weight:400;margin-bottom:8px;}
+.section-subtitle{font-size:14px;color:var(--muted);margin-bottom:32px;line-height:1.6}
+.two-col{display:grid;grid-template-columns:1fr 340px;gap:40px;align-items:start}
+.section-label{font-size:11px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px}
+.supports-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px;}
+.support-card{border:2px solid var(--border);border-radius:var(--radius);padding:18px 14px;cursor:pointer;transition:all .2s;background:var(--surface);text-align:center;}
+.support-card:hover{border-color:var(--warm);transform:translateY(-2px);box-shadow:var(--shadow)}
+.support-card.selected{border-color:var(--accent);box-shadow:0 0 0 3px rgba(184,92,56,.15)}
+.support-icon{font-size:26px;margin-bottom:8px}
+.support-name{font-size:13px;font-weight:500;margin-bottom:3px}
+.support-dims{font-size:11px;color:var(--muted);margin-bottom:6px}
+.support-price{font-size:16px;font-weight:500;color:var(--accent)}
+.style-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px;}
+.style-card{border:2px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:all .2s;background:var(--surface);}
+.style-card:hover{border-color:var(--warm);transform:translateY(-2px);box-shadow:var(--shadow)}
+.style-card.selected{border-color:var(--accent);box-shadow:0 0 0 3px rgba(184,92,56,.15)}
+.style-preview{height:90px;position:relative;display:flex;align-items:center;justify-content:center;}
+.style-info{padding:10px 12px}
+.style-name{font-size:13px;font-weight:500;margin-bottom:2px}
+.style-desc{font-size:11px;color:var(--muted)}
+.style-badge{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.5);color:#fff;font-size:10px;padding:2px 6px;border-radius:99px;}
+.theme-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;}
+.theme-card{border:2px solid var(--border);border-radius:10px;padding:12px 8px;text-align:center;cursor:pointer;transition:all .2s;background:var(--surface);}
+.theme-card:hover{border-color:var(--warm);transform:translateY(-1px)}
+.theme-card.selected{border-color:var(--accent);background:rgba(184,92,56,.06)}
+.suggestion-item{padding:12px 14px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:13px;transition:all .2s;background:var(--surface);margin-bottom:8px;}
+.suggestion-item:hover{border-color:var(--warm);background:rgba(200,168,122,.05)}
+.suggestion-loading{font-size:13px;color:var(--muted);padding:12px 0;display:flex;align-items:center;gap:8px}
+.dot-pulse{display:flex;gap:4px}
+.dot-pulse span{width:6px;height:6px;border-radius:50%;background:var(--warm);animation:pulse 1.2s ease-in-out infinite}
+.dot-pulse span:nth-child(2){animation-delay:.2s}
+.dot-pulse span:nth-child(3){animation-delay:.4s}
+@keyframes pulse{0%,80%,100%{opacity:.3}40%{opacity:1}}
+textarea{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:11px 14px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--ink);background:var(--surface);resize:none;transition:border-color .2s;min-height:80px;line-height:1.6;}
+textarea:focus{outline:none;border-color:var(--warm)}
+textarea::placeholder{color:var(--muted)}
+.gen-counter{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:12px;color:var(--muted)}
+.gen-dots{display:flex;gap:4px}
+.gen-dot{width:8px;height:8px;border-radius:50%;background:var(--border);transition:.3s}
+.gen-dot.used{background:var(--accent)}
+.gen-dot.available{background:var(--warm-light)}
+.preview-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);position:sticky;top:100px;}
+.preview-title{font-size:11px;font-weight:500;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:14px}
+.canvas-mockup{width:100%;aspect-ratio:3/4;background:linear-gradient(135deg,#E8E0D8,#D8CFC5);border-radius:8px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;margin-bottom:12px;}
+.canvas-frame{position:absolute;inset:8px;border:2px solid rgba(255,255,255,.35);border-radius:4px;}
+.canvas-placeholder{text-align:center;color:rgba(26,23,20,.3);font-size:12px}
+.canvas-image{position:absolute;inset:0;object-fit:cover;width:100%;height:100%;display:none;}
+.canvas-image.visible{display:block}
+.canvas-relief{position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 2px,rgba(255,255,255,.04) 2px,rgba(255,255,255,.04) 4px);pointer-events:none;}
+.canvas-label{font-size:11px;color:var(--muted);display:flex;justify-content:space-between;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+.relief-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(200,168,122,.15);color:var(--warm);font-size:11px;padding:3px 9px;border-radius:99px;margin-bottom:12px;}
+.price-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:2px}
+.price-label{font-size:12px;color:var(--muted)}
+.price-value{font-size:22px;font-family:'Playfair Display',serif}
+.price-original{font-size:13px;color:var(--muted);text-decoration:line-through;margin-left:6px}
+.price-free{font-size:22px;font-family:'Playfair Display',serif;color:var(--green)}
+.price-sub{font-size:11px;color:var(--muted);margin-bottom:14px}
+.promo-section{margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.promo-row{display:flex;gap:8px;margin-top:6px}
+.promo-input{flex:1;border:1.5px solid var(--border);border-radius:8px;padding:9px 11px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--ink);background:var(--surface);transition:border-color .2s;}
+.promo-input:focus{outline:none;border-color:var(--warm)}
+.promo-input.valid{border-color:var(--green)}
+.promo-input.invalid{border-color:var(--accent)}
+.promo-btn{padding:9px 14px;background:var(--ink);color:var(--cream);border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:background .2s;}
+.promo-btn:hover{background:var(--accent)}
+.promo-feedback{font-size:11px;margin-top:5px}
+.promo-feedback.ok{color:var(--green)}
+.promo-feedback.ko{color:var(--accent)}
+.btn-primary{width:100%;padding:13px;background:var(--ink);color:var(--cream);border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;}
+.btn-primary:hover:not(:disabled){background:var(--accent);transform:translateY(-1px)}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed}
+.btn-secondary{width:100%;padding:11px;background:transparent;color:var(--ink);border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;margin-top:10px;}
+.btn-secondary:hover{border-color:var(--ink)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-field{display:flex;flex-direction:column;gap:5px}
+.form-field.full{grid-column:1/-1}
+label{font-size:13px;font-weight:500}
+input[type=text],input[type=email]{border:1.5px solid var(--border);border-radius:8px;padding:10px 13px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--ink);background:var(--surface);transition:border-color .2s;}
+input:focus{outline:none;border-color:var(--warm)}
+.order-summary{background:var(--cream);border-radius:8px;padding:14px;margin-bottom:20px}
+.summary-row{display:flex;justify-content:space-between;font-size:13px;padding:3px 0}
+.summary-row.total{font-weight:500;font-size:15px;border-top:1px solid var(--border);padding-top:8px;margin-top:5px}
+.summary-promo{color:var(--green);font-weight:500}
+.loading-overlay{position:fixed;inset:0;background:rgba(247,243,238,.85);display:none;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(4px);flex-direction:column;gap:16px;}
+.loading-overlay.visible{display:flex}
+.spinner{width:38px;height:38px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--ink);color:var(--cream);padding:12px 18px;border-radius:8px;font-size:13px;transform:translateY(80px);opacity:0;transition:all .3s;z-index:300;max-width:300px;}
+.toast.show{transform:translateY(0);opacity:1}
+@media(max-width:768px){
+  .header,.main{padding-left:16px;padding-right:16px}
+  .progress-bar{padding:0 16px;overflow-x:auto}
+  .progress-step{min-width:80px;padding:10px 8px;font-size:11px}
+  .two-col{grid-template-columns:1fr}
+  .style-grid,.supports-grid,.theme-grid{grid-template-columns:repeat(2,1fr)}
+  .canvas-mockup{aspect-ratio:4/3;max-height:200px;}
+  .preview-panel{position:static;}
+}
+</style>
+</head>
+<body>
+<script>
+if(window.self!==window.top){
+  document.addEventListener('DOMContentLoaded',function(){
+    var h=document.querySelector('.header');
+    if(h)h.style.display='none';
+    var p=document.querySelector('.progress-bar');
+    if(p)p.style.display='none';
+    var m=document.querySelector('.main');
+    if(m)m.style.paddingTop='24px';
+  });
+}
+</script>
+
+<header class="header">
+  <div style="display:flex;align-items:center;gap:16px">
+    <a href="https://kesk.ch/configurateur/" style="display:flex;align-items:center;text-decoration:none">
+      <svg viewBox="0 0 595.28 287.23" style="height:28px;width:auto" xmlns="http://www.w3.org/2000/svg">
+        <path fill="#1d1d1b" d="M209.66,181.94l-17.63-36.98c-.09-.19-.17-.38-.25-.57-28.81.04-59.17.08-90.81.13v42.57c0,6.61,5.36,11.97,11.97,11.97h21.7c6.61,0,11.97-5.36,11.97-11.97v-40.1l.31-.16,16.69,44.46c1.75,4.67,6.21,7.77,11.2,7.77h24.05c8.8,0,14.59-9.18,10.8-17.12ZM192.17,134.38l14.65-28.8c4.06-7.97-1.73-17.4-10.66-17.4h-22.35c-4.87,0-9.25,2.95-11.09,7.47l-15.8,38.93-.31-.15v-34.28c0-6.61-5.36-11.97-11.97-11.97h-21.7c-6.61,0-11.97,5.36-11.97,11.97v43.15c30.14-.15,60.2-.4,90.22-.77-.65-2.72-.32-5.61.98-8.15Z"/>
+        <path fill="#1d1d1b" d="M510.28,88.18h-22.35c-4.87,0-9.25,2.95-11.09,7.47l-15.8,38.93-.31-.15v-34.28c0-6.61-5.36-11.97-11.97-11.97h-21.7c-6.61,0-11.96,5.36-11.96,11.97v37.72c28.14-.84,56.27-1.76,84.4-2.78.82-.03,4.56.41,7.07-1.88.27-.25.5-.51.71-.77l1.25-2.46,12.42-24.4c4.05-7.97-1.74-17.4-10.67-17.4ZM523.78,181.94l-12.47-26.15h0c-1.91-2.82-4.95-6.41-9.6-8.95-6.63-3.62-13.19-3.28-15.02-3.22-4.53.15-29.93.27-71.59.38v43.09c0,6.61,5.35,11.97,11.96,11.97h21.7c6.61,0,11.97-5.36,11.97-11.97v-40.1l.31-.16,16.69,44.46c1.75,4.67,6.21,7.77,11.2,7.77h24.05c8.8,0,14.59-9.18,10.8-17.12Z"/>
+        <path fill="#1d1d1b" d="M299.14,163.83h-24.42c-1.65,0-2.99-1.33-2.99-2.98v-.31c0-1.65,1.34-2.99,2.99-2.99h15.69c4.91,0,8.89-3.98,8.89-8.89v-4.43c-22.79.03-47.27.07-73.21.11v45.82c0,4.92,3.99,8.9,8.9,8.9h64.15c4.91,0,8.89-3.98,8.89-8.9v-17.44c0-4.91-3.98-8.89-8.89-8.89ZM296.99,88.18h-62c-4.91,0-8.9,3.98-8.9,8.89v45c24.4-.37,48.79-.8,73.21-1.3v-.66c0-4.92-3.98-8.9-8.89-8.9h-15.69c-.82,0-1.57-.33-2.11-.87-.55-.54-.88-1.28-.88-2.11,0-1.65,1.34-2.99,2.99-2.99h22.27c4.91,0,8.89-3.98,8.89-8.89v-19.28c0-4.91-3.98-8.89-8.89-8.89Z"/>
+        <path fill="#1d1d1b" d="M399.79,144.04c-21.94.05-47.54.1-76.29.15.86,1,1.78,1.93,2.76,2.8,11.33,9.95,26.79,11.64,32.16,13.01,1.98.46,3.36,1.38,3.36,3.53,0,1.83-1.07,3.67-5.66,3.67-3.71,0-10.08-1.11-17.58-3.8-9.21-3.3-18.87,3.71-18.87,13.49v5.32c0,6.11,3.87,11.58,9.68,13.48,9.82,3.23,21.57,5.05,31.82,5.05,29.1,0,46.25-14.85,46.25-36.14,0-8.24-2.51-15-7.63-20.56ZM391.51,91.3c-9.17-2.97-20.16-4.81-29.88-4.81-28.02,0-45.18,15.16-45.18,37.37,0,6.75,1.58,12.11,4.2,16.45l72.47-1.82c-10.49-6.7-23.49-8.33-27.66-9.58-1.84-.61-3.52-1.53-3.52-3.82,0-1.69,1.22-3.37,5.66-3.37,3.16,0,8.74.81,15.56,2.77,9.01,2.59,17.98-4.26,17.98-13.64v-6.09c0-6.08-3.84-11.58-9.63-13.46Z"/>
+        <path fill="#1d1d1b" d="M100.97,143.3v1.22c-11.39.02-19.73.26-21.52.41-.74.06-1.33.09-2.11.32-.8.23-1.13.47-2.05.69-.31.07-.94.22-1.51.21-1.48-.02-3.46-1.08-3.47-2.31,0-1.23,1.98-2.28,3.47-2.31.67-.02,1.28.16,1.5.23,1.01.31,1.31.75,2.22,1.12.73.31,1.33.35,2.06.41,1.72.13,10.05.12,21.41.01Z"/>
+      </svg>
+    </a>
+    <div class="header-sub" style="border-left:1px solid var(--border);padding-left:16px">Impression UV relief · Suisse</div>
+  </div>
+  <div id="headerSub" style="font-size:12px;color:var(--muted)"></div>
+</header>
+
+<nav class="progress-bar" id="progressBar">
+  <div class="progress-step active" data-step="1" onclick="goToStep(1)"><div class="step-num">1</div><span>Support</span></div>
+  <div class="progress-step" data-step="2" onclick="goToStep(2)"><div class="step-num">2</div><span>Style</span></div>
+  <div class="progress-step" data-step="3" onclick="goToStep(3)"><div class="step-num">3</div><span>Résultat</span></div>
+  <div class="progress-step" data-step="4" onclick="goToStep(4)"><div class="step-num">4</div><span>Coordonnées</span></div>
+  <div class="progress-step" data-step="5" onclick="goToStep(5)"><div class="step-num">5</div><span>Paiement</span></div>
+</nav>
+
+<main class="main" id="mainContent"></main>
+<div class="loading-overlay" id="loadingOverlay"><div class="spinner"></div><div id="loadingText" style="font-size:14px;color:var(--muted)">Chargement…</div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const CONFIG={STRIPE_PUBLIC_KEY:'pk_live_51S52CbKHykPIIFiGXsJW5zPitq3GkmD6dMxp5YPdIguhj5oLlFtRSepvgjHOwMEH7RyCoxCmyUAORaGIaAOkfCmG00ySYyZaA1',API_BASE:'https://kesk-configurateur.vercel.app',RELIEF_MM:0.65,MAX_GENERATIONS:5};
+const PROMO_CODES={'KESK2025':{discount:100,label:'Offert par Kesk 🎁'},'FRIEND50':{discount:50,label:'-50% — ami(e) de la maison'},'BIENVENUE':{discount:20,label:'-20% bienvenue'},'LAUNCH10':{discount:10,label:'-10% lancement'}};
+const SUPPORTS=[{id:'toile',name:'Tableau toile',dims:'30 × 40 cm',icon:'🖼️',price:89},{id:'bois',name:'Bois (Wood Art)',dims:'30 × 40 cm',icon:'🪵',price:109},{id:'metal',name:'Métal (Metal Art)',dims:'30 × 40 cm',icon:'⚙️',price:119},{id:'tasse',name:'Tasse',dims:'330 ml',icon:'☕',price:49},{id:'coaster',name:'Dessous de verre',dims:'10 × 10 cm',icon:'🔵',price:19},{id:'magnet',name:'Magnet',dims:'8 × 8 cm',icon:'🧲',price:15}];
+const STYLES=[{id:'van-gogh',name:'Van Gogh',desc:'Tourbillons expressifs',emoji:'🌻',bg:'linear-gradient(135deg,#2B5EA7,#E8A234)',relief:'0.7–0.8mm',prompt:'in the style of Van Gogh, swirling impasto brushstrokes, vibrant post-impressionist colors, thick textured paint'},{id:'manga',name:'Manga',desc:'Contours nets, cel-shading',emoji:'⚡',bg:'linear-gradient(135deg,#1a1a2e,#e94560)',relief:'0.6mm',prompt:'manga illustration style, clean ink outlines, cel shading, high contrast, anime art'},{id:'minimaliste',name:'Minimaliste',desc:'Épuré, géométrique',emoji:'◻',bg:'linear-gradient(135deg,#F0EDE8,#C8C0B8)',relief:'0.5mm',prompt:'minimalist art, clean geometric forms, negative space, muted palette, Bauhaus inspired'},{id:'huile',name:"Peinture à l'huile",desc:'Coups de pinceau épais',emoji:'🎨',bg:'linear-gradient(135deg,#8B4513,#D4891A)',relief:'0.7–0.8mm',prompt:'oil painting, thick impasto brushstrokes, old masters technique, dramatic chiaroscuro lighting'},{id:'aquarelle',name:'Aquarelle',desc:'Doux, translucide',emoji:'💧',bg:'linear-gradient(135deg,#7bbde8,#b8daf5)',relief:'0.5mm',prompt:'watercolor painting, soft color washes, delicate edges, wet-on-wet technique, paper texture'},{id:'cinematique',name:'Cinématique',desc:'Lumière dorée, profondeur',emoji:'🎬',bg:'linear-gradient(135deg,#1C1C1C,#B8A070)',relief:'0.6mm',prompt:'cinematic photography, dramatic golden hour lighting, ultra detailed, shallow depth of field, 8K'}];
+const THEMES=[{id:'nature',label:'Paysages suisses',emoji:'🏔'},{id:'animaux',label:'Animaux',emoji:'🐾'},{id:'famille',label:'Famille',emoji:'👨‍👩‍👧'},{id:'architecture',label:'Architecture',emoji:'🏛'},{id:'fleurs',label:'Fleurs',emoji:'🌸'},{id:'fantasy',label:'Fantasy',emoji:'✨'}];
+
+let state={step:1,selectedSupport:null,selectedStyle:null,selectedTheme:null,suggestions:null,suggestionsLoading:false,prompt:'',generatedImage:null,generatedImageUrl:null,generationsUsed:0,promoCode:'',promoData:null,customer:{nom:'',prenom:'',email:'',adresse:'',ville:'',npa:''}};
+
+const getSupport=()=>SUPPORTS.find(s=>s.id===state.selectedSupport);
+const getStyle=()=>STYLES.find(s=>s.id===state.selectedStyle);
+const getBasePrice=()=>getSupport()?.price||0;
+const getFinalPrice=()=>{const b=getBasePrice();return state.promoData?Math.max(0,b*(1-state.promoData.discount/100)):b;};
+const isFree=()=>getFinalPrice()===0;
+
+function showLoading(t='Chargement…'){document.getElementById('loadingText').textContent=t;document.getElementById('loadingOverlay').classList.add('visible');}
+function hideLoading(){document.getElementById('loadingOverlay').classList.remove('visible');}
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500);}
+
+function updateProgress(){
+  document.querySelectorAll('.progress-step').forEach(el=>{
+    const s=parseInt(el.dataset.step);
+    el.className='progress-step'+(s===state.step?' active':s<state.step?' done':'');
+    el.querySelector('.step-num').textContent=s<state.step?'✓':s;
+  });
+  const sup=getSupport();
+  document.getElementById('headerSub').textContent=sup?sup.name+' · '+sup.dims:'';
+}
+function goToStep(n){if(n>=state.step)return;state.step=n;render();}
+function nextStep(){state.step++;render();window.scrollTo({top:0,behavior:'smooth'});}
+
+function applyPromo(){
+  const val=(document.getElementById('promoInput')?.value||'').toUpperCase().trim();
+  const fb=document.getElementById('promoFeedback');
+  const inp=document.getElementById('promoInput');
+  if(!val){showToast('Entre un code promo');return;}
+  if(PROMO_CODES[val]){state.promoCode=val;state.promoData=PROMO_CODES[val];inp.classList.add('valid');inp.classList.remove('invalid');fb.className='promo-feedback ok';fb.textContent='✓ '+state.promoData.label;render();}
+  else{state.promoCode='';state.promoData=null;inp.classList.add('invalid');inp.classList.remove('valid');fb.className='promo-feedback ko';fb.textContent='✗ Code invalide';}
+}
+
+function selectTheme(id){state.selectedTheme=id;state.suggestions=null;state.suggestionsLoading=true;render();loadSuggestions();}
+function useSuggestion(text){state.prompt=text;const field=document.getElementById('promptField');if(field){field.value=text;field.focus();}}
+
+async function loadSuggestions(){
+  if(!state.selectedTheme||!state.selectedStyle)return;
+  const style=getStyle(),support=getSupport();
+  try{
+    const r=await fetch(CONFIG.API_BASE+'/api/generate-suggestions',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({style:style?.name||'artistique',support:support?.name||'tableau',theme:state.selectedTheme})});
+    const data=await r.json();
+    state.suggestions=data.suggestions||[];state.suggestionsLoading=false;
+    const box=document.getElementById('suggestionsList');
+    if(box){box.innerHTML=state.suggestions.map(s=>`<div class="suggestion-item" onclick="useSuggestion('${s.replace(/'/g,"\\'")}')">💡 ${s}</div>`).join('');}
+  }catch(e){
+    state.suggestionsLoading=false;
+    state.suggestions=['Un paysage montagneux au coucher du soleil, couleurs vives','Un animal majestueux dans la nature, lumière dorée','Une scène poétique et intemporelle, atmosphère unique'];
+    render();
+  }
+}
+
+async function generateImage(){
+  if(!state.selectedStyle){showToast('Choisis un style');return;}
+  if(state.generationsUsed>=CONFIG.MAX_GENERATIONS){showToast('Maximum '+CONFIG.MAX_GENERATIONS+' générations atteint');return;}
+  const style=getStyle(),support=getSupport();
+  const fullPrompt=`${style.prompt}${state.prompt?', '+state.prompt:''}, high quality, ${support?.dims||'30x40cm'} print, ultra detailed`;
+  showLoading('Génération en cours… ~20–40 sec');
+  try{
+    const r=await fetch(CONFIG.API_BASE+'/api/generate-image',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:fullPrompt,style:state.selectedStyle})});
+    const{url,base64,error}=await r.json();
+    if(error)throw new Error(error);
+    state.generatedImage=base64||url;state.generatedImageUrl=url;state.generationsUsed++;
+    hideLoading();nextStep();
+  }catch(e){hideLoading();showToast('Erreur : '+e.message);}
+}
+
+async function launchStripe(){
+  showLoading('Redirection vers le paiement…');
+  try{
+    const r=await fetch(CONFIG.API_BASE+'/api/create-checkout-session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({price_chf:getFinalPrice(),is_free:isFree(),promo_code:state.promoCode||null,promo_label:state.promoData?.label||null,customer:state.customer,support:state.selectedSupport,style:state.selectedStyle,prompt:state.prompt,image_url:state.generatedImageUrl||''})});
+    const data=await r.json();
+    if(data.error)throw new Error(data.error);
+    if(data.free||isFree()){hideLoading();state.step=6;render();}
+    else{const isMobile=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent);if(isMobile){window.location.href=data.url;}else{window.open(data.url,'_blank');hideLoading();showToast('Paiement ouvert dans un nouvel onglet ✓');state.step=6;render();}}
+  }catch(e){hideLoading();showToast('Erreur paiement : '+e.message);}
+}
+
+function renderPreviewPanel(){
+  const support=getSupport(),style=getStyle();
+  const basePrice=getBasePrice(),finalPrice=getFinalPrice(),free=isFree(),hasPromo=!!state.promoData;
+  const genLeft=CONFIG.MAX_GENERATIONS-state.generationsUsed;
+  const dots=Array.from({length:CONFIG.MAX_GENERATIONS},(_,i)=>`<div class="gen-dot ${i<state.generationsUsed?'used':'available'}"></div>`).join('');
+  return `<div class="preview-panel" id="previewPanel">
+    <div class="preview-title">Aperçu</div>
+    <div class="canvas-mockup" style="${style?'background:'+style.bg:''}">
+      <div class="canvas-frame"></div>
+      ${state.generatedImage?`<img src="${state.generatedImage}" class="canvas-image visible" alt="generated"/>`:`<div class="canvas-placeholder">${style?style.emoji+'<br><span style="font-size:11px;margin-top:6px;display:block">'+style.name+'</span>':'🖼️<br><span style="font-size:11px;margin-top:6px;display:block">Choisissez</span>'}</div>`}
+      <div class="canvas-relief"></div>
+    </div>
+    <div class="canvas-label"><span>${support?support.name:'—'}</span><span>${support?support.dims:''}</span></div>
+    <div class="relief-badge">✦ Relief UV ${CONFIG.RELIEF_MM}mm</div>
+    <div class="price-row"><span class="price-label">Prix</span>${free?`<span class="price-free">Gratuit 🎁</span>`:hasPromo?`<span class="price-value">${finalPrice.toFixed(2)} CHF</span><span class="price-original">${basePrice.toFixed(2)}</span>`:`<span class="price-value">${basePrice?basePrice.toFixed(2)+' CHF':'—'}</span>`}</div>
+    ${hasPromo?`<div style="font-size:11px;color:var(--green);margin-top:2px">✓ ${state.promoData.label}</div>`:''}
+    <div class="price-sub">TVA incluse · livraison offerte en Suisse</div>
+    ${state.step>=2?`<div class="gen-counter"><div class="gen-dots">${dots}</div><span>${genLeft} génération${genLeft>1?'s':''} restante${genLeft>1?'s':''}</span></div>`:''}
+    <div class="promo-section">
+      <div style="font-size:12px;font-weight:500;margin-bottom:4px">Code promo</div>
+      <div class="promo-row">
+        <input class="promo-input${state.promoData?' valid':''}" id="promoInput" type="text" placeholder="Entrez votre code" value="${state.promoCode}" onkeydown="if(event.key==='Enter')applyPromo()"/>
+        <button class="promo-btn" onclick="applyPromo()">OK</button>
+      </div>
+      <div class="promo-feedback${state.promoData?' ok':''}" id="promoFeedback">${state.promoData?'✓ '+state.promoData.label:''}</div>
+    </div>
+  </div>`;
+}
+
+function renderStep1(){
+  return `<div class="two-col"><div>
+    <h1 class="section-title">Choisissez votre support</h1>
+    <p class="section-subtitle">Sur quoi souhaitez-vous imprimer votre création ?</p>
+    <div class="supports-grid">${SUPPORTS.map(s=>`<div class="support-card${state.selectedSupport===s.id?' selected':''}" onclick="selectSupport('${s.id}')"><div class="support-icon">${s.icon}</div><div class="support-name">${s.name}</div><div class="support-dims">${s.dims}</div><div class="support-price">${s.price} CHF</div></div>`).join('')}</div>
+    <button class="btn-primary" style="max-width:280px" onclick="validateStep1()" ${!state.selectedSupport?'disabled':''}>Continuer → Style & création</button>
+  </div><div>${renderPreviewPanel()}</div></div>`;
+}
+function selectSupport(id){state.selectedSupport=id;render();}
+function validateStep1(){if(!state.selectedSupport){showToast('Choisis un support');return;}nextStep();}
+
+function renderStep2(){
+  const genLeft=CONFIG.MAX_GENERATIONS-state.generationsUsed;
+  const suggestionsHtml=state.suggestionsLoading?`<div class="suggestion-loading"><div class="dot-pulse"><span></span><span></span><span></span></div> Génération des idées en cours…</div>`:state.suggestions?state.suggestions.map(s=>`<div class="suggestion-item" onclick="useSuggestion('${s.replace(/'/g,"\\'")}')">💡 ${s}</div>`).join(''):'';
+  return `<div class="two-col"><div>
+    <h1 class="section-title">Style & création</h1>
+    <p class="section-subtitle">Choisissez un style artistique, un thème, et laissez l'IA vous inspirer.</p>
+    <div class="section-label">Style artistique</div>
+    <div class="style-grid">${STYLES.map(s=>`<div class="style-card${state.selectedStyle===s.id?' selected':''}" onclick="selectStyle('${s.id}')"><div class="style-preview" style="background:${s.bg}"><span style="font-size:30px">${s.emoji}</span><div class="style-badge">${s.relief}</div></div><div class="style-info"><div class="style-name">${s.name}</div><div class="style-desc">${s.desc}</div></div></div>`).join('')}</div>
+    <div class="section-label" style="margin-top:24px">Choisissez un thème</div>
+    <div class="theme-grid">${THEMES.map(t=>`<div class="theme-card${state.selectedTheme===t.id?' selected':''}" onclick="selectTheme('${t.id}')"><div style="font-size:22px;margin-bottom:4px">${t.emoji}</div><div style="font-size:12px;font-weight:500">${t.label}</div></div>`).join('')}</div>
+    ${state.selectedTheme&&state.selectedStyle?`<div style="margin-bottom:20px"><div class="section-label" style="margin-bottom:10px">Idées de création <span style="font-size:10px;background:rgba(184,92,56,.1);color:var(--accent);padding:2px 8px;border-radius:99px;margin-left:6px;text-transform:none;letter-spacing:0">IA</span></div><div id="suggestionsList">${suggestionsHtml}</div></div>`:state.selectedStyle&&!state.selectedTheme?`<div style="font-size:13px;color:var(--muted);margin-bottom:20px;padding:12px;background:rgba(200,168,122,.1);border-radius:8px">👆 Choisissez un thème pour recevoir des idées générées par IA</div>`:''}
+    <label style="font-size:13px;font-weight:500;display:block;margin-bottom:8px">Votre description <span style="font-size:11px;color:var(--muted);font-weight:400"> — modifiez ou écrivez librement</span></label>
+    <textarea id="promptField" placeholder="Ex: un lac suisse au coucher du soleil, tons chauds et dorés…" oninput="state.prompt=this.value">${state.prompt}</textarea>
+    <div style="font-size:11px;color:var(--muted);margin-top:6px">${genLeft} génération${genLeft>1?'s':''} restante${genLeft>1?'s':''} sur ${CONFIG.MAX_GENERATIONS}</div>
+    <div style="margin-top:18px;display:flex;gap:12px">
+      <button class="btn-secondary" style="margin:0" onclick="state.step=1;render()">← Retour</button>
+      <button class="btn-primary" style="margin:0" onclick="generateImage()" ${!state.selectedStyle||genLeft<=0?'disabled':''}>${genLeft<=0?'Limite atteinte':'✦ Générer l\'image IA'}</button>
+    </div>
+  </div><div>${renderPreviewPanel()}</div></div>`;
+}
+function selectStyle(id){state.selectedStyle=id;if(state.selectedTheme){state.suggestions=null;state.suggestionsLoading=true;render();loadSuggestions();}else render();}
+
+function renderStep3(){
+  const style=getStyle(),genLeft=CONFIG.MAX_GENERATIONS-state.generationsUsed;
+  return `<div class="two-col"><div>
+    <h1 class="section-title">Votre création</h1>
+    <p class="section-subtitle">Style <strong>${style?.name}</strong> · ${genLeft>0?genLeft+' régénération'+(genLeft>1?'s':'')+' disponible'+(genLeft>1?'s':''):'Limite atteinte'}</p>
+    <div style="border-radius:var(--radius);overflow:hidden;margin-bottom:20px;box-shadow:var(--shadow)"><img src="${state.generatedImage}" alt="generated" style="width:100%;display:block;max-height:460px;object-fit:cover"/></div>
+    <div style="display:flex;gap:12px">
+      <button class="btn-secondary" style="margin:0" onclick="state.step=2;render()">← Modifier</button>
+      ${genLeft>0?`<button class="btn-primary" style="margin:0" onclick="generateImage()">↻ Régénérer (${genLeft})</button>`:`<button class="btn-primary" style="margin:0" disabled>Limite atteinte</button>`}
+    </div>
+    <div style="margin-top:20px"><button class="btn-primary" onclick="nextStep()">Continuer → Mes coordonnées</button></div>
+  </div><div>${renderPreviewPanel()}</div></div>`;
+}
+
+function renderStep4(){
+  const c=state.customer;
+  return `<div class="two-col"><div>
+    <h1 class="section-title">Vos coordonnées</h1>
+    <p class="section-subtitle">Pour la livraison de votre création.</p>
+    <div class="form-grid">
+      <div class="form-field"><label>Prénom</label><input type="text" value="${c.prenom}" oninput="state.customer.prenom=this.value" placeholder="Marie"/></div>
+      <div class="form-field"><label>Nom</label><input type="text" value="${c.nom}" oninput="state.customer.nom=this.value" placeholder="Dupont"/></div>
+      <div class="form-field full"><label>Email</label><input type="email" value="${c.email}" oninput="state.customer.email=this.value" placeholder="marie@exemple.ch"/></div>
+      <div class="form-field full"><label>Adresse</label><input type="text" value="${c.adresse}" oninput="state.customer.adresse=this.value" placeholder="Rue des Fleurs 12"/></div>
+      <div class="form-field"><label>NPA</label><input type="text" value="${c.npa}" oninput="state.customer.npa=this.value" placeholder="1000"/></div>
+      <div class="form-field"><label>Ville</label><input type="text" value="${c.ville}" oninput="state.customer.ville=this.value" placeholder="Lausanne"/></div>
+    </div>
+    <div style="margin-top:24px;display:flex;gap:12px">
+      <button class="btn-secondary" style="margin:0" onclick="state.step=3;render()">← Retour</button>
+      <button class="btn-primary" style="margin:0" onclick="validateStep4()">Continuer → Paiement</button>
+    </div>
+  </div><div>${renderPreviewPanel()}</div></div>`;
+}
+function validateStep4(){const c=state.customer;if(!c.prenom||!c.nom||!c.email||!c.adresse||!c.npa||!c.ville){showToast('Merci de remplir tous les champs');return;}if(!c.email.includes('@')){showToast('Email invalide');return;}nextStep();}
+
+function renderStep5(){
+  const support=getSupport(),style=getStyle(),c=state.customer;
+  const basePrice=getBasePrice(),finalPrice=getFinalPrice(),free=isFree();
+  return `<div style="max-width:480px;margin:0 auto">
+    <h1 class="section-title" style="text-align:center;margin-bottom:8px">${free?'🎁 Commande gratuite':'Paiement'}</h1>
+    <p class="section-subtitle" style="text-align:center;margin-bottom:28px">${free?'Votre code promo couvre 100% du montant.':'Sécurisé via Stripe'}</p>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow)">
+      ${!free?'<div style="font-size:36px;text-align:center;margin-bottom:14px">🔒</div>':''}
+      <div style="font-family:\'Playfair Display\',serif;font-size:20px;margin-bottom:5px">Récapitulatif</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:18px">Bonjour ${c.prenom} !</div>
+      <div class="order-summary">
+        <div class="summary-row"><span>${support?.name}</span></div>
+        <div class="summary-row"><span style="color:var(--muted)">Style ${style?.name}</span><span style="color:var(--muted)">${basePrice.toFixed(2)} CHF</span></div>
+        <div class="summary-row"><span style="color:var(--muted)">Relief UV ${CONFIG.RELIEF_MM}mm</span><span style="color:var(--muted)">inclus</span></div>
+        <div class="summary-row"><span style="color:var(--muted)">Livraison Suisse</span><span style="color:var(--muted)">offerte</span></div>
+        ${state.promoData?`<div class="summary-row"><span class="summary-promo">Code ${state.promoCode}</span><span class="summary-promo">-${state.promoData.discount}%</span></div>`:''}
+        <div class="summary-row total"><span>Total</span><span>${free?'Gratuit 🎁':finalPrice.toFixed(2)+' CHF'}</span></div>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:18px">Livraison : ${c.adresse}, ${c.npa} ${c.ville}<br>Confirmation : ${c.email}</div>
+      <button class="btn-primary" onclick="launchStripe()">${free?'✦ Confirmer la commande gratuite':'💳 Payer '+finalPrice.toFixed(2)+' CHF'}</button>
+      ${!free?'<div style="font-size:11px;color:var(--muted);text-align:center;margin-top:10px">🔒 SSL · Stripe · Aucune carte stockée</div>':''}
+    </div>
+    <div style="text-align:center;margin-top:14px"><button class="btn-secondary" style="max-width:180px;margin:0 auto" onclick="state.step=4;render()">← Modifier</button></div>
+  </div>`;
+}
+
+function renderSuccess(){
+  return `<div style="text-align:center;padding:72px 40px;max-width:480px;margin:0 auto">
+    <div style="font-size:60px;margin-bottom:20px">✦</div>
+    <h1 style="font-family:'Playfair Display',serif;font-size:30px;font-weight:400;margin-bottom:12px">Commande reçue !</h1>
+    <p style="font-size:14px;color:var(--muted);line-height:1.7">Merci ${state.customer.prenom} !<br><br>Votre <strong>${getSupport()?.name}</strong> en style <strong>${getStyle()?.name}</strong> est en production avec un relief UV de ${CONFIG.RELIEF_MM}mm — fabriqué en Suisse.<br><br>Confirmation envoyée à <strong>${state.customer.email}</strong></p>
+    <div style="margin-top:28px;padding:18px;background:rgba(200,168,122,.1);border-radius:12px"><div style="font-size:13px;font-weight:500;margin-bottom:4px">Délai estimé</div><div style="font-size:13px;color:var(--muted)">7–10 jours ouvrables · Suisse</div></div>
+    <button class="btn-secondary" style="margin-top:20px" onclick="resetApp()">Commander une autre création</button>
+  </div>`;
+}
+
+function resetApp(){state={step:1,selectedSupport:null,selectedStyle:null,selectedTheme:null,suggestions:null,suggestionsLoading:false,prompt:'',generatedImage:null,generatedImageUrl:null,generationsUsed:0,promoCode:'',promoData:null,customer:{nom:'',prenom:'',email:'',adresse:'',ville:'',npa:''}};document.getElementById('progressBar').style.display='flex';render();}
+
+function render(){
+  updateProgress();
+  const main=document.getElementById('mainContent');
+  if(state.step===1)main.innerHTML=renderStep1();
+  else if(state.step===2)main.innerHTML=renderStep2();
+  else if(state.step===3)main.innerHTML=renderStep3();
+  else if(state.step===4)main.innerHTML=renderStep4();
+  else if(state.step===5)main.innerHTML=renderStep5();
+  else if(state.step===6){main.innerHTML=renderSuccess();document.getElementById('progressBar').style.display='none';}
+}
+
+const urlParams=new URLSearchParams(window.location.search);
+if(urlParams.get('success')==='1'){
+  document.getElementById('progressBar').style.display='none';
+  document.getElementById('mainContent').innerHTML=`<div style="text-align:center;padding:72px 40px;max-width:480px;margin:0 auto"><div style="font-size:60px;margin-bottom:20px">✦</div><h1 style="font-family:'Playfair Display',serif;font-size:30px;font-weight:400;margin-bottom:12px">Commande reçue !</h1><p style="font-size:14px;color:var(--muted);line-height:1.7">Merci pour votre commande !<br><br>Votre création est en production — fabriquée en Suisse avec relief UV.<br><br>Vous recevrez un email de confirmation dans quelques minutes.</p><div style="margin-top:28px;padding:18px;background:rgba(200,168,122,.1);border-radius:12px"><div style="font-size:13px;font-weight:500;margin-bottom:4px">Délai estimé</div><div style="font-size:13px;color:var(--muted)">7–10 jours ouvrables · Suisse</div></div><a href="https://kesk-hub.vercel.app" style="display:inline-block;margin-top:20px;padding:12px 24px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;color:var(--ink);text-decoration:none">Retour au configurateur</a></div>`;
+}else{render();}
+</script>
+</body>
+</html>
