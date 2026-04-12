@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>Kesk · Constellation & Date</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2/astronomy.browser.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#F7F3EE;--bg2:#f0ede8;--cream:#1c1916;--cream2:#2a2520;--terra:#B85C38;--ink:#1c1916;--muted:#9a948c;--border:#e0dbd4;--r:14px}
+html,body{min-height:100%;background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif}
+.nav{position:fixed;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:18px 24px;z-index:50;background:linear-gradient(to bottom,rgba(247,243,238,.98),transparent)}
+.nav-logo{font-family:'Playfair Display',serif;font-size:22px;color:var(--cream);text-decoration:none;letter-spacing:.02em}
+.nav-logo span{color:var(--terra)}
+.nav-back{font-size:12px;color:var(--muted);text-decoration:none;letter-spacing:.06em;text-transform:uppercase;transition:color .2s}
+.nav-back:hover{color:var(--cream)}
+.main{max-width:680px;margin:0 auto;padding:100px 20px 80px}
+.page-title{font-family:'Playfair Display',serif;font-size:clamp(28px,5vw,42px);font-weight:400;line-height:1.15;margin-bottom:8px}
+.page-title em{font-style:italic;color:var(--terra)}
+.page-sub{font-size:14px;color:var(--muted);margin-bottom:40px;line-height:1.6}
+.section{margin-bottom:28px}
+.section-label{font-size:11px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px}
+.inp{width:100%;padding:12px 14px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--cream);font-size:13px;font-family:'DM Sans',sans-serif;transition:border-color .2s;outline:none;-webkit-appearance:none}
+.inp:focus{border-color:var(--muted)}
+.inp option{background:#fff;color:var(--ink)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+/* CANVAS */
+.sky-wrap{display:flex;justify-content:center;margin:0 auto 8px;position:relative;background:#f0ede8;border-radius:50%;width:fit-content}
+#skyCanvas{width:320px;height:320px;border-radius:50%;display:block;cursor:grab}
+/* STYLE TABS */
+.style-tabs{display:flex;gap:6px;margin-bottom:20px}
+.style-tab{flex:1;padding:9px;text-align:center;font-size:12px;font-weight:500;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif}
+.style-tab.active{background:var(--ink);color:#F7F3EE;border-color:var(--ink)}
+/* SUPPORT */
+.sup-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sup-card{border:1px solid var(--border);border-radius:10px;padding:14px 12px;cursor:pointer;transition:all .2s}
+.sup-card:hover{border-color:var(--muted)}
+.sup-card.active{border-color:var(--terra);background:rgba(184,92,56,.05)}
+.sup-name{font-size:13px;font-weight:500;margin-bottom:2px}
+.sup-desc{font-size:11px;color:var(--muted);line-height:1.4}
+.sup-price{font-size:13px;color:var(--terra);margin-top:6px;font-weight:500}
+/* TOTAL */
+.total-row{display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-top:1px solid var(--border);margin-top:8px}
+.total-label{font-size:13px;color:var(--muted)}
+.total-val{font-size:22px;font-weight:500;font-family:'Playfair Display',serif}
+.btn-commande{width:100%;background:var(--ink);border:1px solid var(--ink);color:#F7F3EE;padding:15px;font-size:15px;border-radius:10px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;transition:all .2s;margin-top:6px}
+.btn-commande:hover{background:var(--terra);border-color:var(--terra)}
+.sky-status{text-align:center;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);min-height:16px;margin-bottom:4px;margin-top:8px}
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(28,25,22,.5);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal-box{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:28px 24px;width:100%;max-width:420px;animation:fup .3s ease}
+@keyframes fup{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.modal-title{font-family:'Playfair Display',serif;font-size:22px;margin-bottom:6px}
+.modal-sub{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.5}
+.modal-field{margin-bottom:14px}
+.modal-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.modal-inp{width:100%;padding:11px 14px;background:#f8f6f3;border:1px solid var(--border);border-radius:8px;color:var(--ink);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s}
+.modal-inp:focus{border-color:var(--muted)}
+.modal-btns{display:flex;gap:8px;margin-top:20px}
+.modal-send{flex:1;padding:12px;border-radius:8px;background:var(--terra);border:none;color:#fff;font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity .2s}
+.modal-send:hover{opacity:.85}
+.modal-cancel{padding:12px 16px;border-radius:8px;background:transparent;border:1px solid var(--border);color:var(--muted);font-size:14px;cursor:pointer;font-family:'DM Sans',sans-serif}
+.modal-success{display:none;text-align:center;padding:10px 0}
+.modal-success-icon{font-size:32px;margin-bottom:10px}
+.modal-success-title{font-family:'Playfair Display',serif;font-size:20px;margin-bottom:6px}
+.modal-success-sub{font-size:13px;color:var(--muted);line-height:1.5}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <a class="nav-logo" href="/" style="display:flex;align-items:center;text-decoration:none">
+    <svg viewBox="0 0 595.28 287.23" style="height:24px;width:auto" xmlns="http://www.w3.org/2000/svg">
+      <path fill="#1c1916" d="M209.66,181.94l-17.63-36.98c-.09-.19-.17-.38-.25-.57-28.81.04-59.17.08-90.81.13v42.57c0,6.61,5.36,11.97,11.97,11.97h21.7c6.61,0,11.97-5.36,11.97-11.97v-40.1l.31-.16,16.69,44.46c1.75,4.67,6.21,7.77,11.2,7.77h24.05c8.8,0,14.59-9.18,10.8-17.12ZM192.17,134.38l14.65-28.8c4.06-7.97-1.73-17.4-10.66-17.4h-22.35c-4.87,0-9.25,2.95-11.09,7.47l-15.8,38.93-.31-.15v-34.28c0-6.61-5.36-11.97-11.97-11.97h-21.7c-6.61,0-11.97,5.36-11.97,11.97v43.15c30.14-.15,60.2-.4,90.22-.77-.65-2.72-.32-5.61.98-8.15Z"/>
+      <path fill="#1c1916" d="M510.28,88.18h-22.35c-4.87,0-9.25,2.95-11.09,7.47l-15.8,38.93-.31-.15v-34.28c0-6.61-5.36-11.97-11.97-11.97h-21.7c-6.61,0-11.96,5.36-11.96,11.97v37.72c28.14-.84,56.27-1.76,84.4-2.78.82-.03,4.56.41,7.07-1.88.27-.25.5-.51.71-.77l1.25-2.46,12.42-24.4c4.05-7.97-1.74-17.4-10.67-17.4ZM523.78,181.94l-12.47-26.15h0c-1.91-2.82-4.95-6.41-9.6-8.95-6.63-3.62-13.19-3.28-15.02-3.22-4.53.15-29.93.27-71.59.38v43.09c0,6.61,5.35,11.97,11.96,11.97h21.7c6.61,0,11.97-5.36,11.97-11.97v-40.1l.31-.16,16.69,44.46c1.75,4.67,6.21,7.77,11.2,7.77h24.05c8.8,0,14.59-9.18,10.8-17.12Z"/>
+      <path fill="#1c1916" d="M299.14,163.83h-24.42c-1.65,0-2.99-1.33-2.99-2.98v-.31c0-1.65,1.34-2.99,2.99-2.99h15.69c4.91,0,8.89-3.98,8.89-8.89v-4.43c-22.79.03-47.27.07-73.21.11v45.82c0,4.92,3.99,8.9,8.9,8.9h64.15c4.91,0,8.89-3.98,8.89-8.9v-17.44c0-4.91-3.98-8.89-8.89-8.89ZM296.99,88.18h-62c-4.91,0-8.9,3.98-8.9,8.89v45c24.4-.37,48.79-.8,73.21-1.3v-.66c0-4.92-3.98-8.9-8.89-8.9h-15.69c-.82,0-1.57-.33-2.11-.87-.55-.54-.88-1.28-.88-2.11,0-1.65,1.34-2.99,2.99-2.99h22.27c4.91,0,8.89-3.98,8.89-8.89v-19.28c0-4.91-3.98-8.89-8.89-8.89Z"/>
+      <path fill="#1c1916" d="M399.79,144.04c-21.94.05-47.54.1-76.29.15.86,1,1.78,1.93,2.76,2.8,11.33,9.95,26.79,11.64,32.16,13.01,1.98.46,3.36,1.38,3.36,3.53,0,1.83-1.07,3.67-5.66,3.67-3.71,0-10.08-1.11-17.58-3.8-9.21-3.3-18.87,3.71-18.87,13.49v5.32c0,6.11,3.87,11.58,9.68,13.48,9.82,3.23,21.57,5.05,31.82,5.05,29.1,0,46.25-14.85,46.25-36.14,0-8.24-2.51-15-7.63-20.56ZM391.51,91.3c-9.17-2.97-20.16-4.81-29.88-4.81-28.02,0-45.18,15.16-45.18,37.37,0,6.75,1.58,12.11,4.2,16.45l72.47-1.82c-10.49-6.7-23.49-8.33-27.66-9.58-1.84-.61-3.52-1.53-3.52-3.82,0-1.69,1.22-3.37,5.66-3.37,3.16,0,8.74.81,15.56,2.77,9.01,2.59,17.98-4.26,17.98-13.64v-6.09c0-6.08-3.84-11.58-9.63-13.46Z"/>
+      <path fill="#1c1916" d="M100.97,143.3v1.22c-11.39.02-19.73.26-21.52.41-.74.06-1.33.09-2.11.32-.8.23-1.13.47-2.05.69-.31.07-.94.22-1.51.21-1.48-.02-3.46-1.08-3.47-2.31,0-1.23,1.98-2.28,3.47-2.31.67-.02,1.28.16,1.5.23,1.01.31,1.31.75,2.22,1.12.73.31,1.33.35,2.06.41,1.72.13,10.05.12,21.41.01Z"/>
+    </svg>
+  </a>
+  <a class="nav-back" href="/">← Retour</a>
+</nav>
+<main class="main">
+  <h1 class="page-title">Constellation <em>&amp; Date</em></h1>
+  <p class="page-sub">La carte exacte du ciel à votre moment unique. Calculée astronomiquement, imprimée à Saillon.</p>
+
+  <div class="section">
+    <div class="section-label">Style</div>
+    <div class="style-tabs">
+      <button class="style-tab active" onclick="setStyle('minimal',this)">Minimal</button>
+      <button class="style-tab" onclick="setStyle('classique',this)">Classique</button>
+      <button class="style-tab" onclick="setStyle('dense',this)">Dense</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Moment &amp; lieu</div>
+    <div class="row2" style="margin-bottom:10px">
+      <div>
+        <div class="section-label" style="margin-bottom:6px">Date</div>
+        <input class="inp" type="date" id="inpDate" onchange="render()"/>
+      </div>
+      <div>
+        <div class="section-label" style="margin-bottom:6px">Heure</div>
+        <input class="inp" type="time" id="inpTime" value="22:00" onchange="render()"/>
+      </div>
+    </div>
+    <div>
+      <div class="section-label" style="margin-bottom:6px">Ville</div>
+      <select class="inp" id="inpCity" onchange="render()">
+        <option value="46.948,7.447">Berne, CH</option>
+        <option value="47.376,8.541">Zurich, CH</option>
+        <option value="46.204,6.143" selected>Genève, CH</option>
+        <option value="46.522,6.633">Lausanne, CH</option>
+        <option value="46.233,7.360">Sion, CH</option>
+        <option value="46.115,7.090">Saillon, CH</option>
+        <option value="47.558,7.588">Bâle, CH</option>
+        <option value="46.005,8.952">Lugano, CH</option>
+        <option value="46.799,9.848">Coire, CH</option>
+        <option value="48.853,2.350">Paris, FR</option>
+        <option value="45.764,4.835">Lyon, FR</option>
+        <option value="43.296,5.370">Marseille, FR</option>
+        <option value="43.710,7.262">Nice, FR</option>
+        <option value="45.188,5.724">Grenoble, FR</option>
+        <option value="48.114,1.680">Le Mans, FR</option>
+        <option value="51.507,-0.128">Londres, UK</option>
+        <option value="52.520,13.405">Berlin, DE</option>
+        <option value="48.135,11.582">Munich, DE</option>
+        <option value="41.902,12.496">Rome, IT</option>
+        <option value="40.416,-3.704">Madrid, ES</option>
+        <option value="40.712,-74.006">New York, US</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="sky-wrap">
+      <canvas id="skyCanvas" width="1200" height="1200"></canvas>
+    </div>
+    <div class="sky-status" id="skyStatus">Initialisation…</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Texte gravé (optionnel)</div>
+    <input class="inp" type="text" id="inpCaption" placeholder="Ex : Notre première nuit — 14 juin 2019" maxlength="50" oninput="render()"/>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Support</div>
+    <div class="sup-grid" id="supGrid"></div>
+  </div>
+
+  <div class="total-row">
+    <span class="total-label">Prix estimé</span>
+    <span class="total-val" id="totalVal">55 CHF</span>
+  </div>
+  <button class="btn-commande" onclick="openModal()">Commander cette constellation →</button>
+</main>
+
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box">
+    <div id="modalForm">
+      <div class="modal-title">Commander</div>
+      <div class="modal-sub">Nous régénérons exactement votre ciel et vous contactons sous 24h.</div>
+      <div class="modal-field"><div class="modal-label">Prénom &amp; Nom</div><input class="modal-inp" id="mName" type="text" placeholder="Marie Dupont"/></div>
+      <div class="modal-field"><div class="modal-label">Email</div><input class="modal-inp" id="mEmail" type="email" placeholder="marie@exemple.ch"/></div>
+      <div class="modal-field"><div class="modal-label">Message (optionnel)</div><input class="modal-inp" id="mMsg" type="text" placeholder="Livraison avant le…"/></div>
+      <div class="modal-btns">
+        <button class="modal-cancel" onclick="closeModal()">Annuler</button>
+        <button class="modal-send" id="modalSendBtn" onclick="sendOrder()">Envoyer</button>
+      </div>
+    </div>
+    <div class="modal-success" id="modalSuccess">
+      <div class="modal-success-icon">✦</div>
+      <div class="modal-success-title">Commande reçue</div>
+      <div class="modal-success-sub">Confirmation par email sous peu.<br>Nous vous contactons depuis Saillon sous 24h.</div>
+      <button class="modal-cancel" style="margin-top:20px;width:100%" onclick="closeModal()">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── CONFIG ──────────────────────────────────────────────────
+const SUPPORTS=[
+  {id:'uv-tableau',  label:'Tableau UV',       desc:'30×30 cm · relief UV',             price:55},
+  {id:'uv-metal',    label:'Métal UV',          desc:'30×30 cm · aluminium brossé',       price:65},
+  {id:'affiche',     label:'Affiche papier',    desc:'40×40 cm · papier photo',           price:38},
+  {id:'filament',    label:'Plaquette filament',desc:'20×20 cm · bi-couleur crème/noir',  price:60},
+];
+let activeSupport=SUPPORTS[0];
+let activeStyle='minimal';
+let starsData=[], constelData={};
+let astroReady=false;
+
+// ─── DATE PAR DÉFAUT ─────────────────────────────────────────
+const today=new Date();
+document.getElementById('inpDate').value=today.toISOString().split('T')[0];
+
+// ─── SUPPORTS ────────────────────────────────────────────────
+function buildSupports(){
+  const g=document.getElementById('supGrid');g.innerHTML='';
+  SUPPORTS.forEach(s=>{
+    const d=document.createElement('div');
+    d.className='sup-card'+(s.id===activeSupport.id?' active':'');
+    d.innerHTML=`<div class="sup-name">${s.label}</div><div class="sup-desc">${s.desc}</div><div class="sup-price">${s.price} CHF</div>`;
+    d.onclick=()=>{activeSupport=s;buildSupports();document.getElementById('totalVal').textContent=s.price+' CHF';};
+    g.appendChild(d);
+  });
+}
+buildSupports();
+
+// ─── STYLE ───────────────────────────────────────────────────
+function setStyle(s,btn){
+  activeStyle=s;
+  document.querySelectorAll('.style-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+// ─── CHARGEMENT DONNÉES ──────────────────────────────────────
+async function loadData(){
+  try{
+    const [sr,cr]=await Promise.all([
+      fetch('/data/stars.json'),
+      fetch('/data/constellations.json')
+    ]);
+    starsData=await sr.json();
+    constelData=await cr.json();
+  }catch(e){
+    // Données inline minimales si fetch échoue
+    starsData=STARS_INLINE;
+    constelData=CONSTEL_INLINE;
+  }
+  astroReady=true;
+  render();
+}
+
+// ─── RENDU CIEL ──────────────────────────────────────────────
+function render(){
+  if(!astroReady)return;
+  const canvas=document.getElementById('skyCanvas');
+  const ctx=canvas.getContext('2d');
+  const W=1200,H=1200,cx=W/2,cy=H/2,R=560;
+
+  // Parse date/heure
+  const dateStr=document.getElementById('inpDate').value;
+  const timeStr=document.getElementById('inpTime').value||'22:00';
+  if(!dateStr){document.getElementById('skyStatus').textContent='Choisissez une date';return;}
+
+  const [y,mo,d]=dateStr.split('-').map(Number);
+  const [h,mi]=timeStr.split(':').map(Number);
+  const dt=new Date(y,mo-1,d,h,mi,0);
+
+  // Parse lieu
+  const cityVal=document.getElementById('inpCity').value;
+  const [lat,lon]=cityVal.split(',').map(Number);
+  const cityName=document.getElementById('inpCity').selectedOptions[0].text;
+
+  const caption=document.getElementById('inpCaption').value;
+
+  // Styles
+  const styles={
+    minimal:{bgColor:'#0a0908',starColor:'#F7F3EE',lineColor:'rgba(247,243,238,0.12)',lineWidth:0.8,magLimit:3.5,showLines:true,showGrid:false},
+    classique:{bgColor:'#0d1020',starColor:'#e8dfc8',lineColor:'rgba(184,92,56,0.25)',lineWidth:1,magLimit:4.0,showLines:true,showGrid:true},
+    dense:{bgColor:'#080807',starColor:'#ffffff',lineColor:'rgba(255,255,255,0.08)',lineWidth:0.6,magLimit:4.5,showLines:true,showGrid:false},
+  };
+  const S=styles[activeStyle];
+
+  // Fond
+  ctx.fillStyle=S.bgColor;
+  ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.fill();
+
+  // Vignette
+  const vg=ctx.createRadialGradient(cx,cy,R*0.6,cx,cy,R);
+  vg.addColorStop(0,'rgba(0,0,0,0)');
+  vg.addColorStop(1,'rgba(0,0,0,0.5)');
+  ctx.fillStyle=vg;
+  ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.fill();
+
+  // Clip au cercle
+  ctx.save();
+  ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.clip();
+
+  // Calcul positions étoiles
+  const observer=new AstronomyEngine.Observer(lat,lon,0);
+  const astroDate=new AstronomyEngine.AstroTime(dt);
+
+  const starPos={};
+  const visible=[];
+
+  starsData.forEach(star=>{
+    if(star.mag>S.magLimit)return;
+    try{
+      const eq=new AstronomyEngine.Equatorial(star.ra/15,star.dec,1000);
+      const hor=AstronomyEngine.HorizonFromVector(
+        AstronomyEngine.VectorFromEquator(eq,astroDate,observer),
+        observer,'normal'
+      );
+      const alt=hor.altitude;
+      const az=hor.azimuth;
+      if(alt<0)return;
+
+      // Projection stéréographique
+      const altRad=alt*Math.PI/180;
+      const azRad=az*Math.PI/180;
+      const r_proj=R*(Math.cos(altRad)/(1+Math.sin(altRad)));
+      const px=cx+r_proj*Math.sin(azRad);
+      const py=cy-r_proj*Math.cos(azRad);
+
+      starPos[star.hip]={x:px,y:py};
+      visible.push({...star,x:px,y:py,alt});
+    }catch(e){}
+  });
+
+  // Lignes constellations
+  if(S.showLines){
+    ctx.strokeStyle=S.lineColor;
+    ctx.lineWidth=S.lineWidth;
+    ctx.setLineDash([3,6]);
+    Object.entries(constelData).forEach(([name,segs])=>{
+      segs.forEach(([h1,h2])=>{
+        const a=starPos[h1],b=starPos[h2];
+        if(!a||!b)return;
+        ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+      });
+    });
+    ctx.setLineDash([]);
+  }
+
+  // Grille azimutale
+  if(S.showGrid){
+    ctx.strokeStyle='rgba(255,255,255,0.05)';
+    ctx.lineWidth=0.5;
+    for(let alt=10;alt<=80;alt+=20){
+      const altRad=alt*Math.PI/180;
+      const rg=R*(Math.cos(altRad)/(1+Math.sin(altRad)));
+      ctx.beginPath();ctx.arc(cx,cy,rg,0,Math.PI*2);ctx.stroke();
+    }
+    for(let az=0;az<360;az+=45){
+      const azRad=az*Math.PI/180;
+      ctx.beginPath();ctx.moveTo(cx,cy);
+      ctx.lineTo(cx+R*Math.sin(azRad),cy-R*Math.cos(azRad));ctx.stroke();
+    }
+  }
+
+  // Étoiles
+  visible.forEach(star=>{
+    const size=Math.max(0.8,(4.5-star.mag)*2.2);
+    const alpha=Math.min(1,0.4+(4.5-star.mag)*0.18);
+    ctx.globalAlpha=alpha;
+    const grd=ctx.createRadialGradient(star.x,star.y,0,star.x,star.y,size*2);
+    grd.addColorStop(0,S.starColor);
+    grd.addColorStop(1,'rgba(255,255,255,0)');
+    ctx.fillStyle=grd;
+    ctx.beginPath();ctx.arc(star.x,star.y,size*2,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle=S.starColor;
+    ctx.beginPath();ctx.arc(star.x,star.y,size,0,Math.PI*2);ctx.fill();
+  });
+  ctx.globalAlpha=1;
+
+  ctx.restore();
+
+  // Cadre circulaire
+  ctx.strokeStyle='rgba(247,243,238,0.2)';
+  ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.stroke();
+
+  // Graduations
+  ctx.strokeStyle='rgba(247,243,238,0.3)';
+  for(let az=0;az<360;az+=5){
+    const azRad=az*Math.PI/180;
+    const isMain=az%45===0,isMed=az%15===0;
+    const len=isMain?18:isMed?12:6;
+    const sx=cx+(R-1)*Math.sin(azRad),sy=cy-(R-1)*Math.cos(azRad);
+    const ex=cx+(R-len)*Math.sin(azRad),ey=cy-(R-len)*Math.cos(azRad);
+    ctx.lineWidth=isMain?1.2:0.6;
+    ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(ex,ey);ctx.stroke();
+  }
+
+  // Texte date/ville
+  ctx.fillStyle='rgba(247,243,238,0.5)';
+  ctx.font='26px DM Mono, monospace';
+  ctx.textAlign='center';
+  ctx.textBaseline='middle';
+  const dateLabel=dt.toLocaleDateString('fr-CH',{day:'2-digit',month:'long',year:'numeric'});
+  ctx.fillText(dateLabel,cx,cy+R-70);
+  ctx.font='22px DM Sans, sans-serif';
+  ctx.fillStyle='rgba(247,243,238,0.35)';
+  ctx.fillText(cityName+' · '+timeStr,cx,cy+R-40);
+
+  // Texte gravé
+  if(caption){
+    ctx.fillStyle='rgba(247,243,238,0.6)';
+    ctx.font='italic 32px Playfair Display, serif';
+    ctx.textAlign='center';
+    ctx.textBaseline='middle';
+    ctx.fillText(caption,cx,cy+R-100);
+  }
+
+  // Status
+  const vis=visible.length;
+  document.getElementById('skyStatus').textContent=
+    `${vis} étoile${vis>1?'s':''} visible${vis>1?'s':''} · ${cityName} · ${dateLabel}`;
+}
+
+// ─── MODAL ───────────────────────────────────────────────────
+function openModal(){document.getElementById('modalOverlay').classList.add('open');document.getElementById('modalForm').style.display='';document.getElementById('modalSuccess').style.display='none';}
+function closeModal(){document.getElementById('modalOverlay').classList.remove('open');}
+
+async function sendOrder(){
+  const name=document.getElementById('mName').value.trim();
+  const email=document.getElementById('mEmail').value.trim();
+  const msg=document.getElementById('mMsg').value.trim();
+  if(!email||!email.includes('@')){document.getElementById('mEmail').style.borderColor='#B85C38';return;}
+  document.getElementById('mEmail').style.borderColor='';
+
+  const dateStr=document.getElementById('inpDate').value;
+  const timeStr=document.getElementById('inpTime').value;
+  const cityVal=document.getElementById('inpCity').value;
+  const cityName=document.getElementById('inpCity').selectedOptions[0].text;
+  const caption=document.getElementById('inpCaption').value.trim();
+  const [lat,lon]=cityVal.split(',');
+  const ref='KESK-CIEL-'+Date.now().toString().slice(-6);
+
+  // Capture canvas en PNG
+  let svg_preview='';
+  try{
+    svg_preview=document.getElementById('skyCanvas').toDataURL('image/jpeg',0.85);
+  }catch(e){}
+
+  const extra=[
+    'Date: '+dateStr+' '+timeStr,
+    'Lieu: '+cityName+' ('+lat+', '+lon+')',
+    'Style: '+activeStyle,
+    'Support: '+activeSupport.label+' — '+activeSupport.price+' CHF',
+    caption?'Texte: '+caption:'',
+  ].filter(Boolean).join(' | ');
+
+  const payload={
+    name,email,message:msg,ref,
+    shape:'Constellation & Date',
+    texture:activeStyle,
+    dims:'30×30 cm',
+    color:'Blanc sur fond sombre',
+    lh:0.2,layers:1,wall:'3',bottom:'3',texamp:'0',
+    stl_url:'',filename:'kesk-ciel-'+ref+'.jpg',
+    svg_preview,extra
+  };
+
+  const btn=document.getElementById('modalSendBtn');
+  btn.disabled=true;btn.textContent='Envoi…';
+
+  try{
+    const r=await fetch('/api/planter-quote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const d=await r.json();
+    if(!d.success)throw new Error(d.error||'Erreur');
+  }catch(e){
+    const body=encodeURIComponent('Réf: '+ref+'\nNom: '+name+'\nEmail: '+email+'\n\n'+extra+'\n\n'+msg);
+    window.open('mailto:hello@kesk.ch?subject=Commande Constellation — '+ref+'&body='+body,'_blank');
+  }
+
+  btn.disabled=false;btn.textContent='Envoyer';
+  document.getElementById('modalForm').style.display='none';
+  document.getElementById('modalSuccess').style.display='block';
+}
+
+// Données inline minimal si fetch échoue
+const STARS_INLINE=[
+  {hip:91262,ra:279.235,dec:38.784,mag:0.03,name:"Vega"},
+  {hip:69673,ra:213.915,dec:19.182,mag:-0.05,name:"Arcturus"},
+  {hip:65474,ra:201.298,dec:-11.162,mag:0.98,name:"Spica"},
+  {hip:102098,ra:310.358,dec:45.281,mag:1.25,name:"Deneb"},
+  {hip:98036,ra:301.182,dec:27.960,mag:1.25,name:"Altair"},
+  {hip:32349,ra:101.287,dec:-16.716,mag:-1.46,name:"Sirius"},
+  {hip:37279,ra:114.825,dec:5.225,mag:0.38,name:"Procyon"},
+  {hip:24436,ra:78.634,dec:7.407,mag:0.18,name:"Rigel"},
+  {hip:27989,ra:88.793,dec:7.407,mag:0.45,name:"Betelgeuse"},
+  {hip:21421,ra:68.980,dec:16.510,mag:0.85,name:"Aldebaran"},
+  {hip:49669,ra:152.093,dec:11.967,mag:1.35,name:"Regulus"},
+  {hip:37826,ra:116.329,dec:28.026,mag:1.14,name:"Pollux"},
+  {hip:11767,ra:37.952,dec:89.264,mag:2.02,name:"Polaris"},
+  {hip:71683,ra:219.920,dec:-60.835,mag:-0.27,name:"Rigil Kentaurus"},
+  {hip:30438,ra:97.204,dec:-52.696,mag:-0.74,name:"Canopus"},
+  {hip:80763,ra:247.352,dec:-26.432,mag:1.06,name:"Antares"},
+];
+const CONSTEL_INLINE={
+  "Orion":[[24436,26311],[27989,25985]],
+  "Ursa Major":[[53910,54061],[54061,58001]],
+  "Cygnus":[[102098,100453]],
+};
+
+// ─── INIT ─────────────────────────────────────────────────────
+loadData();
+</script>
+</body>
+</html>
