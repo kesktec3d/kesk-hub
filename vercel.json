@@ -4,6 +4,7 @@
     { "src": "/api/(.*)", "dest": "/api/$1" },
     { "src": "/vase", "dest": "/kesk-vase.html" },
     { "src": "/uv", "dest": "/kesk-uv.html" },
+    { "src": "/texte", "dest": "/kesk-text3d.html" },
     { "src": "/(.*\\.html)", "dest": "/$1" },
     { "src": "/(.*)", "dest": "/index.html" }
   ],
