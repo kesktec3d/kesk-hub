@@ -99,15 +99,37 @@ export default async function handler(req, res) {
 
     // Email admin
     try {
+      const imageUrl = session.metadata?.image_url || '';
+      const prompt = session.metadata?.prompt || '';
+      const address = session.metadata?.customer_address || '';
+      const promoLabel = session.metadata?.promo_label || '';
+
       await sendEmail('hello@kesk.ch', `[Kesk] Commande ${ref} — ${customerName} — ${amount} CHF`,
-        `<div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;padding:20px">
-          <h2 style="color:#B85C38">Nouvelle commande reçue</h2>
-          <p><strong>Réf :</strong> ${ref}</p>
-          <p><strong>Client :</strong> ${customerName}</p>
-          <p><strong>Email :</strong> <a href="mailto:${customerEmail}">${customerEmail}</a></p>
-          <p><strong>Support :</strong> ${support}</p>
-          <p><strong>Style :</strong> ${style}</p>
-          <p><strong>Montant :</strong> ${amount} CHF</p>
+        `<div style="font-family:Arial,sans-serif;max-width:580px;margin:0 auto">
+          <div style="background:#0e0d0c;padding:18px 24px;border-bottom:3px solid #B85C38">
+            <span style="background:#B85C38;padding:5px 14px;border-radius:5px;font-weight:700;color:#fff">Kesk</span>
+            &nbsp;<span style="color:#F7F3EE;font-size:15px;font-weight:600">Nouvelle commande UV</span>
+            <div style="color:#9a948c;font-size:12px;margin-top:6px">Réf. <strong style="color:#B85C38">${ref}</strong></div>
+          </div>
+          <div style="padding:20px 24px;background:#fff">
+            ${imageUrl && imageUrl.startsWith('http') ? `<img src="${imageUrl}" style="width:100%;max-height:280px;object-fit:cover;border-radius:8px;margin-bottom:16px"/>` : ''}
+            <table style="width:100%;border-collapse:collapse;font-size:13px">
+              <tr><td style="padding:5px 0;color:#9a948c;width:130px">Client</td><td style="color:#1c1916;font-weight:600">${customerName}</td></tr>
+              <tr><td style="padding:5px 0;color:#9a948c">Email</td><td><a href="mailto:${customerEmail}" style="color:#B85C38">${customerEmail}</a></td></tr>
+              ${address ? `<tr><td style="padding:5px 0;color:#9a948c">Adresse</td><td style="color:#1c1916">${address}</td></tr>` : ''}
+              <tr><td style="padding:5px 0;color:#9a948c">Support</td><td style="color:#1c1916">${support}</td></tr>
+              <tr><td style="padding:5px 0;color:#9a948c">Style</td><td style="color:#1c1916">${style}</td></tr>
+              ${prompt ? `<tr><td style="padding:5px 0;color:#9a948c">Description</td><td style="color:#1c1916">${prompt}</td></tr>` : ''}
+              ${promoLabel ? `<tr><td style="padding:5px 0;color:#9a948c">Promo</td><td style="color:#2D7A4F">${promoLabel}</td></tr>` : ''}
+              <tr><td style="padding:5px 0;color:#9a948c">Montant</td><td style="color:#1c1916;font-weight:700;font-size:15px">${amount} CHF</td></tr>
+            </table>
+            <div style="margin-top:16px">
+              <a href="mailto:${customerEmail}" style="display:inline-block;padding:10px 20px;background:#B85C38;color:#fff;border-radius:7px;font-weight:700;font-size:13px;text-decoration:none">Répondre au client →</a>
+            </div>
+          </div>
+          <div style="background:#f8f6f3;padding:10px;text-align:center">
+            <p style="color:#9a948c;font-size:11px;margin:0">Kesk Studio · Route de Fully 21 · 1913 Saillon</p>
+          </div>
         </div>`
       );
       console.log('Admin email sent');
