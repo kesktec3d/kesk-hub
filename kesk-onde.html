@@ -329,6 +329,21 @@ html,body{
       </label>
       <button class="btn-source" onclick="loadDemo()">Démo</button>
     </div>
+    <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
+      <input id="spotifyUrl" type="text" placeholder="Coller un lien Spotify…"
+        style="flex:1;padding:9px 12px;border:1px solid var(--border);border-radius:99px;background:transparent;color:var(--ink);font-size:12px;font-family:'DM Sans',sans-serif;outline:none"/>
+      <button class="btn-source" onclick="loadSpotify()" style="flex-shrink:0;gap:6px">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="#1DB954"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+        Analyser
+      </button>
+    </div>
+    <div id="spotifyInfo" style="display:none;margin-top:8px;padding:8px 12px;background:rgba(29,158,84,.08);border:1px solid rgba(29,158,84,.2);border-radius:8px;font-size:12px;display:flex;align-items:center;gap:10px">
+      <img id="spotifyCover" width="36" height="36" style="border-radius:4px"/>
+      <div>
+        <div id="spotifyTitle" style="font-weight:500"></div>
+        <div id="spotifyArtist" style="color:var(--muted);font-size:11px"></div>
+      </div>
+    </div>
     <div class="audio-status" id="audioStatus">Aucun son chargé — lancez la démo pour voir</div>
   </div>
 
@@ -577,8 +592,8 @@ async function toggleRec() {
       _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       const source = _audioCtx.createMediaStreamSource(stream);
       _analyser = _audioCtx.createAnalyser();
-      _analyser.fftSize = 256;
-      _analyser.smoothingTimeConstant = 0.75;
+      _analyser.fftSize = 512;
+      _analyser.smoothingTimeConstant = 0.92;
       source.connect(_analyser);
 
       // MediaRecorder pour capturer l'audio
@@ -628,17 +643,19 @@ async function toggleRec() {
   }
 }
 
+let _prevAmps = null;
+
 function startLiveViz() {
   if (!_analyser) return;
   const bufLen = _analyser.frequencyBinCount;
   const dataArr = new Uint8Array(bufLen);
+  _prevAmps = Array(N_BARS).fill(0.3);
   
   function draw() {
     if (!isRecording) return;
     _animFrame = requestAnimationFrame(draw);
     _analyser.getByteTimeDomainData(dataArr);
     
-    // Convertir en amplitudes normalisées pour les N_BARS barres
     const step = Math.floor(bufLen / N_BARS);
     const liveAmps = [];
     for (let i = 0; i < N_BARS; i++) {
@@ -647,11 +664,14 @@ function startLiveViz() {
         const v = (dataArr[i * step + j] - 128) / 128;
         sum += Math.abs(v);
       }
-      liveAmps.push(Math.min(1, (sum / step) * 3));
+      liveAmps.push(Math.min(1, (sum / step) * 4));
     }
-    // Normaliser
     const max = Math.max(...liveAmps, 0.01);
-    waveAmps = liveAmps.map(v => v / max);
+    const normalized = liveAmps.map(v => v / max);
+    
+    // Lissage inter-frames : 80% ancienne valeur + 20% nouvelle
+    _prevAmps = _prevAmps.map((prev, i) => prev * 0.82 + normalized[i] * 0.18);
+    waveAmps = _prevAmps;
     updateSVG();
   }
   draw();
@@ -1125,6 +1145,41 @@ async function sendCapsule(){
       if(title && title.parentNode) title.parentNode.insertBefore(wrap, title.nextSibling);
     }).catch(()=>{});
 })();
+
+
+// SPOTIFY
+async function loadSpotify() {
+  const url = document.getElementById('spotifyUrl').value.trim();
+  if (!url) return;
+  document.getElementById('audioStatus').textContent = 'Recherche sur Spotify…';
+  try {
+    const r = await fetch('/api/spotify-preview?url=' + encodeURIComponent(url));
+    const d = await r.json();
+    if (d.error) throw new Error(d.error);
+
+    // Afficher les infos du track
+    const info = document.getElementById('spotifyInfo');
+    info.style.display = 'flex';
+    document.getElementById('spotifyTitle').textContent = d.name;
+    document.getElementById('spotifyArtist').textContent = d.artist;
+    if (d.cover) document.getElementById('spotifyCover').src = d.cover;
+
+    if (d.preview_url) {
+      document.getElementById('audioStatus').textContent = 'Chargement du preview 30s…';
+      const resp = await fetch(d.preview_url);
+      const blob = await resp.blob();
+      await processAudioBlob(blob);
+      document.getElementById('audioStatus').textContent = 
+        d.name + ' — ' + d.artist + ' (preview 30s)';
+    } else {
+      document.getElementById('audioStatus').textContent = 
+        'Preview indisponible pour ce titre — essayez un autre';
+    }
+  } catch(e) {
+    document.getElementById('audioStatus').textContent = 'Erreur Spotify — vérifiez le lien';
+    console.error(e);
+  }
+}
 
 </script>
 
