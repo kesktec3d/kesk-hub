@@ -1191,6 +1191,171 @@ async function loadImpact(){
 }
 
 // Cacher/montrer gift btn avec le menu
+
+// ─── 08 EMPREINTE DU JOUR ────────────────────────────────────
+const THEMES_JOUR = {
+  // Format MM-DD
+  '01-01': { label:'Nouvel An', couleur:'#C9A227', emoji:'✨' },
+  '02-14': { label:'Saint-Valentin', couleur:'#C0392B', emoji:'💝' },
+  '03-20': { label:'Équinoxe de printemps', couleur:'#2ECC71', emoji:'🌸' },
+  '03-21': { label:'Début du printemps', couleur:'#27AE60', emoji:'🌿' },
+  '04-13': { label:'Printemps valaisan', couleur:'#E67E22', emoji:'🌺' },
+  '05-01': { label:'Fête du travail', couleur:'#E74C3C', emoji:'🌹' },
+  '06-21': { label:"Solstice d'été", couleur:'#F39C12', emoji:'☀️' },
+  '08-01': { label:'Fête nationale suisse', couleur:'#E74C3C', emoji:'🇨🇭' },
+  '09-22': { label:"Équinoxe d'automne", couleur:'#D35400', emoji:'🍂' },
+  '10-31': { label:'Halloween', couleur:'#E67E22', emoji:'🎃' },
+  '11-01': { label:'Toussaint', couleur:'#8E44AD', emoji:'🕯️' },
+  '12-06': { label:'Saint-Nicolas', couleur:'#C0392B', emoji:'🎅' },
+  '12-21': { label:"Solstice d'hiver", couleur:'#2980B9', emoji:'❄️' },
+  '12-24': { label:"Veille de Noël", couleur:'#27AE60', emoji:'🎄' },
+  '12-25': { label:'Noël', couleur:'#C0392B', emoji:'🎁' },
+  '12-31': { label:'Saint-Sylvestre', couleur:'#F1C40F', emoji:'🥂' },
+};
+
+const SAISONS = {
+  hiver:   { label:'Édition Hiver', couleur:'#2C3E50', emoji:'❄️', mois:[12,1,2] },
+  printemps:{ label:'Édition Printemps', couleur:'#27AE60', emoji:'🌿', mois:[3,4,5] },
+  ete:     { label:'Édition Été', couleur:'#E67E22', emoji:'☀️', mois:[6,7,8] },
+  automne: { label:'Édition Automne', couleur:'#D35400', emoji:'🍂', mois:[9,10,11] },
+};
+
+function getThemeJour() {
+  const now = new Date();
+  const mm = String(now.getMonth()+1).padStart(2,'0');
+  const dd = String(now.getDate()).padStart(2,'0');
+  const key = mm + '-' + dd;
+  if (THEMES_JOUR[key]) return { ...THEMES_JOUR[key], date: key };
+  // Fallback saison
+  const mois = now.getMonth()+1;
+  if ([12,1,2].includes(mois)) return { ...SAISONS.hiver, date: key };
+  if ([3,4,5].includes(mois)) return { ...SAISONS.printemps, date: key };
+  if ([6,7,8].includes(mois)) return { ...SAISONS.ete, date: key };
+  return { ...SAISONS.automne, date: key };
+}
+
+function initEmpreinteJour() {
+  const theme = getThemeJour();
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('fr-CH', { day:'numeric', month:'long' });
+
+  // Créer la pastille sur l'orbite
+  const pastille = document.createElement('div');
+  pastille.id = 'empreintePastille';
+  pastille.style.cssText = `
+    position:fixed;top:20px;right:20px;
+    display:flex;align-items:center;gap:6px;
+    padding:5px 12px 5px 8px;
+    background:rgba(14,13,12,.88);
+    border:1px solid ${theme.couleur}44;
+    border-radius:99px;cursor:pointer;
+    font-family:'DM Mono',monospace;font-size:10px;
+    color:rgba(247,243,238,.7);letter-spacing:.06em;
+    z-index:20;transition:all .3s;backdrop-filter:blur(8px);
+    animation:pulse-theme 3s ease-in-out infinite;
+  `;
+  pastille.innerHTML = `<span style="font-size:14px">${theme.emoji}</span><span>${theme.label}</span>`;
+  pastille.title = dateStr;
+  pastille.onclick = () => surprendsWithTheme(theme);
+  document.getElementById('stage').appendChild(pastille);
+
+  // Exposer le thème globalement pour les configurateurs
+  window._themeJour = theme;
+}
+
+function surprendsWithTheme(theme) {
+  // Ouvrir le configurateur le plus adapté au thème avec la couleur du jour
+  const mapping = {
+    '#C0392B': 'onde', '#E74C3C': 'onde',
+    '#27AE60': 'vase', '#2ECC71': 'vase',
+    '#E67E22': 'constellation', '#F39C12': 'constellation',
+    '#2980B9': 'texte', '#2C3E50': 'texte',
+    '#C9A227': 'uv', '#F1C40F': 'uv',
+  };
+  const type = mapping[theme.couleur] || 'constellation';
+  const urls = {
+    uv: 'https://kesk-hub.vercel.app/uv',
+    vase: 'https://kesk-hub.vercel.app/vase',
+    texte: 'https://kesk-hub.vercel.app/texte',
+    constellation: 'https://kesk-hub.vercel.app/constellation',
+    onde: 'https://kesk-hub.vercel.app/onde',
+  };
+  openIframe(urls[type]);
+}
+
+// Injecter l'animation CSS
+const styleEl = document.createElement('style');
+styleEl.textContent = `
+@keyframes pulse-theme {
+  0%,100%{box-shadow:0 0 0 0 transparent}
+  50%{box-shadow:0 0 8px 2px rgba(184,92,56,.25)}
+}
+#empreintePastille:hover{
+  border-color:rgba(184,92,56,.6)!important;
+  color:rgba(247,243,238,1)!important;
+}`;
+document.head.appendChild(styleEl);
+
+initEmpreinteJour();
+
+
+// ─── 09 VITRINE SAISONNIÈRE ──────────────────────────────────
+const SAISON_THEMES = {
+  hiver: {
+    bg: '#0a1520',
+    accent: '#4A9ECD',
+    ring: 'rgba(74,158,205,.35)',
+    label: 'Hiver',
+  },
+  printemps: {
+    bg: '#0a1a0a',
+    accent: '#5DB85C',
+    ring: 'rgba(93,184,92,.35)',
+    label: 'Printemps',
+  },
+  ete: {
+    bg: '#1a1200',
+    accent: '#E8A234',
+    ring: 'rgba(232,162,52,.35)',
+    label: 'Été',
+  },
+  automne: {
+    bg: '#1a0d00',
+    accent: '#C4622D',
+    ring: 'rgba(196,98,45,.35)',
+    label: 'Automne',
+  },
+};
+
+function getSaison() {
+  const m = new Date().getMonth()+1;
+  if ([12,1,2].includes(m)) return 'hiver';
+  if ([3,4,5].includes(m)) return 'printemps';
+  if ([6,7,8].includes(m)) return 'ete';
+  return 'automne';
+}
+
+function applySaisonTheme() {
+  const saison = getSaison();
+  const t = SAISON_THEMES[saison];
+  document.documentElement.style.setProperty('--bg', t.bg);
+  document.documentElement.style.setProperty('--season-accent', t.accent);
+  // Fond du body
+  document.body.style.background = t.bg;
+  const stage = document.getElementById('stage');
+  if(stage) stage.style.background = t.bg;
+  // Anneaux K plus visibles
+  const rings = document.querySelectorAll('.k-ring');
+  rings.forEach(r => { r.style.borderColor = t.ring; r.style.opacity = '1'; });
+  // Gradient radial subtil depuis le centre
+  const grd = document.createElement('div');
+  grd.style.cssText = `position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:radial-gradient(ellipse at center, ${t.accent}18 0%, transparent 65%)`;
+  document.getElementById('stage').insertBefore(grd, document.getElementById('stage').firstChild);
+}
+
+applySaisonTheme();
+
 </script>
 </body>
 </html>
