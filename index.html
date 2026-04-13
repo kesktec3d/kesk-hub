@@ -530,27 +530,23 @@ async function loadConfigFromURL() {
   try {
     const r = await fetch('/api/load-config?code=' + code);
     const d = await r.json();
-    if (d.config) {
-      currentCode = code;
-      document.getElementById('configCodeVal').textContent = code;
-      document.getElementById('configCodeBar').classList.add('visible');
-      // Ouvrir directement le bon configurateur
-      const urls = {
-        uv: 'https://kesk-hub.vercel.app/uv',
-        vase: 'https://kesk-hub.vercel.app/vase',
-        texte: 'https://kesk-hub.vercel.app/texte',
-        constellation: 'https://kesk-hub.vercel.app/constellation',
-        onde: 'https://kesk-hub.vercel.app/onde',
-      };
-      const cfg = d.config;
-      if (cfg.type && urls[cfg.type]) {
-        const targetUrl = urls[cfg.type] + '?preset=' + encodeURIComponent(JSON.stringify(cfg));
-        // Attendre que le hub soit rendu avant d'ouvrir l'iframe
-        setTimeout(() => openIframe(targetUrl), 800);
-      }
+    if (!d.config) return;
+    const cfg = d.config;
+    const urls = {
+      uv: 'https://kesk-hub.vercel.app/uv',
+      vase: 'https://kesk-hub.vercel.app/vase',
+      texte: 'https://kesk-hub.vercel.app/texte',
+      constellation: 'https://kesk-hub.vercel.app/constellation',
+      onde: 'https://kesk-hub.vercel.app/onde',
+    };
+    if (cfg.type && urls[cfg.type]) {
+      setTimeout(() => openIframe(urls[cfg.type]), 800);
     }
   } catch(e) { console.log('loadConfig error:', e.message); }
 }
+
+// Appel au démarrage
+window.addEventListener('load', () => setTimeout(loadConfigFromURL, 300));
 
 // ─── ROUE MYSTÈRE ────────────────────────────────────────────
 const SURPRISE_PRESETS = [
