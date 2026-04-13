@@ -12,11 +12,13 @@ export default async function handler(req, res) {
 
   try {
     const r = await fetch(`${url}/get/config:${code.toUpperCase()}`, {
+      method: 'GET',
       headers: { Authorization: `Bearer ${token}` }
     });
     const data = await r.json();
+    console.log('Upstash load response:', JSON.stringify(data));
     if (!data.result) return res.status(404).json({ error: 'Config introuvable' });
-    const config = JSON.parse(data.result);
+    const config = JSON.parse(decodeURIComponent(data.result));
     return res.status(200).json({ config });
   } catch (e) {
     return res.status(500).json({ error: e.message });
