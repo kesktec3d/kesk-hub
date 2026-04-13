@@ -64,6 +64,36 @@ body::before{
 .circular-text-wrap{animation:fade-up .6s ease .4s both}
 .hint{animation:fade-up .6s ease .7s both}
 .footer-fixed{animation:fade-up .5s ease .9s both}
+.surprise-btn{
+  position:fixed;bottom:82px;left:50%;transform:translateX(-50%);
+  background:transparent;border:1px solid rgba(247,243,238,0.2);
+  color:rgba(247,243,238,0.5);font-family:'DM Sans',sans-serif;
+  font-size:12px;letter-spacing:.08em;padding:7px 18px;border-radius:99px;
+  cursor:pointer;transition:all .3s;z-index:10;white-space:nowrap;
+}
+.surprise-btn:hover{border-color:rgba(184,92,56,.6);color:var(--terracotta)}
+.surprise-btn.hide{opacity:0;pointer-events:none}
+
+/* CODE DE RÉSONANCE */
+.config-code-bar{
+  position:fixed;top:0;left:0;right:0;
+  display:none;align-items:center;justify-content:center;gap:10px;
+  padding:8px 16px;
+  background:rgba(14,13,12,.95);
+  border-bottom:1px solid rgba(184,92,56,.3);
+  z-index:100;font-family:'DM Mono',monospace;font-size:12px;
+}
+.config-code-bar.visible{display:flex}
+.config-code-val{
+  color:var(--terracotta);font-weight:500;letter-spacing:.12em;font-size:13px;
+}
+.config-code-copy{
+  background:transparent;border:1px solid rgba(184,92,56,.4);
+  color:var(--terracotta);padding:3px 10px;border-radius:99px;
+  font-size:11px;cursor:pointer;font-family:'DM Mono',monospace;
+  transition:all .2s;
+}
+.config-code-copy:hover{background:rgba(184,92,56,.15)}
 .share-btn{animation:fade-up .5s ease 1s both}
 
 /* ── TEXTE CIRCULAIRE ── */
@@ -92,19 +122,46 @@ body::before{
 
 /* ── HINT ── */
 .hint{
-  position:fixed;bottom:56px;left:50%;transform:translateX(-50%);
+  position:fixed;bottom:44px;left:0;right:0;
+  text-align:center;
   font-family:'DM Mono',monospace;
   font-size:13px;letter-spacing:.2em;text-transform:uppercase;
-  color:#ffffff;
-  opacity:.7;
-  transition:opacity .5s;
-  display:flex;align-items:center;gap:10px;
+  color:#ffffff;opacity:.7;transition:opacity .5s;
   white-space:nowrap;
 }
-.hint::before{content:'';width:28px;height:1px;background:#ffffff;opacity:.4;display:inline-block}
 .hint.hide{opacity:0}
 
 /* ── SHARE BTN ── */
+.surprise-btn{
+  position:fixed;bottom:82px;left:50%;transform:translateX(-50%);
+  background:transparent;border:1px solid rgba(247,243,238,0.2);
+  color:rgba(247,243,238,0.5);font-family:'DM Sans',sans-serif;
+  font-size:12px;letter-spacing:.08em;padding:7px 18px;border-radius:99px;
+  cursor:pointer;transition:all .3s;z-index:10;white-space:nowrap;
+}
+.surprise-btn:hover{border-color:rgba(184,92,56,.6);color:var(--terracotta)}
+.surprise-btn.hide{opacity:0;pointer-events:none}
+
+/* CODE DE RÉSONANCE */
+.config-code-bar{
+  position:fixed;top:0;left:0;right:0;
+  display:none;align-items:center;justify-content:center;gap:10px;
+  padding:8px 16px;
+  background:rgba(14,13,12,.95);
+  border-bottom:1px solid rgba(184,92,56,.3);
+  z-index:100;font-family:'DM Mono',monospace;font-size:12px;
+}
+.config-code-bar.visible{display:flex}
+.config-code-val{
+  color:var(--terracotta);font-weight:500;letter-spacing:.12em;font-size:13px;
+}
+.config-code-copy{
+  background:transparent;border:1px solid rgba(184,92,56,.4);
+  color:var(--terracotta);padding:3px 10px;border-radius:99px;
+  font-size:11px;cursor:pointer;font-family:'DM Mono',monospace;
+  transition:all .2s;
+}
+.config-code-copy:hover{background:rgba(184,92,56,.15)}
 .share-btn{
   position:fixed;bottom:90px;right:28px;
   width:36px;height:36px;border-radius:50%;
@@ -317,10 +374,10 @@ iframe{flex:1;border:none;width:100%;background:var(--bg)}
 
 /* ── FOOTER ── */
 .footer-fixed{
-  position:fixed;bottom:22px;left:50%;transform:translateX(-50%);
+  position:fixed;bottom:20px;left:16px;right:16px;text-align:center;
   font-family:'DM Mono',monospace;font-size:11px;
-  letter-spacing:.16em;color:#ffffff;opacity:.25;
-  text-transform:uppercase;white-space:nowrap;
+  letter-spacing:.12em;color:#ffffff;opacity:.25;
+  text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 
 /* ── MOBILE ── */
@@ -330,12 +387,42 @@ iframe{flex:1;border:none;width:100%;background:var(--bg)}
   .p-name{font-size:12px}
   .p-desc{font-size:9px}
   .tagline-wrap{top:24px;font-size:9px}
-  .hint{bottom:52px;font-size:9px}
+  .hint{bottom:128px;font-size:9px}
   .k-btn{width:80px;height:80px}
   .k-logo-svg{width:62px;height:62px}
   .k-ring{width:98px;height:98px}
   .k-ring.r2{width:144px;height:144px}
-  .share-btn{bottom:90px;right:20px}
+  .surprise-btn{
+  position:fixed;bottom:82px;left:50%;transform:translateX(-50%);
+  background:transparent;border:1px solid rgba(247,243,238,0.2);
+  color:rgba(247,243,238,0.5);font-family:'DM Sans',sans-serif;
+  font-size:12px;letter-spacing:.08em;padding:7px 18px;border-radius:99px;
+  cursor:pointer;transition:all .3s;z-index:10;white-space:nowrap;
+}
+.surprise-btn:hover{border-color:rgba(184,92,56,.6);color:var(--terracotta)}
+.surprise-btn.hide{opacity:0;pointer-events:none}
+
+/* CODE DE RÉSONANCE */
+.config-code-bar{
+  position:fixed;top:0;left:0;right:0;
+  display:none;align-items:center;justify-content:center;gap:10px;
+  padding:8px 16px;
+  background:rgba(14,13,12,.95);
+  border-bottom:1px solid rgba(184,92,56,.3);
+  z-index:100;font-family:'DM Mono',monospace;font-size:12px;
+}
+.config-code-bar.visible{display:flex}
+.config-code-val{
+  color:var(--terracotta);font-weight:500;letter-spacing:.12em;font-size:13px;
+}
+.config-code-copy{
+  background:transparent;border:1px solid rgba(184,92,56,.4);
+  color:var(--terracotta);padding:3px 10px;border-radius:99px;
+  font-size:11px;cursor:pointer;font-family:'DM Mono',monospace;
+  transition:all .2s;
+}
+.config-code-copy:hover{background:rgba(184,92,56,.15)}
+.share-btn{bottom:90px;right:20px}
   .k-wrap{margin-left:0}
   .stage{overflow:hidden}
 }
@@ -343,6 +430,12 @@ iframe{flex:1;border:none;width:100%;background:var(--bg)}
 </head>
 <body>
 <div class="stage" id="stage">
+  <!-- CODE DE RÉSONANCE -->
+  <div class="config-code-bar" id="configCodeBar">
+    <span style="font-size:11px;color:rgba(247,243,238,.4);letter-spacing:.08em;text-transform:uppercase">Votre code</span>
+    <span class="config-code-val" id="configCodeVal">—</span>
+    <button class="config-code-copy" onclick="copyCode()">Copier</button>
+  </div>
 
   <!-- TEXTE CIRCULAIRE centré sur l'écran -->
   <div class="circular-text-wrap" id="circularTextWrap">
@@ -376,7 +469,8 @@ iframe{flex:1;border:none;width:100%;background:var(--bg)}
     </button>
   </div>
 
-  <div class="hint" id="hint">Appuyez pour créer</div>
+  <div class="hint" id="hint">— Appuyez pour créer —</div>
+  <button class="surprise-btn" id="surpriseBtn" onclick="surprendsMode()">✦ Surprends-moi</button>
 
   <!-- SHARE -->
   <button class="share-btn" id="shareBtn" onclick="shareHub()" aria-label="Partager">
@@ -454,6 +548,116 @@ iframe{flex:1;border:none;width:100%;background:var(--bg)}
 
 <script>
 // ── PÉTALES ──
+
+// ─── CODE DE RÉSONANCE ───────────────────────────────────────
+let currentCode = null;
+
+async function saveConfig(configObj) {
+  try {
+    const r = await fetch('/api/save-config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ config: configObj })
+    });
+    const d = await r.json();
+    if (d.code) {
+      currentCode = d.code;
+      document.getElementById('configCodeVal').textContent = d.code;
+      document.getElementById('configCodeBar').classList.add('visible');
+      // Mettre à jour l'URL sans recharger
+      const url = new URL(window.location);
+      url.searchParams.set('config', d.code);
+      history.replaceState({}, '', url);
+    }
+  } catch(e) { console.log('saveConfig error:', e.message); }
+}
+
+function copyCode() {
+  if (!currentCode) return;
+  const shareUrl = window.location.origin + '/?config=' + currentCode;
+  navigator.clipboard.writeText(shareUrl).then(() => {
+    const btn = document.querySelector('.config-code-copy');
+    btn.textContent = 'Copié ✓';
+    setTimeout(() => btn.textContent = 'Copier', 2000);
+  }).catch(() => {
+    prompt('Votre lien de partage :', shareUrl);
+  });
+}
+
+// Charger une config depuis ?config=K-XXXX au démarrage
+async function loadConfigFromURL() {
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get('config');
+  if (!code) return;
+  try {
+    const r = await fetch('/api/load-config?code=' + code);
+    const d = await r.json();
+    if (d.config) {
+      currentCode = code;
+      document.getElementById('configCodeVal').textContent = code;
+      document.getElementById('configCodeBar').classList.add('visible');
+      // Ouvrir directement le bon configurateur
+      const urls = {
+        uv: 'https://kesk-hub.vercel.app/uv',
+        vase: 'https://kesk-hub.vercel.app/vase',
+        texte: 'https://kesk-hub.vercel.app/texte',
+        constellation: 'https://kesk-hub.vercel.app/constellation',
+        onde: 'https://kesk-hub.vercel.app/onde',
+      };
+      const cfg = d.config;
+      if (cfg.type && urls[cfg.type]) {
+        // Passer la config en query param pour que le configurateur puisse l'hydrater
+        const targetUrl = urls[cfg.type] + '?preset=' + encodeURIComponent(JSON.stringify(cfg));
+        setTimeout(() => openIframe(targetUrl), 500);
+      }
+    }
+  } catch(e) { console.log('loadConfig error:', e.message); }
+}
+
+// ─── ROUE MYSTÈRE ────────────────────────────────────────────
+const SURPRISE_PRESETS = [
+  // UV — visuels forts
+  { url:'https://kesk-hub.vercel.app/uv', label:'Tableau UV · Style Van Gogh', weight:3 },
+  { url:'https://kesk-hub.vercel.app/uv', label:'Tableau UV · Style Abstrait', weight:2 },
+  // Vase
+  { url:'https://kesk-hub.vercel.app/vase', label:'Vase · Forme onde, terracotta', weight:3 },
+  { url:'https://kesk-hub.vercel.app/vase', label:'Vase · Forme hexagonale, noir', weight:2 },
+  // Texte 3D
+  { url:'https://kesk-hub.vercel.app/texte', label:'Texte 3D · Script attaché', weight:3 },
+  { url:'https://kesk-hub.vercel.app/texte', label:'Texte 3D · Bebas caps', weight:2 },
+  // Constellation
+  { url:'https://kesk-hub.vercel.app/constellation', label:'Constellation · Ce soir à Saillon', weight:4 },
+  // Onde
+  { url:'https://kesk-hub.vercel.app/onde', label:'Son & Onde · Démo', weight:2 },
+];
+
+function weightedRandom(presets){
+  const total = presets.reduce((s,p)=>s+p.weight,0);
+  let r = Math.random()*total;
+  for(const p of presets){ r-=p.weight; if(r<=0)return p; }
+  return presets[0];
+}
+
+function surprendsMode(){
+  const btn = document.getElementById('surpriseBtn');
+  btn.textContent = '✦ …';
+  btn.style.pointerEvents = 'none';
+
+  // Animation spinner rapide
+  let i=0;
+  const frames = ['✦ …','✦ ··','✦ · ','✦  ·','✦ ··'];
+  const spin = setInterval(()=>{ btn.textContent=frames[i++%frames.length]; },120);
+
+  setTimeout(()=>{
+    clearInterval(spin);
+    btn.textContent='✦ Surprends-moi';
+    btn.style.pointerEvents='';
+    const preset = weightedRandom(SURPRISE_PRESETS);
+    // Ouvrir via iframe comme les autres cartes
+    openIframe(preset.url);
+  }, 1200);
+}
+
 const PETALS = [
   {id:'uv',      name:'Tableau & Art UV',   desc:'Image IA avec relief UV. Toile, bois, métal, magnet.',    tag:'Disponible', cta:'Configurer →',  active:true,  url:'https://kesk-hub.vercel.app/uv'},
   {id:'vase',    name:'Vase & Pied de table',desc:'Forme, couleur, texture : imprimé 3D à Saillon.',        tag:'Disponible', cta:'Configurer →',  active:true,  url:'https://kesk-hub.vercel.app/vase'},
@@ -489,6 +693,7 @@ function openMenu(){
   document.getElementById('hint').classList.add('hide');
   document.getElementById('circularTextWrap').classList.add('hide');
   document.getElementById('shareBtn').classList.add('hide');
+  document.getElementById('surpriseBtn').classList.add('hide');
 
   const container=document.getElementById('petals');
   container.innerHTML='';
@@ -532,6 +737,7 @@ function closeMenu(){
   document.getElementById('hint').classList.remove('hide');
   document.getElementById('circularTextWrap').classList.remove('hide');
   document.getElementById('shareBtn').classList.remove('hide');
+  document.getElementById('surpriseBtn').classList.remove('hide');
 
   document.querySelectorAll('.petal').forEach(el=>{
     const t=el.style.transform;
