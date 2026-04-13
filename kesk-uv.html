@@ -460,25 +460,109 @@ if(urlParams.get('success')==='1'){
   document.getElementById('mainContent').innerHTML=`<div style="text-align:center;padding:72px 40px;max-width:480px;margin:0 auto"><div style="font-size:60px;margin-bottom:20px">✦</div><h1 style="font-family:'Playfair Display',serif;font-size:30px;font-weight:400;margin-bottom:12px">Commande reçue !</h1><p style="font-size:14px;color:var(--muted);line-height:1.7">Merci pour votre commande !<br><br>Votre création est en production — fabriquée en Suisse avec relief UV.<br><br>Vous recevrez un email de confirmation dans quelques minutes.</p><div style="margin-top:28px;padding:18px;background:rgba(200,168,122,.1);border-radius:12px"><div style="font-size:13px;font-weight:500;margin-bottom:4px">Délai estimé</div><div style="font-size:13px;color:var(--muted)">7–10 jours ouvrables · Suisse</div></div><a href="https://kesk-hub.vercel.app" style="display:inline-block;margin-top:20px;padding:12px 24px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;color:var(--ink);text-decoration:none">Retour au configurateur</a></div>`;
 }else{render();}
 
+
+// ── QR CODE (04) ─────────────────────────────────────────────
+function loadQRLib(cb){
+  if(window.QRCode){cb();return;}
+  const s=document.createElement('script');
+  s.src='https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+  s.onload=cb;document.head.appendChild(s);
+}
+
+function generateQR(url, containerId){
+  loadQRLib(()=>{
+    const el=document.getElementById(containerId);
+    if(!el)return;
+    el.innerHTML='';
+    new QRCode(el,{text:url,width:120,height:120,colorDark:'#1c1916',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
+  });
+}
 // Écouter le code de résonance depuis le hub parent
 window.addEventListener('message', function(e){
   if(e.data&&e.data.type==='config-code'){
     const code = e.data.code;
+    window._lastConfigCode = code;
     const shareUrl = 'https://kesk-hub.vercel.app/?config=' + code;
-    // Afficher dans tous les éléments .config-code-display
     document.querySelectorAll('.config-code-display').forEach(el=>{
       el.style.display='block';
-      el.innerHTML = '<div style="margin-top:14px;padding:12px 14px;background:rgba(184,92,56,.08);border:1px solid rgba(184,92,56,.2);border-radius:8px;text-align:center">'
-        + '<div style="font-size:10px;color:var(--muted,#9a948c);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px">Votre code de partage</div>'
-        + '<div style="font-family:monospace;font-size:18px;font-weight:600;color:#B85C38;letter-spacing:.12em;margin-bottom:8px">' + code + '</div>'
+      // Afficher la section capsule
+      const capsuleSection = document.getElementById('capsuleSection');
+      if(capsuleSection) capsuleSection.style.display='block';
+      el.innerHTML = '<div style="margin-top:14px;padding:16px;background:rgba(184,92,56,.06);border:1px solid rgba(184,92,56,.2);border-radius:10px;text-align:center">'
+        + '<div style="font-size:10px;color:var(--muted,#9a948c);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px">Votre création · Code de partage</div>'
+        + '<div style="display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap">'
+        + '<div id="qr-container-' + code + '" style="background:#fff;padding:6px;border-radius:6px;display:inline-block"></div>'
+        + '<div style="text-align:left">'
+        + '<div style="font-family:monospace;font-size:20px;font-weight:700;color:#B85C38;letter-spacing:.15em;margin-bottom:8px">' + code + '</div>'
         + '<button onclick="navigator.clipboard.writeText(\''+shareUrl+'\').then(()=>{this.textContent=\'Copié ✓\';setTimeout(()=>this.textContent=\'Copier le lien\',2000)})" '
-        + 'style="font-size:12px;padding:6px 16px;border-radius:99px;border:1px solid rgba(184,92,56,.4);background:transparent;color:#B85C38;cursor:pointer;font-family:inherit">'
+        + 'style="font-size:12px;padding:7px 16px;border-radius:99px;border:1px solid rgba(184,92,56,.4);background:transparent;color:#B85C38;cursor:pointer;font-family:inherit;display:block;margin-bottom:6px">'
         + 'Copier le lien</button>'
-        + '<div style="font-size:11px;color:var(--muted,#9a948c);margin-top:6px">Partagez ce code pour retrouver cette création</div>'
-        + '</div>';
+        + '<div style="font-size:10px;color:var(--muted,#9a948c);line-height:1.5">Scannez pour<br>retrouver cette création</div>'
+        + '</div></div></div>';
+      // Générer le QR
+      generateQR(shareUrl, 'qr-container-' + code);
     });
   }
 });
+
+// CAPSULE TEMPORELLE
+let _capsuleMonths = 6;
+function setCapsuleDate(months){
+  _capsuleMonths = months;
+  document.querySelectorAll('.caps-btn').forEach(b=>{
+    b.classList.toggle('active', parseInt(b.dataset.months)===months);
+  });
+}
+// Activer la première option par défaut
+setTimeout(()=>{ const b=document.querySelector('.caps-btn[data-months="6"]'); if(b)b.classList.add('active'); },100);
+
+async function sendCapsule(){
+  const email = document.getElementById('capsuleEmail').value.trim();
+  if(!email||!email.includes('@')){document.getElementById('capsuleEmail').style.borderColor='#B85C38';return;}
+  const btn = document.getElementById('capsuleSendBtn');
+  btn.textContent='Envoi…';btn.disabled=true;
+  const sendDate = new Date();
+  sendDate.setMonth(sendDate.getMonth() + _capsuleMonths);
+  try{
+    const r = await fetch('/api/capsule',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      email,
+      send_at: sendDate.toISOString(),
+      config_code: window._lastConfigCode||null,
+      shape: document.title||'Création Kesk',
+      message: ''
+    })});
+    const d = await r.json();
+    if(d.success){
+      document.getElementById('capsuleStatus').style.display='block';
+      document.getElementById('capsuleStatus').textContent='✓ Capsule programmée pour '+ sendDate.toLocaleDateString('fr-CH',{month:'long',year:'numeric'});
+      btn.style.display='none';
+    } else throw new Error(d.error);
+  }catch(e){
+    btn.textContent='Programmer l\'envoi →';btn.disabled=false;
+    document.getElementById('capsuleStatus').style.display='block';
+    document.getElementById('capsuleStatus').textContent='Erreur — réessayez';
+  }
+}
+
 </script>
+
+<!-- CAPSULE TEMPORELLE -->
+<div id="capsuleSection" style="display:none;margin-top:16px;padding:14px;background:rgba(184,92,56,.06);border:1px solid rgba(184,92,56,.15);border-radius:10px">
+  <div style="font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#B85C38;margin-bottom:8px;font-weight:500">⏳ Capsule temporelle</div>
+  <div style="font-size:12px;color:var(--muted,#9a948c);margin-bottom:10px;line-height:1.5">Recevez un email dans 6 mois, 1 an ou 2 ans avec votre création.</div>
+  <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
+    <button onclick="setCapsuleDate(6)" class="caps-btn" data-months="6">6 mois</button>
+    <button onclick="setCapsuleDate(12)" class="caps-btn" data-months="12">1 an</button>
+    <button onclick="setCapsuleDate(24)" class="caps-btn" data-months="24">2 ans</button>
+  </div>
+  <input id="capsuleEmail" type="email" placeholder="votre@email.ch" style="width:100%;padding:8px 10px;border:1px solid rgba(184,92,56,.3);border-radius:6px;font-size:12px;margin-bottom:8px;background:transparent;color:inherit;font-family:inherit;outline:none;box-sizing:border-box"/>
+  <div style="font-size:10px;color:var(--muted,#9a948c);margin-bottom:8px">Utilisé uniquement pour ce rappel · RGPD</div>
+  <button onclick="sendCapsule()" id="capsuleSendBtn" style="width:100%;padding:8px;background:#B85C38;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:500">Programmer l'envoi →</button>
+  <div id="capsuleStatus" style="font-size:11px;color:#B85C38;margin-top:6px;text-align:center;display:none"></div>
+</div>
+<style>
+.caps-btn{padding:5px 12px;border-radius:99px;border:1px solid rgba(184,92,56,.3);background:transparent;color:#B85C38;font-size:11px;cursor:pointer;font-family:inherit;transition:all .2s}
+.caps-btn.active{background:#B85C38;color:#fff;border-color:#B85C38}
+</style>
 </body>
 </html>
