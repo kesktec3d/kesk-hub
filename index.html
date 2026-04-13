@@ -112,6 +112,17 @@ body::before{
 }
 .hint.hide{opacity:0}
 
+/* ── GIFT CHOICE ── */
+.gift-choice{
+  padding:14px 10px;border-radius:10px;
+  border:1px solid rgba(247,243,238,.12);
+  background:rgba(247,243,238,.05);
+  color:var(--cream,#F7F3EE);font-family:'DM Sans',sans-serif;
+  font-size:13px;cursor:pointer;transition:all .2s;text-align:center;
+  line-height:1.4;
+}
+.gift-choice:hover{border-color:rgba(184,92,56,.5);background:rgba(184,92,56,.1)}
+
 /* ── SHARE BTN ── */
 .surprise-btn{
   position:fixed;bottom:82px;left:50%;transform:translateX(-50%);
@@ -415,7 +426,65 @@ iframe{flex:1;border:none;width:100%;background:var(--bg)}
     <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
   </button>
 
+  <!-- BOUTON CADEAU -->
+  <button class="gift-btn" id="giftBtn" onclick="openGift()" title="Je cherche un cadeau">🎁</button>
+
+  <!-- COMPTEUR IMPACT -->
+  <div class="impact-badge" id="impactBadge">
+    <span class="impact-num" id="impactNum">—</span> kg recyclés à Saillon
+  </div>
+
   <div class="footer-fixed">kesk.ch · Saillon, Valais</div>
+</div>
+
+<!-- MODAL CADEAU -->
+<div class="modal-overlay" id="giftOverlay" style="display:none;z-index:250" onclick="if(event.target===this)closeGift()">
+  <div class="modal" style="max-width:420px;padding:28px 24px">
+    <div id="giftContent">
+      <!-- Step 1 -->
+      <div id="giftStep1">
+        <div class="modal-eyebrow">Mode cadeau</div>
+        <div class="modal-title" style="font-size:20px;margin-bottom:6px">Pour qui est ce cadeau ?</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px">
+          <button class="gift-choice" onclick="giftPick('dest','amie')">👩 Une amie</button>
+          <button class="gift-choice" onclick="giftPick('dest','ami')">👨 Un ami</button>
+          <button class="gift-choice" onclick="giftPick('dest','couple')">💑 Mon/ma partenaire</button>
+          <button class="gift-choice" onclick="giftPick('dest','famille')">👨‍👩‍👧 Famille</button>
+        </div>
+      </div>
+      <!-- Step 2 -->
+      <div id="giftStep2" style="display:none">
+        <div class="modal-eyebrow">Mode cadeau</div>
+        <div class="modal-title" style="font-size:20px;margin-bottom:6px">Quelle occasion ?</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px">
+          <button class="gift-choice" onclick="giftPick('occasion','anniversaire')">🎂 Anniversaire</button>
+          <button class="gift-choice" onclick="giftPick('occasion','noel')">🎄 Noël</button>
+          <button class="gift-choice" onclick="giftPick('occasion','amour')">💝 Saint-Valentin</button>
+          <button class="gift-choice" onclick="giftPick('occasion','mariage')">💍 Mariage / PACS</button>
+          <button class="gift-choice" onclick="giftPick('occasion','autre')" style="grid-column:1/-1">✨ Juste comme ça</button>
+        </div>
+      </div>
+      <!-- Step 3 -->
+      <div id="giftStep3" style="display:none">
+        <div class="modal-eyebrow">Mode cadeau</div>
+        <div class="modal-title" style="font-size:20px;margin-bottom:6px">Quel budget ?</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:16px">
+          <button class="gift-choice" onclick="giftPick('budget','petit')">🌱<br><span style="font-size:11px">~ 38 CHF</span></button>
+          <button class="gift-choice" onclick="giftPick('budget','moyen')">⭐<br><span style="font-size:11px">~ 55 CHF</span></button>
+          <button class="gift-choice" onclick="giftPick('budget','genereux')">✨<br><span style="font-size:11px">~ 75 CHF</span></button>
+        </div>
+      </div>
+      <!-- Résultat -->
+      <div id="giftResult" style="display:none;text-align:center">
+        <div style="font-size:40px;margin-bottom:12px" id="giftEmoji">✦</div>
+        <div class="modal-title" style="font-size:20px;margin-bottom:6px" id="giftReco">—</div>
+        <div class="modal-sub" id="giftDesc">—</div>
+        <button class="modal-btn" id="giftCTA" onclick="openGiftResult()" style="margin-top:16px">Configurer ce cadeau →</button>
+        <button onclick="resetGift()" style="display:block;margin:10px auto 0;background:none;border:none;color:var(--muted,#9a948c);font-size:12px;cursor:pointer">Recommencer</button>
+      </div>
+    </div>
+    <button onclick="closeGift()" style="display:block;margin:16px auto 0;background:none;border:none;color:var(--muted,#9a948c);font-size:13px;cursor:pointer">Annuler</button>
+  </div>
 </div>
 
 <!-- MODAL WAITLIST -->
@@ -546,7 +615,7 @@ async function loadConfigFromURL() {
 }
 
 // Appel au démarrage
-window.addEventListener('load', () => setTimeout(loadConfigFromURL, 300));
+window.addEventListener('load', () => { setTimeout(loadConfigFromURL, 300); loadImpact(); });
 
 // ─── ROUE MYSTÈRE ────────────────────────────────────────────
 const SURPRISE_PRESETS = [
@@ -628,6 +697,7 @@ function openMenu(){
   document.getElementById('circularTextWrap').classList.add('hide');
   document.getElementById('shareBtn').classList.add('hide');
   document.getElementById('surpriseBtn').classList.add('hide');
+  document.getElementById('giftBtn').classList.add('hide');
 
   const container=document.getElementById('petals');
   container.innerHTML='';
@@ -672,6 +742,7 @@ function closeMenu(){
   document.getElementById('circularTextWrap').classList.remove('hide');
   document.getElementById('shareBtn').classList.remove('hide');
   document.getElementById('surpriseBtn').classList.remove('hide');
+  document.getElementById('giftBtn').classList.remove('hide');
 
   document.querySelectorAll('.petal').forEach(el=>{
     const t=el.style.transform;
@@ -960,6 +1031,135 @@ document.addEventListener('touchstart',e=>{ty0=e.touches[0].clientY},{passive:tr
 document.addEventListener('touchend',e=>{
   if(e.changedTouches[0].clientY-ty0>80&&menuOpen)closeMenu();
 },{passive:true});
+
+// ─── MODE CADEAU (05) ────────────────────────────────────────
+const GIFT_MAP = {
+  // [dest, occasion, budget] → { url, emoji, label, desc }
+  couple: {
+    amour:   { petit: {url:'constellation', emoji:'🌌', label:'Constellation & Date', desc:'La carte du ciel de votre première nuit. Imprimée UV 30×30 cm.'},
+               moyen: {url:'constellation', emoji:'🌌', label:'Constellation & Date', desc:'La carte du ciel de votre première nuit. Cadre métal UV.'},
+               genereux:{url:'uv', emoji:'🖼', label:'Tableau UV personnalisé', desc:'Une image unique générée par IA sur support de votre choix.'} },
+    mariage: { petit: {url:'texte', emoji:'✍', label:'Texte 3D', desc:'Prénom ou date en lettres 3D posées sur un bureau.'},
+               moyen: {url:'constellation', emoji:'🌌', label:'Constellation & Date', desc:'La carte du ciel de leur jour J.'},
+               genereux:{url:'uv', emoji:'🖼', label:'Tableau UV', desc:'Œuvre personnalisée pour leur intérieur.'} },
+    autre:   { petit: {url:'onde', emoji:'🎵', label:'Son & Onde', desc:'Une voix ou chanson transformée en objet physique.'},
+               moyen: {url:'constellation', emoji:'🌌', label:'Constellation & Date', desc:'Un moment unique figé dans les étoiles.'},
+               genereux:{url:'uv', emoji:'🖼', label:'Tableau UV', desc:'Une création IA unique.'} },
+  },
+  amie: {
+    anniversaire:{ petit:{url:'vase', emoji:'🌿', label:'Vase personnalisé', desc:'Forme et texture sur mesure en plastique recyclé.'},
+                   moyen:{url:'texte', emoji:'✍', label:'Texte 3D', desc:'Son prénom en lettres 3D fusionnées.'},
+                   genereux:{url:'uv', emoji:'🖼', label:'Tableau UV', desc:'Œuvre IA sur toile ou métal.'} },
+    noel:       { petit:{url:'vase', emoji:'🌿', label:'Vase personnalisé', desc:'Cadeau déco original en recyclé.'},
+                  moyen:{url:'texte', emoji:'✍', label:'Texte 3D', desc:'Un mot qui lui correspond en 3D.'},
+                  genereux:{url:'constellation', emoji:'🌌', label:'Constellation & Date', desc:'La carte du ciel de sa naissance.'} },
+    autre:      { petit:{url:'vase', emoji:'🌿', label:'Vase personnalisé', desc:'Unique, local, recyclé.'},
+                  moyen:{url:'onde', emoji:'🎵', label:'Son & Onde', desc:'Son rire ou sa chanson préférée en objet.'},
+                  genereux:{url:'uv', emoji:'🖼', label:'Tableau UV', desc:'Une image qui lui ressemble.'} },
+  },
+  ami: {
+    anniversaire:{ petit:{url:'texte', emoji:'✍', label:'Texte 3D', desc:'Son nom en lettres massives.'},
+                   moyen:{url:'vase', emoji:'🌿', label:'Vase personnalisé', desc:'Design industriel en recyclé.'},
+                   genereux:{url:'uv', emoji:'🖼', label:'Tableau UV', desc:'Poster IA sur métal brossé.'} },
+    noel:       { petit:{url:'texte', emoji:'✍', label:'Texte 3D', desc:'Un mot fort en 3D.'},
+                  moyen:{url:'onde', emoji:'🎵', label:'Son & Onde', desc:'Son morceau préféré en objet.'},
+                  genereux:{url:'uv', emoji:'🖼', label:'Tableau UV métal', desc:'Œuvre sur aluminium brossé.'} },
+    autre:      { petit:{url:'texte', emoji:'✍', label:'Texte 3D', desc:'Simple et impactant.'},
+                  moyen:{url:'vase', emoji:'🌿', label:'Vase', desc:'Design épuré, matière recyclée.'},
+                  genereux:{url:'constellation', emoji:'🌌', label:'Constellation', desc:'Un souvenir gravé dans les étoiles.'} },
+  },
+  famille: {
+    anniversaire:{ petit:{url:'texte', emoji:'✍', label:'Texte 3D', desc:'Le nom de famille en lettres 3D.'},
+                   moyen:{url:'constellation', emoji:'🌌', label:'Constellation & Date', desc:'La carte du ciel de leur anniversaire.'},
+                   genereux:{url:'uv', emoji:'🖼', label:'Tableau UV', desc:'Portrait IA de la famille.'} },
+    noel:       { petit:{url:'vase', emoji:'🌿', label:'Vase personnalisé', desc:'Décoration unique pour la maison.'},
+                  moyen:{url:'texte', emoji:'✍', label:'Texte 3D', desc:'Le nom de famille en grand format.'},
+                  genereux:{url:'uv', emoji:'🖼', label:'Tableau UV', desc:'Création IA pour leur intérieur.'} },
+    autre:      { petit:{url:'vase', emoji:'🌿', label:'Vase', desc:'Cadeau déco recyclé.'},
+                  moyen:{url:'onde', emoji:'🎵', label:'Son & Onde', desc:'Un message audio en objet physique.'},
+                  genereux:{url:'constellation', emoji:'🌌', label:'Constellation', desc:'La date qui compte pour eux.'} },
+  },
+};
+
+const GIFT_URLS = {
+  uv: 'https://kesk-hub.vercel.app/uv',
+  vase: 'https://kesk-hub.vercel.app/vase',
+  texte: 'https://kesk-hub.vercel.app/texte',
+  constellation: 'https://kesk-hub.vercel.app/constellation',
+  onde: 'https://kesk-hub.vercel.app/onde',
+};
+
+let giftState = { dest:null, occasion:null, budget:null };
+let giftResultUrl = null;
+
+function openGift(){
+  resetGift();
+  document.getElementById('giftOverlay').style.display='flex';
+}
+function closeGift(){
+  document.getElementById('giftOverlay').style.display='none';
+}
+function resetGift(){
+  giftState={dest:null,occasion:null,budget:null};
+  giftResultUrl=null;
+  ['giftStep1','giftStep2','giftStep3','giftResult'].forEach((id,i)=>{
+    document.getElementById(id).style.display=i===0?'block':'none';
+  });
+}
+function giftPick(key, val){
+  giftState[key]=val;
+  if(key==='dest'){
+    document.getElementById('giftStep1').style.display='none';
+    document.getElementById('giftStep2').style.display='block';
+  } else if(key==='occasion'){
+    document.getElementById('giftStep2').style.display='none';
+    document.getElementById('giftStep3').style.display='block';
+  } else if(key==='budget'){
+    document.getElementById('giftStep3').style.display='none';
+    showGiftResult();
+  }
+}
+function showGiftResult(){
+  const {dest,occasion,budget}=giftState;
+  const destMap=GIFT_MAP[dest]||GIFT_MAP.amie;
+  const occasionMap=destMap[occasion]||destMap.autre||destMap[Object.keys(destMap)[0]];
+  const reco=occasionMap[budget]||occasionMap.moyen;
+  giftResultUrl=GIFT_URLS[reco.url];
+  document.getElementById('giftEmoji').textContent=reco.emoji;
+  document.getElementById('giftReco').textContent=reco.label;
+  document.getElementById('giftDesc').textContent=reco.desc;
+  document.getElementById('giftResult').style.display='block';
+}
+function openGiftResult(){
+  closeGift();
+  if(giftResultUrl) openIframe(giftResultUrl);
+}
+
+// ─── LABEL VALAIS RECYCLÉ (07) ───────────────────────────────
+async function loadImpact(){
+  try{
+    const r=await fetch('/api/impact');
+    const d=await r.json();
+    if(d.kg_total){
+      const el=document.getElementById('impactNum');
+      if(!el)return;
+      // Count-up animation
+      const target=d.kg_total;
+      const duration=1500;
+      const start=performance.now();
+      function tick(now){
+        const t=Math.min((now-start)/duration,1);
+        const ease=1-Math.pow(1-t,3);
+        el.textContent=Math.round(ease*target);
+        if(t<1)requestAnimationFrame(tick);
+        else el.textContent=target;
+      }
+      requestAnimationFrame(tick);
+    }
+  }catch(e){}
+}
+
+// Cacher/montrer gift btn avec le menu
 </script>
 </body>
 </html>
