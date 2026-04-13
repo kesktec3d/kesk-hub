@@ -1061,7 +1061,7 @@ async function sendCapsule(){
     .then(d=>{
       if(!d.total_created && !d.active_now) return;
       const wrap = document.createElement('div');
-      wrap.style.cssText = 'text-align:center;padding:6px 0 2px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted,#9a948c);letter-spacing:.06em';
+      wrap.style.cssText = "text-align:center;padding:6px 0 2px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted,#9a948c);letter-spacing:.06em";
       const parts = [];
       if(d.total_created > 0) parts.push(d.total_created + ' créations');
       if(d.active_now > 1) parts.push(d.active_now + ' personnes configurent maintenant');
