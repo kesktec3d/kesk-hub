@@ -841,6 +841,11 @@ function downloadBlob(blob, filename) {
 
 // ─── MODALE ────────────────────────────────────────────────
 function openModal() {
+  // Code de résonance
+  try{
+    const cfg={type:'onde',mode:activeMode,barColor:activeBarColor.id,bgColor:activeBgColor.id,support:activeSupport.id,caption:document.getElementById('captionInp').value.trim()};
+    if(window.parent&&window.parent.saveConfig)window.parent.saveConfig(cfg);
+  }catch(e){}
   document.getElementById('modalOverlay').classList.add('open');
   document.getElementById('modalForm').style.display = '';
   document.getElementById('modalSuccess').style.display = 'none';
