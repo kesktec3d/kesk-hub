@@ -558,6 +558,10 @@ function loadDemo() {
   updateSVG();
 }
 
+let _audioCtx = null;
+let _analyser = null;
+let _animFrame = null;
+
 async function toggleRec() {
   if (!isRecording) {
     try {
@@ -568,32 +572,48 @@ async function toggleRec() {
           sampleRate: 44100
         } 
       });
+
+      // Web Audio API pour visualisation temps réel
+      _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const source = _audioCtx.createMediaStreamSource(stream);
+      _analyser = _audioCtx.createAnalyser();
+      _analyser.fftSize = 256;
+      _analyser.smoothingTimeConstant = 0.75;
+      source.connect(_analyser);
+
+      // MediaRecorder pour capturer l'audio
       mediaRecorder = new MediaRecorder(stream);
       audioChunks = [];
       mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
       mediaRecorder.onstop = async () => {
+        stopLiveViz();
         const blob = new Blob(audioChunks, { type: 'audio/webm' });
         await processAudioBlob(blob);
         stream.getTracks().forEach(t => t.stop());
+        if (_audioCtx) { _audioCtx.close(); _audioCtx = null; }
       };
       mediaRecorder.start();
       isRecording = true;
+
       document.getElementById('recBtn').classList.add('recording');
       document.getElementById('recDot').classList.remove('idle');
       document.getElementById('recLabel').textContent = 'Arrêter';
-      
+
+      // Démarrer la visualisation live
+      startLiveViz();
+
       // Timer 30s max
       let elapsed = 0;
       window._recTimer = setInterval(() => {
         elapsed++;
-        const remaining = 30 - elapsed;
         document.getElementById('audioStatus').textContent = 
-          'Enregistrement en cours… ' + elapsed + 's / 30s max';
+          'Enregistrement… ' + elapsed + 's / 30s';
         if (elapsed >= 30) {
           clearInterval(window._recTimer);
           if (isRecording) toggleRec();
         }
       }, 1000);
+
     } catch (e) {
       document.getElementById('audioStatus').textContent = 'Accès micro refusé — utilisez le mode démo';
     }
@@ -606,6 +626,39 @@ async function toggleRec() {
     document.getElementById('recLabel').textContent = 'Enregistrer';
     document.getElementById('audioStatus').textContent = 'Traitement…';
   }
+}
+
+function startLiveViz() {
+  if (!_analyser) return;
+  const bufLen = _analyser.frequencyBinCount;
+  const dataArr = new Uint8Array(bufLen);
+  
+  function draw() {
+    if (!isRecording) return;
+    _animFrame = requestAnimationFrame(draw);
+    _analyser.getByteTimeDomainData(dataArr);
+    
+    // Convertir en amplitudes normalisées pour les N_BARS barres
+    const step = Math.floor(bufLen / N_BARS);
+    const liveAmps = [];
+    for (let i = 0; i < N_BARS; i++) {
+      let sum = 0;
+      for (let j = 0; j < step; j++) {
+        const v = (dataArr[i * step + j] - 128) / 128;
+        sum += Math.abs(v);
+      }
+      liveAmps.push(Math.min(1, (sum / step) * 3));
+    }
+    // Normaliser
+    const max = Math.max(...liveAmps, 0.01);
+    waveAmps = liveAmps.map(v => v / max);
+    updateSVG();
+  }
+  draw();
+}
+
+function stopLiveViz() {
+  if (_animFrame) { cancelAnimationFrame(_animFrame); _animFrame = null; }
 }
 
 function loadFile(input) {
