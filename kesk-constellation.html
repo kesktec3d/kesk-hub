@@ -420,23 +420,13 @@ function render(){
   }
 
   // Texte date/ville
-  ctx.fillStyle='rgba(247,243,238,0.5)';
-  ctx.font='26px DM Mono, monospace';
-  ctx.textAlign='center';
-  ctx.textBaseline='middle';
-  const dateLabel=dt.toLocaleDateString('fr-CH',{day:'2-digit',month:'long',year:'numeric'});
-  ctx.fillText(dateLabel,cx,cy+R-70);
-  ctx.font='22px DM Sans, sans-serif';
-  ctx.fillStyle='rgba(247,243,238,0.35)';
-  ctx.fillText(cityName+' · '+timeStr,cx,cy+R-40);
-
-  // Texte gravé
+  // Texte gravé uniquement dans le cercle
   if(caption){
     ctx.fillStyle='rgba(247,243,238,0.6)';
     ctx.font='italic 32px Playfair Display, serif';
     ctx.textAlign='center';
     ctx.textBaseline='middle';
-    ctx.fillText(caption,cx,cy+R-100);
+    ctx.fillText(caption,cx,cy+R-60);
   }
 
   // Status
