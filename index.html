@@ -115,13 +115,13 @@ body::before{
 /* ── GIFT CHOICE ── */
 .gift-choice{
   padding:14px 10px;border-radius:10px;
-  border:1px solid rgba(247,243,238,.12);
-  background:rgba(247,243,238,.05);
-  color:var(--cream,#F7F3EE);font-family:'DM Sans',sans-serif;
+  border:1px solid rgba(28,25,22,.12);
+  background:rgba(28,25,22,.05);
+  color:#1c1916;font-family:'DM Sans',sans-serif;
   font-size:13px;cursor:pointer;transition:all .2s;text-align:center;
   line-height:1.4;
 }
-.gift-choice:hover{border-color:rgba(184,92,56,.5);background:rgba(184,92,56,.1)}
+.gift-choice:hover{border-color:rgba(184,92,56,.5);background:rgba(184,92,56,.08);color:#B85C38}
 
 /* ── SHARE BTN ── */
 .surprise-btn{
@@ -623,7 +623,7 @@ async function loadConfigFromURL() {
 }
 
 // Appel au démarrage
-window.addEventListener('load', () => { setTimeout(loadConfigFromURL, 300); loadImpact(); });
+window.addEventListener('load', () => { setTimeout(loadConfigFromURL, 1200); loadImpact(); });
 
 // ─── ROUE MYSTÈRE ────────────────────────────────────────────
 const SURPRISE_PRESETS = [
