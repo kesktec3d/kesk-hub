@@ -8,7 +8,7 @@ export default async function handler(req, res) {
   const {
     name, company, email, phone, address, message,
     shape, texture, texamp, dims, color, lh, layers, wall, bottom,
-    filename, stl_url, svg_preview, extra, ref: clientRef
+    filename, stl_url, svg_preview, extra, ref: clientRef, config_code
   } = req.body;
 
   if (!name || !email || !email.includes('@'))
@@ -16,6 +16,23 @@ export default async function handler(req, res) {
 
   const ref = clientRef || 'JAR-' + Date.now();
   const senderEmail = process.env.BREVO_SENDER || 'hello@kesk.ch';
+
+  // QR code via API externe si config_code présent
+  let qrHtml = '';
+  if (config_code) {
+    const shareUrl = `https://kesk-hub.vercel.app/?config=${config_code}`;
+    const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(shareUrl)}&color=1c1916&bgcolor=ffffff`;
+    qrHtml = `<div style="margin-top:16px;padding:16px;background:#f8f6f3;border-radius:10px;text-align:center;border:1px solid #e0dbd4">
+      <div style="font-size:10px;color:#9a948c;text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px">Votre cachet d'authenticité</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap">
+        <img src="${qrApiUrl}" width="100" height="100" alt="QR Code" style="border-radius:6px;display:block"/>
+        <div style="text-align:left">
+          <div style="font-family:monospace;font-size:18px;font-weight:700;color:#B85C38;letter-spacing:.15em;margin-bottom:6px">${config_code}</div>
+          <div style="font-size:11px;color:#9a948c;line-height:1.6">Scannez ce code pour retrouver<br>et partager cette création.<br><a href="${shareUrl}" style="color:#B85C38">${shareUrl}</a></div>
+        </div>
+      </div>
+    </div>`;
+  }
 
   const swatches = { blanc:'#eeeae4', white:'#eeeae4', gris:'#909088', grey:'#909088',
     noir:'#28272a', black:'#28272a', rouge:'#b02015', red:'#b02015',
@@ -93,6 +110,7 @@ export default async function handler(req, res) {
       </div>
       <p style="color:#9a948c;font-size:13px;margin:0">Questions : <a href="mailto:hello@kesk.ch" style="color:#B85C38">hello@kesk.ch</a></p>
     </div>
+    ${qrHtml}
     <div style="background:#f8f6f3;padding:10px;text-align:center;border-top:1px solid #e0dbd4">
       <p style="color:#9a948c;font-size:11px;margin:0">Kesk Studio · Route de Fully 21 · 1913 Saillon · Suisse</p>
     </div>
