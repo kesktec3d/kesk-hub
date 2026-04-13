@@ -675,6 +675,40 @@ async function sendCapsule(){
   }
 }
 
+
+// ─── 12 COMPTEUR DE RÉSONANCE ────────────────────────────────
+(function(){
+  const type = document.title.toLowerCase().includes('vase') ? 'vase'
+    : document.title.toLowerCase().includes('uv') ? 'uv'
+    : document.title.toLowerCase().includes('texte') ? 'texte'
+    : document.title.toLowerCase().includes('onde') ? 'onde'
+    : document.title.toLowerCase().includes('constellation') ? 'constellation'
+    : 'autre';
+
+  // Session ID persistant
+  let sid = localStorage.getItem('kesk_session');
+  if(!sid){ sid = Math.random().toString(36).slice(2,14); localStorage.setItem('kesk_session',sid); }
+
+  // Signaler présence
+  fetch('/api/stats?type='+type+'&action=active&session='+sid, { method:'POST' }).catch(()=>{});
+
+  // Charger et afficher le compteur
+  fetch('/api/stats?type='+type)
+    .then(r=>r.json())
+    .then(d=>{
+      if(!d.total_created && !d.active_now) return;
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'text-align:center;padding:6px 0 2px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted,#9a948c);letter-spacing:.06em';
+      const parts = [];
+      if(d.total_created > 0) parts.push(d.total_created + ' créations');
+      if(d.active_now > 1) parts.push(d.active_now + ' personnes configurent maintenant');
+      if(parts.length) wrap.textContent = parts.join(' · ');
+      // Insérer sous le titre de la page
+      const title = document.querySelector('h1,.page-title');
+      if(title && title.parentNode) title.parentNode.insertBefore(wrap, title.nextSibling);
+    }).catch(()=>{});
+})();
+
 </script>
 
 <!-- CAPSULE TEMPORELLE -->
