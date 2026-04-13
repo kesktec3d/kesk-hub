@@ -789,8 +789,9 @@ async function sendCapsule(){
       wrap.style.cssText = "text-align:center;padding:6px 0 2px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted,#9a948c);letter-spacing:.06em";
       const parts = [];
       if(d.total_created > 0) parts.push(d.total_created + ' créations');
+      else parts.push('Première création aujourd'hui ?');
       if(d.active_now > 1) parts.push(d.active_now + ' personnes configurent maintenant');
-      if(parts.length) wrap.textContent = parts.join(' · ');
+      wrap.textContent = parts.join(' · ');
       // Insérer sous le titre de la page
       const title = document.querySelector('h1,.page-title');
       if(title && title.parentNode) title.parentNode.insertBefore(wrap, title.nextSibling);
@@ -814,15 +815,39 @@ function onTxChangeWithLore(){
 }
 
 async function fetchLore(name) {
-  if (_loreCache[name.toLowerCase()]) { showLore(_loreCache[name.toLowerCase()]); return; }
+  const key = name.toLowerCase();
+  if (_loreCache[key]) { showLore(_loreCache[key]); return; }
+  
+  // Fallback hardcodé pour prénoms courants
+  const FALLBACK = {
+    'marie': 'de la mer amère, portée par des millions de femmes à travers les siècles.',
+    'thomas': 'le jumeau, celui qui doute et cherche la vérité de ses propres mains.',
+    'lucie': 'fille de lumière, née sous l\'étoile des jours les plus longs.',
+    'lucas': 'porteur de lumière, prénom latin qui traverse les siècles sans vieillir.',
+    'emma': 'entière, universelle — le prénom le plus aimé d\'Europe depuis vingt ans.',
+    'léa': 'la fatiguée des textes anciens, devenue symbole de douceur et de grâce.',
+    'hugo': 'l\'esprit brillant, celui dont la pensée éclaire comme un phare.',
+    'sarah': 'la princesse des déserts, mère de peuples selon les textes sacrés.',
+    'camille': 'enfant des dieux, serviteur du sacré dans la Rome antique.',
+    'noah': 'le repos, l\'apaisement après la tempête — prénom universel et intemporel.',
+  };
+  
+  if (FALLBACK[key]) {
+    _loreCache[key] = FALLBACK[key];
+    showLore(FALLBACK[key]);
+    return;
+  }
+
   try {
+    console.log('[name-lore] fetching for:', name);
     const r = await fetch('/api/name-lore', {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ name })
     });
     const d = await r.json();
-    if(d.lore){ _loreCache[name.toLowerCase()] = d.lore; showLore(d.lore); }
-  } catch(e) {}
+    console.log('[name-lore] response:', d);
+    if(d.lore){ _loreCache[key] = d.lore; showLore(d.lore); }
+  } catch(e) { console.error('[name-lore] error:', e); }
 }
 
 function showLore(text) {
