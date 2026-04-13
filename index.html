@@ -74,26 +74,7 @@ body::before{
 .surprise-btn:hover{border-color:rgba(184,92,56,.6);color:var(--terracotta)}
 .surprise-btn.hide{opacity:0;pointer-events:none}
 
-/* CODE DE RÉSONANCE */
-.config-code-bar{
-  position:fixed;top:0;left:0;right:0;
-  display:none;align-items:center;justify-content:center;gap:10px;
-  padding:8px 16px;
-  background:rgba(14,13,12,.95);
-  border-bottom:1px solid rgba(184,92,56,.3);
-  z-index:100;font-family:'DM Mono',monospace;font-size:12px;
-}
-.config-code-bar.visible{display:flex}
-.config-code-val{
-  color:var(--terracotta);font-weight:500;letter-spacing:.12em;font-size:13px;
-}
-.config-code-copy{
-  background:transparent;border:1px solid rgba(184,92,56,.4);
-  color:var(--terracotta);padding:3px 10px;border-radius:99px;
-  font-size:11px;cursor:pointer;font-family:'DM Mono',monospace;
-  transition:all .2s;
-}
-.config-code-copy:hover{background:rgba(184,92,56,.15)}
+
 .share-btn{animation:fade-up .5s ease 1s both}
 
 /* ── TEXTE CIRCULAIRE ── */
@@ -142,26 +123,7 @@ body::before{
 .surprise-btn:hover{border-color:rgba(184,92,56,.6);color:var(--terracotta)}
 .surprise-btn.hide{opacity:0;pointer-events:none}
 
-/* CODE DE RÉSONANCE */
-.config-code-bar{
-  position:fixed;top:0;left:0;right:0;
-  display:none;align-items:center;justify-content:center;gap:10px;
-  padding:8px 16px;
-  background:rgba(14,13,12,.95);
-  border-bottom:1px solid rgba(184,92,56,.3);
-  z-index:100;font-family:'DM Mono',monospace;font-size:12px;
-}
-.config-code-bar.visible{display:flex}
-.config-code-val{
-  color:var(--terracotta);font-weight:500;letter-spacing:.12em;font-size:13px;
-}
-.config-code-copy{
-  background:transparent;border:1px solid rgba(184,92,56,.4);
-  color:var(--terracotta);padding:3px 10px;border-radius:99px;
-  font-size:11px;cursor:pointer;font-family:'DM Mono',monospace;
-  transition:all .2s;
-}
-.config-code-copy:hover{background:rgba(184,92,56,.15)}
+
 .share-btn{
   position:fixed;bottom:90px;right:28px;
   width:36px;height:36px;border-radius:50%;
@@ -402,26 +364,7 @@ iframe{flex:1;border:none;width:100%;background:var(--bg)}
 .surprise-btn:hover{border-color:rgba(184,92,56,.6);color:var(--terracotta)}
 .surprise-btn.hide{opacity:0;pointer-events:none}
 
-/* CODE DE RÉSONANCE */
-.config-code-bar{
-  position:fixed;top:0;left:0;right:0;
-  display:none;align-items:center;justify-content:center;gap:10px;
-  padding:8px 16px;
-  background:rgba(14,13,12,.95);
-  border-bottom:1px solid rgba(184,92,56,.3);
-  z-index:100;font-family:'DM Mono',monospace;font-size:12px;
-}
-.config-code-bar.visible{display:flex}
-.config-code-val{
-  color:var(--terracotta);font-weight:500;letter-spacing:.12em;font-size:13px;
-}
-.config-code-copy{
-  background:transparent;border:1px solid rgba(184,92,56,.4);
-  color:var(--terracotta);padding:3px 10px;border-radius:99px;
-  font-size:11px;cursor:pointer;font-family:'DM Mono',monospace;
-  transition:all .2s;
-}
-.config-code-copy:hover{background:rgba(184,92,56,.15)}
+
 .share-btn{bottom:90px;right:20px}
   .k-wrap{margin-left:0}
   .stage{overflow:hidden}
@@ -430,12 +373,7 @@ iframe{flex:1;border:none;width:100%;background:var(--bg)}
 </head>
 <body>
 <div class="stage" id="stage">
-  <!-- CODE DE RÉSONANCE -->
-  <div class="config-code-bar" id="configCodeBar">
-    <span style="font-size:11px;color:rgba(247,243,238,.4);letter-spacing:.08em;text-transform:uppercase">Votre code</span>
-    <span class="config-code-val" id="configCodeVal">—</span>
-    <button class="config-code-copy" onclick="copyCode()">Copier</button>
-  </div>
+
 
   <!-- TEXTE CIRCULAIRE centré sur l'écran -->
   <div class="circular-text-wrap" id="circularTextWrap">
@@ -562,12 +500,12 @@ async function saveConfig(configObj) {
     const d = await r.json();
     if (d.code) {
       currentCode = d.code;
-      document.getElementById('configCodeVal').textContent = d.code;
-      document.getElementById('configCodeBar').classList.add('visible');
       // Mettre à jour l'URL sans recharger
       const url = new URL(window.location);
       url.searchParams.set('config', d.code);
       history.replaceState({}, '', url);
+      // Retourner le code au configurateur via postMessage
+      document.getElementById('mainIframe').contentWindow.postMessage({ type:'config-code', code: d.code }, '*');
     }
   } catch(e) { console.log('saveConfig error:', e.message); }
 }
@@ -606,9 +544,9 @@ async function loadConfigFromURL() {
       };
       const cfg = d.config;
       if (cfg.type && urls[cfg.type]) {
-        // Passer la config en query param pour que le configurateur puisse l'hydrater
         const targetUrl = urls[cfg.type] + '?preset=' + encodeURIComponent(JSON.stringify(cfg));
-        setTimeout(() => openIframe(targetUrl), 500);
+        // Attendre que le hub soit rendu avant d'ouvrir l'iframe
+        setTimeout(() => openIframe(targetUrl), 800);
       }
     }
   } catch(e) { console.log('loadConfig error:', e.message); }
