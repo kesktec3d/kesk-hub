@@ -436,7 +436,20 @@ function render(){
 }
 
 // ─── MODAL ───────────────────────────────────────────────────
-function openModal(){document.getElementById('modalOverlay').classList.add('open');document.getElementById('modalForm').style.display='';document.getElementById('modalSuccess').style.display='none';}
+function openModal(){
+  // Code de résonance
+  try{
+    const dateStr=document.getElementById('inpDate').value;
+    const timeStr=document.getElementById('inpTime').value;
+    const cityVal=document.getElementById('inpCity').value;
+    const caption=document.getElementById('inpCaption').value.trim();
+    const cfg={type:'constellation',date:dateStr,time:timeStr,city:cityVal,style:activeStyle,caption,support:activeSupport.id};
+    if(window.parent&&window.parent.saveConfig)window.parent.saveConfig(cfg);
+  }catch(e){}
+  document.getElementById('modalOverlay').classList.add('open');
+  document.getElementById('modalForm').style.display='';
+  document.getElementById('modalSuccess').style.display='none';
+}
 function closeModal(){document.getElementById('modalOverlay').classList.remove('open');}
 
 async function sendOrder(){
