@@ -598,6 +598,12 @@ function setEdge(t,btn){
 // ═══ EXPORT STL ══════════════════════════════════════════════
 function exportSTL(){
   if(!mergedPositions)return;
+  // Code de résonance
+  try{
+    const txt=document.getElementById('txInput').value.trim();
+    const cfg={type:'texte',text:txt,font:curFont.id,lh:P.lh,ep:P.ep,link:P.link,withBase,edgeType};
+    if(window.parent&&window.parent.saveConfig)window.parent.saveConfig(cfg);
+  }catch(e){}
   showSpin('Export STL…');
   setTimeout(()=>{
     const pos=mergedPositions,idx=mergedIndices;
