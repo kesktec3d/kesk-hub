@@ -669,8 +669,12 @@ function startLiveViz() {
     const max = Math.max(...liveAmps, 0.01);
     const normalized = liveAmps.map(v => v / max);
     
-    // Lissage inter-frames : 80% ancienne valeur + 20% nouvelle
-    _prevAmps = _prevAmps.map((prev, i) => prev * 0.82 + normalized[i] * 0.18);
+    // Lissage inter-frames avec seuil de silence
+    const SILENCE_THRESHOLD = 0.05;
+    _prevAmps = _prevAmps.map((prev, i) => {
+      const target = normalized[i] < SILENCE_THRESHOLD ? 0 : normalized[i];
+      return prev * 0.65 + target * 0.35;
+    });
     waveAmps = _prevAmps;
     updateSVG();
   }
