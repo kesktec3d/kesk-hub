@@ -604,10 +604,21 @@ async function loadConfigFromURL() {
   const params = new URLSearchParams(window.location.search);
   const code = params.get('config');
   if (!code) return;
+
+  // Afficher un message d'attente
+  const loading = document.createElement('div');
+  loading.id = 'configLoading';
+  loading.innerHTML = `<div style="position:fixed;inset:0;background:rgba(14,13,12,.92);z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px">
+    <div style="width:32px;height:32px;border:2px solid rgba(184,92,56,.3);border-top-color:#B85C38;border-radius:50%;animation:sp .8s linear infinite"></div>
+    <div style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.12em;color:rgba(247,243,238,.6);text-transform:uppercase">Chargement de votre création…</div>
+    <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.1em;color:rgba(184,92,56,.7)">${code}</div>
+  </div>`;
+  document.body.appendChild(loading);
+
   try {
     const r = await fetch('/api/load-config?code=' + code);
     const d = await r.json();
-    if (!d.config) return;
+    if (!d.config) { loading.remove(); return; }
     const cfg = d.config;
     const urls = {
       uv: 'https://kesk-hub.vercel.app/uv',
@@ -617,9 +628,17 @@ async function loadConfigFromURL() {
       onde: 'https://kesk-hub.vercel.app/onde',
     };
     if (cfg.type && urls[cfg.type]) {
-      setTimeout(() => openIframe(urls[cfg.type]), 800);
+      setTimeout(() => {
+        loading.remove();
+        openIframe(urls[cfg.type]);
+      }, 800);
+    } else {
+      loading.remove();
     }
-  } catch(e) { console.log('loadConfig error:', e.message); }
+  } catch(e) {
+    loading.remove();
+    console.log('loadConfig error:', e.message);
+  }
 }
 
 // Appel au démarrage
