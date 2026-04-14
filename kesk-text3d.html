@@ -544,18 +544,21 @@ function buildBase(tw){
     shape.quadraticCurveTo(-hw,-hd,-hw+es,-hd);
   }
 
-  // Extruder avec bevel : top+bottom caps reçoivent le chanfrein/rayon
-  // bevel est consommé DANS la depth (pas au-delà) → depth=bh donne Y=[0,bh] après rotation
-  // bevel du bas : Z=0..es (dans la depth), bevel du haut : Z=bh-es..bh → top à Y=bh = base du texte ✓
+  // THREE.js bevel s'étend AU-DELÀ de la depth (+bevelThickness de chaque côté)
+  // Plage Z totale : -bevelThickness .. depth+bevelThickness
+  // Avec depth=bh-es, bevelThickness=es → Z=-es..bh → après rotation Y=-es..bh
+  // Bevel bas Y=-es..0 (sous le sol, caché) ; bevel haut Y=bh-es..bh (visible) ✓
+  // Top cap à Y=bh : bevelSize inset, ne dépasse PAS dans le texte ✓
   const geo=new T.ExtrudeGeometry(shape,{
-    depth:Math.max(0.1,bh),
+    depth:Math.max(0.1,bh-es),
     bevelEnabled:true,
     bevelThickness:es,
-    bevelSize:0.01,
+    bevelSize:es,
     bevelSegments:edgeType==='fillet'?8:1,
     curveSegments:SEG
   });
   geo.applyMatrix4(new T.Matrix4().makeRotationX(-Math.PI/2));
+  // Pas de translate : Y=[−es, bh], top rejoint exactement la base du texte ✓
 
   const m=new T.Mesh(geo,baseMat);
   m.castShadow=true;m.receiveShadow=true;
