@@ -842,32 +842,21 @@ const PETALS = [
 
 function isMobile(){return window.innerWidth < 600}
 
-function getPetalPositions(n, mobile){
-  if(mobile){
-    const GAP=10, cardH=88;
-    const cardW=Math.floor((window.innerWidth-44)/2);
-    const rowH=cardH+GAP;
-    const nRows=Math.ceil(n/2);
-    const totalH=nRows*cardH+(nRows-1)*GAP;
-    const colX=[-(cardW/2+GAP/2), +(cardW/2+GAP/2)];
-    const Y_OFFSET=-24;
-    return Array.from({length:n},(_,i)=>{
-      const row=Math.floor(i/2), col=i%2;
-      const isLastOdd=(n%2===1)&&(i===n-1);
-      return {
-        tx: isLastOdd?0:colX[col],
-        ty: -totalH/2+cardH/2+row*rowH+Y_OFFSET,
-        cardW, row, col
-      };
-    });
-  }
-  const d=200;
-  return Array.from({length:n},(_,i)=>({angle:-90+(360/n)*i, dist:d, cardW:138}));
-}
-
 let menuOpen=false, currentModal=null, model3dUrl=null;
 
 function toggleMenu(){menuOpen?closeMenu():openMenu()}
+
+/* ── Helpers carte ── */
+function _makeCard(p, extraStyle){
+  const isAi=p.active==='3d';
+  const cc=p.active===true?'active-card':isAi?'ai-card':'soon-card';
+  const c=document.createElement('div');
+  c.className='petal-card '+cc;
+  if(extraStyle)Object.assign(c.style,extraStyle);
+  c.innerHTML=`<div class="p-tag">${p.tag}</div><div class="p-name">${p.name}</div><div class="p-desc">${p.desc}</div><div class="p-cta">${p.cta}</div>`;
+  c.onclick=e=>{e.stopPropagation();handlePetal(p)};
+  return c;
+}
 
 function openMenu(){
   menuOpen=true;
@@ -878,49 +867,94 @@ function openMenu(){
   document.getElementById('shareBtn').classList.add('hide');
   document.getElementById('surpriseBtn').classList.add('hide');
   document.getElementById('giftBtn').classList.add('hide');
-
   const container=document.getElementById('petals');
   container.innerHTML='';
-  const mobile=isMobile();
-  const positions=getPetalPositions(PETALS.length,mobile);
+  isMobile() ? _openMobile(container) : _openDesktop(container);
+}
 
+function _openDesktop(container){
+  const n=PETALS.length, d=200;
   PETALS.forEach((p,i)=>{
-    const pos=positions[i];
-    let tx, ty, cardW;
-    if(mobile){
-      tx=pos.tx; ty=pos.ty; cardW=pos.cardW;
-    } else {
-      const rad=pos.angle*Math.PI/180;
-      tx=Math.cos(rad)*pos.dist;
-      ty=Math.sin(rad)*pos.dist;
-      cardW=pos.cardW||138;
-    }
-
-    const rot=((Math.random()*10-5).toFixed(1));
+    const a=(-90+(360/n)*i)*Math.PI/180;
+    const tx=Math.cos(a)*d, ty=Math.sin(a)*d;
     const el=document.createElement('div');
     el.className='petal';
-    // Burst depuis le centre (bouton K) : toutes les cartes partent de (0,0)
-    el.style.cssText=`top:50%;left:50%;width:${cardW}px;position:absolute;opacity:0;pointer-events:none;transform:translate(-50%,-50%) scale(0.25) rotate(${rot}deg)`;
-
-    const isAi=p.active==='3d';
-    const cardClass=p.active===true?'active-card':isAi?'ai-card':'soon-card';
-    const card=document.createElement('div');
-    card.className='petal-card '+cardClass;
-    card.innerHTML=`<div class="p-tag">${p.tag}</div><div class="p-name">${p.name}</div><div class="p-desc">${p.desc}</div><div class="p-cta">${p.cta}</div>`;
-    card.onclick=e=>{e.stopPropagation();handlePetal(p)};
-
-    el.appendChild(card);
+    el.style.cssText=`top:50%;left:50%;width:138px;position:absolute;opacity:0;pointer-events:none;transform:translate(calc(-50% + ${tx}px),calc(-50% + ${ty}px)) scale(0)`;
+    el.appendChild(_makeCard(p));
     container.appendChild(el);
-
-    // Wave stagger diagonal : top-left → bottom-right sur mobile, linéaire sur desktop
-    const stagger=mobile ? 18+(pos.row||0)*50+(pos.col||0)*25 : 20+i*65;
     setTimeout(()=>{
-      el.style.transition=`transform .52s cubic-bezier(.34,1.56,.64,1), opacity .3s ease`;
-      el.style.transform=`translate(calc(-50% + ${tx}px),calc(-50% + ${ty}px)) scale(1) rotate(0deg)`;
-      el.style.opacity='1';
-      el.style.pointerEvents='auto';
-    }, stagger);
+      el.style.transition='transform .55s cubic-bezier(.34,1.56,.64,1), opacity .35s ease';
+      el.style.transform=`translate(calc(-50% + ${tx}px),calc(-50% + ${ty}px)) scale(1)`;
+      el.style.opacity='1'; el.style.pointerEvents='auto';
+    }, 20+i*65);
   });
+}
+
+function _openMobile(container){
+  /* ── TOP 4 cartes : grille 2×2, burst depuis le bouton K ── */
+  const gap=10, spad=16, cH=88, ring=49;
+  const cW=Math.floor((window.innerWidth-spad*2-gap)/2);
+  const r2ty=-(ring+gap+cH/2);        // rangée basse : juste au-dessus du ring
+  const r1ty=r2ty-cH-gap;             // rangée haute
+  const c0tx=-(cW/2+gap/2);           // colonne gauche
+  const c1tx= (cW/2+gap/2);           // colonne droite
+  const topPos=[
+    {tx:c0tx,ty:r1ty},{tx:c1tx,ty:r1ty},
+    {tx:c0tx,ty:r2ty},{tx:c1tx,ty:r2ty}
+  ];
+
+  PETALS.slice(0,4).forEach((p,i)=>{
+    const {tx,ty}=topPos[i];
+    const rot=((Math.random()*12-6).toFixed(1));
+    const el=document.createElement('div');
+    el.className='petal';
+    el.style.cssText=`top:50%;left:50%;width:${cW}px;position:absolute;opacity:0;pointer-events:none;transform:translate(-50%,-50%) scale(0.15) rotate(${rot}deg)`;
+    el.appendChild(_makeCard(p));
+    container.appendChild(el);
+    // Stagger en vague : col droite légèrement après col gauche
+    setTimeout(()=>{
+      el.style.transition='transform .48s cubic-bezier(.34,1.56,.64,1), opacity .26s ease';
+      el.style.transform=`translate(calc(-50% + ${tx}px),calc(-50% + ${ty}px)) scale(1) rotate(0deg)`;
+      el.style.opacity='1'; el.style.pointerEvents='auto';
+    }, 15+Math.floor(i/2)*45+(i%2)*22);
+  });
+
+  /* ── BOTTOM : scroll horizontal pour les cartes 5-7 ── */
+  const stripY=ring+gap+2;
+  const strip=document.createElement('div');
+  strip.id='mobileStrip';
+  strip.style.cssText=`position:absolute;top:calc(50% + ${stripY}px);left:0;right:0;pointer-events:auto;opacity:0;transform:translateY(16px);transition:opacity .3s ease .16s,transform .38s cubic-bezier(.34,1.56,.64,1) .16s`;
+
+  const scrollW=Math.round(window.innerWidth*0.76);
+  const track=document.createElement('div');
+  track.style.cssText=`display:flex;gap:${gap}px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding:0 ${spad}px`;
+
+  const nBot=PETALS.length-4;
+  PETALS.slice(4).forEach(p=>{
+    track.appendChild(_makeCard(p,{flexShrink:'0',width:scrollW+'px',scrollSnapAlign:'start'}));
+  });
+
+  // Dots pagination
+  const dotsEl=document.createElement('div');
+  dotsEl.style.cssText='display:flex;justify-content:center;gap:6px;margin-top:8px';
+  const dotEls=Array.from({length:nBot},(_,d)=>{
+    const dot=document.createElement('div');
+    dot.style.cssText=`width:5px;height:5px;border-radius:50%;transition:background .2s,transform .2s;background:${d===0?'var(--terracotta)':'rgba(247,243,238,.25)'};transform:${d===0?'scale(1.2)':'scale(1)'}`;
+    dotsEl.appendChild(dot); return dot;
+  });
+  track.addEventListener('scroll',()=>{
+    const idx=Math.round(track.scrollLeft/(scrollW+gap));
+    dotEls.forEach((d,i)=>{
+      d.style.background=i===idx?'var(--terracotta)':'rgba(247,243,238,.25)';
+      d.style.transform=i===idx?'scale(1.2)':'scale(1)';
+    });
+  },{passive:true});
+
+  strip.appendChild(track); strip.appendChild(dotsEl);
+  container.appendChild(strip);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    strip.style.opacity='1'; strip.style.transform='translateY(0)';
+  }));
 }
 
 function closeMenu(){
@@ -936,16 +970,13 @@ function closeMenu(){
 
   const mob=isMobile();
   document.querySelectorAll('.petal').forEach(el=>{
-    el.style.transition='transform .22s cubic-bezier(.55,.055,.675,.19), opacity .18s ease';
-    if(mob){
-      // Collapse vers le bouton K (centre)
-      el.style.transform='translate(-50%,-50%) scale(0.2)';
-    } else {
-      el.style.transform=el.style.transform.replace(/scale\([^)]+\)/,'scale(0)');
-    }
+    el.style.transition='transform .2s cubic-bezier(.55,.055,.675,.19), opacity .16s ease';
+    el.style.transform=mob?'translate(-50%,-50%) scale(0.12)':el.style.transform.replace(/scale\([^)]+\)/,'scale(0)');
     el.style.opacity='0';
   });
-  setTimeout(()=>document.getElementById('petals').innerHTML='',280);
+  const strip=document.getElementById('mobileStrip');
+  if(strip){strip.style.transition='opacity .15s ease,transform .18s ease';strip.style.opacity='0';strip.style.transform='translateY(12px)';}
+  setTimeout(()=>document.getElementById('petals').innerHTML='',260);
 }
 
 function handlePetal(p){
