@@ -172,6 +172,11 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:11px;heigh
   </div>
 
   <div class="pf">
+    <div id="mirrorColorRow" style="display:none;align-items:center;gap:8px;padding:2px 0 4px">
+      <span style="font-family:'DM Mono',monospace;font-size:.56rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);flex:1">Couleur rendu</span>
+      <input type="color" id="renderColor" value="#c8a878" title="Couleur de la pièce pour le rendu vidéo"
+             style="width:34px;height:22px;border:1px solid var(--border);border-radius:3px;cursor:pointer;padding:1px 2px;background:var(--card)"/>
+    </div>
     <button id="mirrorBtn" onclick="startMirrorCapture()"
   style="display:none;margin-top:8px;width:100%;padding:.62rem;border-radius:6px;
          border:1.5px solid rgba(200,240,96,.3);background:transparent;
@@ -265,6 +270,7 @@ let THREE_READY=false;
 let renderer,camera,scene,group,textMat,baseMat;
 let sph={theta:.35,phi:1.0,r:260};
 let isDrag=false,mpx=0,mpy=0;
+let mirrorRotating=false,mirrorRotSpeed=0;
 
 function camUp(){
   if(!camera)return;
@@ -323,7 +329,7 @@ function initThree(){
     renderer.setSize(rw,rh);camera.aspect=rw/rh;camera.updateProjectionMatrix();
   }).observe(vp);
   
-  (function animate(){requestAnimationFrame(animate);renderer.render(scene,camera)})();
+  (function animate(){requestAnimationFrame(animate);if(mirrorRotating&&group)group.rotation.y+=mirrorRotSpeed;renderer.render(scene,camera)})();
   
   // Build si texte présent
   const txt=document.getElementById('txInput').value.trim();
@@ -538,16 +544,21 @@ function buildBase(tw){
     shape.quadraticCurveTo(-hw,-hd,-hw+es,-hd);
   }
 
-  // Extruder sur Z puis faire pivoter pour que ce soit sur Y
+  // Extruder avec bevel : top+bottom caps reçoivent le chanfrein/rayon
+  // depth = bh-es (corps principal), bevel es de chaque côté → total = bh+es
+  // Après rotation -X : l'extrusion devient l'axe Y
+  // On décale de -es pour que le bevel du bas passe sous le sol (caché par le plancher)
+  // → bevel du bas : Y=-es..0 (caché), corps : Y=0..bh-es, bevel du haut : Y=bh-es..bh ✓
   const geo=new T.ExtrudeGeometry(shape,{
-    depth:bh,
-    bevelEnabled:false,
+    depth:Math.max(0.1,bh-es),
+    bevelEnabled:true,
+    bevelThickness:es,
+    bevelSize:es,
+    bevelSegments:edgeType==='fillet'?8:1,
     curveSegments:SEG
   });
-  // La shape est dans XY, extrudée sur Z → pivoter -90° sur X pour mettre sur Y
   geo.applyMatrix4(new T.Matrix4().makeRotationX(-Math.PI/2));
-  // Décaler en Y pour que le bas soit à Y=0
-  geo.translate(0,bh,0);
+  geo.translate(0,-es,0);
 
   const m=new T.Mesh(geo,baseMat);
   m.castShadow=true;m.receiveShadow=true;
@@ -579,7 +590,14 @@ function doBuild(){
 }
 
 function clearScene(){if(group)group.clear();mergedPositions=null;mergedIndices=null;enableBtns(false);}
-function enableBtns(v){document.getElementById('btnSTL').disabled=!v;document.getElementById('btnDev').disabled=!v;if(v)document.getElementById('mirrorBtn').style.display='block';}
+function enableBtns(v){
+  document.getElementById('btnSTL').disabled=!v;
+  document.getElementById('btnDev').disabled=!v;
+  const mb=document.getElementById('mirrorBtn');
+  const cr=document.getElementById('mirrorColorRow');
+  if(v){mb.style.display='block';if(cr)cr.style.display='flex';}
+  else{if(cr)cr.style.display='none';}
+}
 function showSpin(t){document.getElementById('spinTx').textContent=t;document.getElementById('spinOv').classList.add('on');}
 function hideSpinr(){document.getElementById('spinOv').classList.remove('on');}
 
@@ -877,10 +895,11 @@ function hideLore() {
   if(el) el.style.opacity = '0';
 }
 
-// ─── EFFET MIROIR (15) ───────────────────────────────────────
+// ─── EFFET MIROIR — TURNTABLE (15) ──────────────────────────
 function startMirrorCapture() {
   const btn = document.getElementById('mirrorBtn');
   const canvas = document.getElementById('c3');
+  const T = window.THREE;
 
   if (!canvas || typeof canvas.captureStream !== 'function') {
     alert('Votre navigateur ne supporte pas la capture vidéo. Essayez Chrome ou Firefox.');
@@ -891,21 +910,60 @@ function startMirrorCapture() {
     .find(t => MediaRecorder.isTypeSupported(t)) || 'video/webm';
   const ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
 
+  // ── Sauvegarder l'état de la scène ──
+  const origTextHex = textMat ? textMat.color.getHex() : 0xc8a878;
+  const origBaseHex = baseMat ? baseMat.color.getHex() : 0xa88858;
+  const origBg = scene ? scene.background.clone() : null;
+  const origCam = { theta: sph.theta, phi: sph.phi, r: sph.r };
+  const origGroupRY = group ? group.rotation.y : 0;
+
+  // ── Appliquer la couleur choisie + scène studio ──
+  const color = document.getElementById('renderColor')?.value || '#c8a878';
+  if (textMat) textMat.color.set(color);
+  if (baseMat) baseMat.color.set(new T.Color(color).multiplyScalar(0.72));
+  if (scene) scene.background = new T.Color(0x161210);
+
+  // ── Caméra cinématique pour la table tournante ──
+  sph.phi = 0.85;
+  sph.r = Math.max(220, totalWidth * 2.8);
+  if (group) group.rotation.y = 0;
+  camUp();
+
+  // ── Lancer la rotation (360° en 5s à 30fps) ──
+  const DURATION = 5;
+  mirrorRotSpeed = (2 * Math.PI) / (DURATION * 30);
+  mirrorRotating = true;
+
   btn.textContent = '⏺ Enregistrement…'; btn.disabled = true;
+
+  function restoreScene() {
+    mirrorRotating = false;
+    mirrorRotSpeed = 0;
+    if (group) group.rotation.y = origGroupRY;
+    if (textMat) textMat.color.setHex(origTextHex);
+    if (baseMat) baseMat.color.setHex(origBaseHex);
+    if (scene && origBg) scene.background = origBg;
+    sph.theta = origCam.theta; sph.phi = origCam.phi; sph.r = origCam.r;
+    camUp();
+  }
 
   let stream, recorder;
   try {
     stream = canvas.captureStream(30);
-    recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 4000000 });
+    recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 5000000 });
   } catch (err) {
+    restoreScene();
     btn.textContent = '✦ Télécharger l\'animation'; btn.disabled = false;
     alert('Impossible de démarrer la capture. Essayez Chrome ou Firefox.');
     return;
   }
+
   const chunks = [];
 
   recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
   recorder.onstop = () => {
+    restoreScene();
+    stream.getTracks().forEach(t => t.stop());
     if (chunks.length === 0) {
       btn.textContent = '✦ Télécharger l\'animation'; btn.disabled = false;
       return;
@@ -919,12 +977,11 @@ function startMirrorCapture() {
     a.click();
     document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(url), 1000);
-    stream.getTracks().forEach(t => t.stop());
     btn.textContent = '✦ Télécharger l\'animation'; btn.disabled = false;
   };
 
   recorder.start();
-  let remaining = 5;
+  let remaining = DURATION;
   const tick = setInterval(() => {
     remaining--;
     btn.textContent = `⏺ ${remaining}s…`;
