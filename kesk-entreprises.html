@@ -5,71 +5,86 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>Kesk · Goodies valaisans pour entreprises</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400&family=Bebas+Neue&display=swap" rel="stylesheet" />
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{min-height:100%;font-family:'Playfair Display',serif;background:#100908;color:#0f0906;overflow-x:hidden}
-body{background:#ffedf1;}
-.nav, .btn-primary, .btn-secondary, .pricing-table, .footer{font-family:'DM Sans',sans-serif;}
+:root{--bg:#FFF8F2;--panel:#fff;--ink:#1A1614;--muted:#7A5048;--terracotta:#C03818;--accent:#C03818;--accent-soft:#FDDDD5;--border:rgba(26,22,20,.14)}
+html,body{min-height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);overflow-x:hidden}
+body{background:linear-gradient(180deg,#fff3ed 0%,#fff6f2 45%,#fcf1ed 100%)}
 button, a{font:inherit}
 img{max-width:100%;display:block}
-button{cursor:pointer;border:none}
 a{text-decoration:none;color:inherit}
 .page{position:relative;overflow:hidden}
-.background-splodge{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 20% 20%, rgba(255,233,230,.7) 0%, transparent 22%),radial-gradient(circle at 80% 10%, rgba(216,198,255,.72) 0%, transparent 20%),radial-gradient(circle at 15% 85%, rgba(255,200,160,.35) 0%, transparent 16%),linear-gradient(180deg, #ffedf1 0%, #fff7eb 45%, #f7f2ff 100%)}
+.background-splodge{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 25% 25%, rgba(210,95,115,.16) 0%, transparent 24%),radial-gradient(circle at 85% 10%, rgba(255,184,160,.22) 0%, transparent 20%),radial-gradient(circle at 12% 82%, rgba(141,83,148,.12) 0%, transparent 16%)}
 .particles{position:absolute;inset:0;pointer-events:none}
-.particles span{position:absolute;width:8px;height:8px;border-radius:999px;background:rgba(18,12,10,.16);box-shadow:0 0 0 2px rgba(255,255,255,.12)}
+.particles span{position:absolute;width:10px;height:10px;border-radius:999px;background:rgba(210,95,115,.18);box-shadow:0 0 0 2px rgba(255,255,255,.18)}
 .header{position:relative;z-index:2;padding:28px 40px;display:flex;align-items:center;justify-content:space-between;gap:24px}
-.brand{font-family:'Playfair Display',serif;font-size:42px;letter-spacing:-0.08em;color:#0f0906;text-shadow:1px 1px 0 rgba(255,255,255,.9)}
-.nav{display:flex;gap:24px;font-size:13px;text-transform:uppercase;letter-spacing:.22em;color:#0f0906;}
-.nav a:hover{color:#b43d68}
-.hero{position:relative;z-index:1;padding:88px 40px 48px;display:grid;grid-template-columns:1.2fr 1fr;align-items:center;gap:48px;min-height:calc(100vh - 120px)}
+.brand{font-family:'Bebas Neue',sans-serif;font-size:34px;letter-spacing:-.08em;color:var(--ink)}
+.nav{display:flex;gap:24px;font-family:'DM Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.2em;color:var(--ink);}
+.nav a:hover{color:var(--terracotta)}
+.hero{position:relative;z-index:1;padding:80px 40px 40px;display:grid;grid-template-columns:1.2fr 1fr;align-items:center;gap:40px;min-height:calc(100vh - 120px)}
 .hero-copy{max-width:560px}
-.hero-copy h1{font-family:'Playfair Display',serif;font-size:86px;line-height:.9;letter-spacing:-.08em;margin-bottom:18px;color:#111}
-.hero-copy p{font-size:18px;line-height:1.7;color:#3f302b;margin-bottom:28px;max-width:500px}
+.hero-copy h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(3.6rem,5vw,5.2rem);line-height:.96;letter-spacing:.02em;margin-bottom:20px;color:var(--ink)}
+.hero-copy p{font-size:18px;line-height:1.8;color:var(--muted);margin-bottom:28px;max-width:540px}
 .hero-actions{display:flex;flex-wrap:wrap;gap:16px}
-.btn-primary{display:inline-flex;align-items:center;justify-content:center;padding:16px 32px;border-radius:999px;background:#1d0c17;color:#fff;box-shadow:0 24px 55px -35px rgba(31,11,22,.65);transition:transform .2s ease,background .2s ease}
-.btn-primary:hover{transform:translateY(-2px);background:#491c37}
-.btn-secondary{display:inline-flex;align-items:center;justify-content:center;padding:16px 32px;border-radius:999px;background:rgba(255,255,255,.88);color:#1d0c17;box-shadow:0 18px 45px -30px rgba(31,11,22,.25)}
-.hero-visual{position:relative;display:grid;place-items:center;min-height:520px;}
-.hero-card{position:relative;width:100%;padding:48px;min-height:420px;border-radius:42px;background:rgba(255,255,255,.95);box-shadow:0 80px 120px -70px rgba(18,12,10,.2);overflow:hidden}
-.hero-card::before{content:'';position:absolute;left:-32px;top:-24px;width:260px;height:260px;border-radius:50%;background:rgba(255,156,151,.12)}
-.hero-card::after{content:'';position:absolute;right:-64px;bottom:-54px;width:280px;height:280px;border-radius:50%;background:rgba(106,170,240,.14)}
-.hero-card img{border-radius:32px;box-shadow:0 40px 80px -50px rgba(15,9,6,.4);}
-.section{position:relative;z-index:1;padding:120px 40px;border-top:1px solid rgba(15,9,6,.06)}
-.section-inner{max-width:1220px;margin:0 auto}
-.section-title{font-family:'Playfair Display',serif;font-size:44px;line-height:1.05;margin-bottom:18px;color:#100908}
-.section-copy{max-width:680px;font-size:17px;line-height:1.8;color:#423735;margin-bottom:40px}
+.btn-primary{display:inline-flex;align-items:center;justify-content:center;padding:16px 34px;border-radius:999px;background:var(--ink);color:#fff;box-shadow:0 24px 55px -35px rgba(31,11,22,.35);transition:transform .2s ease,background .2s ease}
+.btn-primary:hover{transform:translateY(-2px);background:#47323a}
+.btn-secondary{display:inline-flex;align-items:center;justify-content:center;padding:16px 34px;border-radius:999px;background:rgba(255,255,255,.92);color:var(--ink);box-shadow:0 18px 45px -30px rgba(31,11,22,.12)}
+.hero-visual{display:grid;place-items:center;min-height:520px}
+.hero-card{position:relative;width:100%;padding:40px;border-radius:42px;background:linear-gradient(180deg,rgba(255,255,255,.95),#fff);border:1px solid rgba(209,165,170,.35);box-shadow:0 40px 80px -45px rgba(31,17,17,.08);overflow:hidden}
+.hero-card::before{content:'';position:absolute;left:-30px;top:-30px;width:220px;height:220px;border-radius:50%;background:rgba(210,95,115,.11)}
+.hero-card::after{content:'';position:absolute;right:-40px;bottom:-30px;width:240px;height:240px;border-radius:50%;background:rgba(255,184,160,.12)}
+.hero-illustration{position:relative;height:100%;display:grid;place-items:center}
+.hero-badge{display:inline-flex;align-items:center;gap:12px;padding:10px 18px;border-radius:999px;background:rgba(192,56,24,.08);color:var(--terracotta);font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.2em;margin-bottom:24px}
+.hero-block{width:100%;max-width:380px;padding:32px;border-radius:28px;background:linear-gradient(180deg,#fff,#fff);box-shadow:0 20px 60px rgba(31,17,17,.08);border:1px solid rgba(209,165,170,.18);}
+.hero-block strong{display:block;font-size:24px;font-family:'Bebas Neue',sans-serif;color:var(--ink);margin-bottom:12px}
+.hero-block span{display:block;color:var(--muted);line-height:1.8}
+.section{position:relative;z-index:1;padding:100px 40px;border-top:1px solid rgba(31,17,17,.05)}
+.section-inner{max-width:1180px;margin:0 auto}
+.section-title{font-family:'Bebas Neue',sans-serif;font-size:44px;line-height:1.05;margin-bottom:18px;color:var(--ink)}
+.section-copy{max-width:680px;font-size:17px;line-height:1.85;color:var(--muted);margin-bottom:40px}
 .grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
-.card{padding:32px;border-radius:32px;background:rgba(255,255,255,.92);backdrop-filter:blur(14px);box-shadow:0 40px 70px -50px rgba(18,12,10,.2)}
-.card h3{font-size:20px;margin-bottom:14px;color:#1f1311}
-.card p{font-size:15px;line-height:1.9;color:#52433f}
-.badge{display:inline-flex;align-items:center;gap:10px;padding:10px 18px;border-radius:999px;font-size:12px;text-transform:uppercase;letter-spacing:.18em;background:rgba(23,15,13,.08);color:#1f1311;margin-bottom:18px}
-.preview-panel{display:grid;grid-template-columns:1.05fr .95fr;gap:28px;align-items:center}
-.viewer-card{position:relative;padding:32px;border-radius:40px;background:rgba(15,9,6,.04);box-shadow:inset 0 0 0 1px rgba(255,255,255,.25);}
-.viewer-overlay{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,transparent 20%,rgba(255,255,255,.75) 100%);border-radius:40px}
-.viewer-canvas{width:100%;aspect-ratio:1.1 / 1;border-radius:32px;display:block;background:#11070e;}
+.card{padding:32px;border-radius:32px;background:#fff;border:1px solid rgba(209,165,170,.16);box-shadow:0 28px 60px rgba(31,17,17,.06)}
+.card h3{font-size:20px;margin-bottom:14px;color:var(--ink)}
+.card p{font-size:15px;line-height:1.95;color:var(--muted)}
+.badge{display:inline-flex;align-items:center;gap:10px;padding:8px 14px;border-radius:999px;font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.2em;background:rgba(192,56,24,.08);color:var(--terracotta);margin-bottom:18px}
+.preview-panel{display:grid;grid-template-columns:1.1fr .9fr;gap:28px;align-items:start}
+.viewer-card{position:relative;padding:30px;border-radius:40px;background:#fff;border:1px solid rgba(209,165,170,.16);box-shadow:0 18px 45px rgba(31,17,17,.06)}
+.viewer-overlay{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,transparent 0%,rgba(255,255,255,.82) 100%);border-radius:40px}
+.viewer-fallback{position:absolute;inset:0;display:grid;place-items:center;gap:12px;padding:32px;pointer-events:none}
+.viewer-fallback.hidden{display:none}
+.fallback-shape{width:80px;height:80px;border-radius:26px;background:rgba(255,255,255,.18);box-shadow:inset 0 0 0 1px rgba(255,255,255,.18)}
+.fallback-shape.shape1{transform:translateX(-14px) rotate(15deg);background:rgba(210,95,115,.18)}
+.fallback-shape.shape2{border-radius:50%;background:rgba(255,184,160,.18);width:70px;height:70px}
+.fallback-shape.shape3{border-radius:18px 32px 18px 32px;background:rgba(141,83,148,.14);width:90px;height:70px}
+.fallback-note{font-size:13px;color:#e7d5d2;text-transform:uppercase;letter-spacing:.16em}
+.viewer-canvas{width:100%;aspect-ratio:1.08 / 1;border-radius:28px;display:block;background:#1e1110}
 .viewer-meta{margin-top:24px;display:flex;flex-wrap:wrap;gap:12px}
-.model-pill{padding:12px 18px;border-radius:999px;border:1px solid rgba(15,9,6,.12);background:rgba(255,255,255,.92);color:#1d0c17;font-size:14px;cursor:pointer;transition:transform .2s ease,background .2s ease}
-.model-pill.active{background:#1d0c17;color:#fff;border-color:transparent;transform:translateY(-2px)}
-.model-pill:hover{background:#f4d2d8}
-.viewer-copy{margin-top:28px;color:#52433f;font-size:15px;line-height:1.8}
-.footnote{font-size:13px;color:#6a5752;line-height:1.8;margin-top:16px}
+.model-pill{padding:10px 18px;border-radius:999px;border:1px solid var(--border);background:#fff;color:var(--ink);font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.14em;cursor:pointer;transition:transform .2s ease,background .2s ease}
+.model-pill.active{background:var(--ink);color:#fff;border-color:transparent;transform:translateY(-2px)}
+.model-pill:hover{background:var(--accent-soft)}
+.viewer-copy{margin-top:18px;color:var(--muted);font-size:15px;line-height:1.85}
+.color-swatches{display:none}
+.color-swatch{width:30px;height:30px;border-radius:50%;cursor:pointer;border:2.5px solid transparent;transition:transform .18s,border-color .18s;padding:0;box-shadow:0 2px 8px rgba(31,17,17,.15)}
+.color-swatch.active{border-color:var(--ink);transform:scale(1.18)}
+.color-swatch:hover{transform:scale(1.1)}
+.viewer-status{margin-top:14px;color:var(--muted);font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;min-height:16px}
+.footnote{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.1em;color:var(--muted);line-height:1.85;margin-top:14px}
 .quote-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-.quote{padding:30px;border-radius:32px;background:rgba(255,255,255,.92);box-shadow:0 30px 60px -50px rgba(18,12,10,.18)}
-.quote h4{font-size:16px;margin-bottom:10px;color:#3e2e29}
-.quote p{font-size:14px;line-height:1.8;color:#6b5650}
+.quote{padding:28px;border-radius:32px;background:#fff;border:1px solid rgba(209,165,170,.14);box-shadow:0 20px 40px rgba(31,17,17,.05)}
+.quote h4{font-size:16px;margin-bottom:10px;color:var(--ink)}
+.quote p{font-size:14px;line-height:1.8;color:var(--muted)}
 .pricing-table{width:100%;border-collapse:collapse;margin-top:32px}
 .pricing-table th, .pricing-table td{padding:18px 20px;text-align:left;font-size:14px}
-.pricing-table th{color:#111;background:rgba(255,255,255,.98)}
-.pricing-table tr{border-bottom:1px solid rgba(15,9,6,.08)}
-.pricing-table td:last-child{text-align:right;color:#b83d65;font-weight:600}
-.cta-block{padding:64px 64px 72px;border-radius:42px;background:#1d0c17;color:#fff;text-align:center;box-shadow:0 60px 120px -70px rgba(18,12,10,.45);margin-top:40px}
-.cta-block h2{font-family:'Playfair Display',serif;font-size:42px;line-height:1.05;margin-bottom:18px}
-.cta-block p{font-size:18px;line-height:1.8;color:rgba(255,255,255,.85);max-width:760px;margin:0 auto 28px}
-.footer{padding:44px 40px;text-align:center;font-size:13px;color:#4a3630}
-@media (max-width:1100px){.hero{grid-template-columns:1fr;min-height:auto;}.preview-panel{grid-template-columns:1fr}.grid-3{grid-template-columns:1fr}.quote-grid{grid-template-columns:1fr}.hero-copy h1{font-size:64px}.header{flex-wrap:wrap;justify-content:center}.hero-card{padding:28px}} 
-@media (max-width:720px){.header{padding:24px 20px}.hero{padding:64px 20px}.hero-copy h1{font-size:48px}.hero-card{min-height:320px}.model-pill{font-size:13px;padding:10px 16px}.cta-block{padding:44px 28px}} 
+.pricing-table th{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);background:rgba(255,255,255,.95)}
+.pricing-table tr{border-bottom:1px solid rgba(209,165,170,.16)}
+.pricing-table td:last-child{text-align:right;color:var(--terracotta);font-weight:600}
+.cta-block{padding:64px 64px 72px;border-radius:42px;background:var(--ink);color:#fff;text-align:center;box-shadow:0 60px 120px -70px rgba(31,17,17,.45);margin-top:40px}
+.cta-block h2{font-family:'Bebas Neue',sans-serif;font-size:42px;line-height:1.05;margin-bottom:18px}
+.cta-block p{font-size:18px;line-height:1.8;color:rgba(255,255,255,.8);max-width:760px;margin:0 auto 28px}
+.footer{padding:44px 40px;text-align:center;font-size:13px;color:#6d514b}
+@media (max-width:1100px){.hero{grid-template-columns:1fr;min-height:auto;}.preview-panel{grid-template-columns:1fr}.grid-3{grid-template-columns:1fr}.quote-grid{grid-template-columns:1fr}.hero-copy h1{font-size:3.8rem}.header{flex-wrap:wrap;justify-content:center}.hero-card{padding:28px}} 
+@media (max-width:720px){.header{padding:24px 20px}.hero{padding:64px 20px}.hero-copy h1{font-size:3rem}.hero-card{min-height:320px}.model-pill{font-size:13px;padding:10px 16px}.cta-block{padding:44px 28px}} 
 </style>
 </head>
 <body>
@@ -95,8 +110,8 @@ a{text-decoration:none;color:inherit}
     </a>
     <nav class="nav">
       <a href="#hero">Accueil</a>
-      <a href="#viewer">Modeles</a>
-      <a href="#projets">Realisations</a>
+      <a href="#viewer">Modèles</a>
+      <a href="#projets">Réalisations</a>
       <a href="#contact">Contact</a>
     </nav>
   </header>
@@ -104,59 +119,73 @@ a{text-decoration:none;color:inherit}
     <section class="hero" id="hero">
       <div class="hero-copy">
         <h1>Goodies valaisans qui claquent pour les entreprises</h1>
-        <p>Des objets corporate jouets, souvenirs ou cadeaux clients, fabriques a Saillon avec la patte Kesk : ultra colores, tactile et 100 % personnalisable.</p>
+        <p>Des objets corporate jouets, souvenirs ou cadeaux clients, fabriqués à Saillon avec la patte Kesk : ultra colorés, tactile et 100 % personnalisable.</p>
         <div class="hero-actions">
           <a href="#contact" class="btn-primary">Demander un devis</a>
-          <a href="#viewer" class="btn-secondary">Voir les modeles</a>
+          <a href="#viewer" class="btn-secondary">Voir les modèles</a>
         </div>
       </div>
       <div class="hero-visual">
         <div class="hero-card">
-          <img src="https://images.unsplash.com/photo-1510829512234-83857d8e54d9?auto=format&fit=crop&w=1200&q=80" alt="Goodies valaisans" />
+          <div class="hero-illustration">
+            <div class="hero-badge">Goodies x Entreprises</div>
+            <div class="hero-block">
+              <strong>Collections colorées</strong>
+              <span>Une vitrine tactile pour votre marque, pensée pour les boutiques, les banques, les hôtels et les événements locaux.</span>
+            </div>
+          </div>
         </div>
       </div>
     </section>
     <section class="section" id="why">
       <div class="section-inner">
         <div class="section-title">Un style qui parle tout de suite</div>
-        <p class="section-copy">C'est la page pour les marques, les banques et les boutiques touristiques qui veulent envoyer un message fort. Goodies 3D, animaux valaisans colores, editions limitees signes Kesk.</p>
+        <p class="section-copy">C'est la page pour les marques, les banques et les boutiques touristiques qui veulent envoyer un message fort. Goodies 3D, animaux valaisans colorés, éditions limitées signées Kesk.</p>
         <div class="grid-3">
-          <div class="card"><span class="badge">100% lokal</span><h3>Fabrique a Saillon</h3><p>Chaque piece est produite dans notre studio valaisan, avec du filament, de la resine et une touche de design a la main.</p></div>
-          <div class="card"><span class="badge">Custom</span><h3>Couleurs et logos</h3><p>Vos goodies peuvent porter vos couleurs, votre signature, ou une edition speciale pour votre campagne.</p></div>
-          <div class="card"><span class="badge">Rapide</span><h3>Devis sous 48h</h3><p>On repond vite, on produit vite, et on livre en Suisse romande sans complication.</p></div>
+          <div class="card"><span class="badge">100% lokal</span><h3>Fabriqué à Saillon</h3><p>Chaque pièce est produite dans notre studio valaisan, avec du filament, de la résine et une touche de design à la main.</p></div>
+          <div class="card"><span class="badge">Custom</span><h3>Couleurs et logos</h3><p>Vos goodies peuvent porter vos couleurs, votre signature, ou une édition spéciale pour votre campagne.</p></div>
+          <div class="card"><span class="badge">Rapide</span><h3>Devis sous 48h</h3><p>On répond vite, on produit vite, et on livre en Suisse romande sans complication.</p></div>
         </div>
       </div>
     </section>
     <section class="section" id="viewer">
       <div class="section-inner">
-        <div class="section-title">Modeles disponibles</div>
-        <p class="section-copy">Selectionnez un animal pour voir le rendu 3D en direct. Les modeles tournent automatiquement, et chaque objet peut etre produit en grand format ou en edition goodies.</p>
+        <div class="section-title">Modèles disponibles</div>
+        <p class="section-copy">Sélectionnez un animal pour voir le rendu 3D en direct. Les modèles tournent automatiquement, et chaque objet peut être produit en grand format ou en édition goodies.</p>
         <div class="preview-panel">
           <div class="viewer-card">
             <div id="viewerContainer">
               <canvas id="viewerCanvas" class="viewer-canvas"></canvas>
               <div class="viewer-overlay"></div>
+              <div class="viewer-fallback" id="viewerFallback">
+                <div class="fallback-shape shape1"></div>
+                <div class="fallback-shape shape2"></div>
+                <div class="fallback-shape shape3"></div>
+                <div class="fallback-note">Preview 3D disponible ici</div>
+              </div>
             </div>
             <div class="viewer-meta" id="modelButtons"></div>
-            <p class="viewer-copy">Le modele charge directement depuis nos archives 3D. Si le chien manque encore, il arrivera bientot comme version bonus.</p>
-            <p class="footnote">Modeles actuels : Vache d'Herens, Bouquetin, Loup, Mouton nez noir. Ajout du chien des reception.</p>
+            <div class="color-swatches" id="colorSwatches"></div>
+            <div class="viewer-status" id="viewerStatus">Chargement du modèle...</div>
+            <p class="viewer-copy">Le modèle charge directement depuis nos archives 3D. Si le chien manque encore, il arrivera bientôt comme version bonus.</p>
+            <p class="footnote">Modèles actuels : Vache d'Hérens, Bouquetin, Loup, Mouton nez noir. Ajout du chien dès réception.</p>
           </div>
           <div>
-            <div class="card"><h3>Vache d'Herens</h3><p>Best-seller corporate pour banques, hotels et boutiques.</p></div>
-            <div class="card" style="margin-top:24px"><h3>Bouquetin</h3><p>Silhouette dynamique et attitude fiere, parfait en cadeaux clients.</p></div>
-            <div class="card" style="margin-top:24px"><h3>Loup</h3><p>Objet joueur et fort, ideal pour communication lifestyle et tourisme.</p></div>
-            <div class="card" style="margin-top:24px"><h3>Mouton nez noir</h3><p>Produit local fort, excellent pour boutiques regionales et editions limitees.</p></div>
+            <div class="card"><h3>Vache d'Hérens</h3><p>Best-seller corporate pour banques, hôtels et boutiques.</p></div>
+            <div class="card" style="margin-top:24px"><h3>Bouquetin</h3><p>Silhouette dynamique et attitude fière, parfait en cadeaux clients.</p></div>
+            <div class="card" style="margin-top:24px"><h3>Loup</h3><p>Objet joueur et fort, idéal pour communication lifestyle et tourisme.</p></div>
+            <div class="card" style="margin-top:24px"><h3>Mouton nez noir</h3><p>Produit local fort, excellent pour boutiques régionales et éditions limitées.</p></div>
           </div>
         </div>
       </div>
     </section>
     <section class="section" id="projets">
       <div class="section-inner">
-        <div class="section-title">Realisations en live</div>
+        <div class="section-title">Réalisations</div>
         <div class="quote-grid">
-          <div class="quote"><h4>Raiffeisen</h4><p>Animaux articules personnalises pour evenement client. Design local, impact visible en vitrine.</p></div>
-          <div class="quote"><h4>Barryland</h4><p>Tirelires St Bernard multicolores pour boutique. Version premium, couleur sur mesure, packaging pret-a-offrir.</p></div>
-          <div class="quote"><h4>Rouvinez</h4><p>Moutons nez noirs en production. Projet 100% regional, sur un theme de terroir leger et engageant.</p></div>
+          <div class="quote"><h4>Raiffeisen</h4><p>Animaux articulés personnalisés pour événement client. Design local, impact visible en vitrine.</p></div>
+          <div class="quote"><h4>Barryland</h4><p>Tirelires St Bernard multicolores pour boutique. Version premium, couleur sur mesure, packaging prêt-à-offrir.</p></div>
+          <div class="quote"><h4>Rouvinez</h4><p>Moutons nez noirs en production. Projet 100% régional, sur un thème de terroir léger et engageant.</p></div>
         </div>
       </div>
     </section>
@@ -165,20 +194,20 @@ a{text-decoration:none;color:inherit}
         <div class="section-title">Tarifs sur volume</div>
         <p class="section-copy">Formules simples, remises volume claires, options de finition sur demande.</p>
         <table class="pricing-table">
-          <thead><tr><th>Quantite</th><th>Prix unitaire</th></tr></thead>
+          <thead><tr><th>Quantité</th><th>Prix unitaire</th></tr></thead>
           <tbody>
-            <tr><td>1-50 pieces</td><td>18 CHF</td></tr>
-            <tr><td>51-200 pieces</td><td>14 CHF</td></tr>
-            <tr><td>201-500 pieces</td><td>11 CHF</td></tr>
-            <tr><td>501+ pieces</td><td>Tarif negocie</td></tr>
+            <tr><td>1-50 pièces</td><td>18 CHF</td></tr>
+            <tr><td>51-200 pièces</td><td>14 CHF</td></tr>
+            <tr><td>201-500 pièces</td><td>11 CHF</td></tr>
+            <tr><td>501+ pièces</td><td>Tarif négocié</td></tr>
           </tbody>
         </table>
       </div>
     </section>
     <section class="section" id="contact">
       <div class="section-inner cta-block">
-        <h2>Pret a lancer votre collection de goodies ?</h2>
-        <p>On prepare un dossier avec votre brief, on vous montre le rendu initial en 48h et on produit les premiers exemplaires sous 2-3 semaines.</p>
+        <h2>Prêt à lancer votre collection de goodies ?</h2>
+        <p>On prépare un dossier avec votre brief, on vous montre le rendu initial en 48h et on produit les premiers exemplaires sous 2-3 semaines.</p>
         <a href="mailto:contact@kesk.ch?subject=Devis%20goodies%20entreprise" class="btn-primary">Envoyer une demande</a>
       </div>
     </section>
@@ -186,18 +215,25 @@ a{text-decoration:none;color:inherit}
   <footer class="footer">Kesk Studio - Saillon, Valais - <a href="https://kesk.ch">kesk.ch</a></footer>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/3MFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/STLLoader.js"></script>
 <script>
+const COLORS = [0x1A1A1A, 0xF0F0F0, 0x7B4A28, 0x1C3F6E]; // noir, blanc, brun, bleu foncé
 const modelList = [
-  {key:'COW', label:'Vache d\'Herens', file:'/models/animals/COW.3mf'},
-  {key:'IBEX', label:'Bouquetin', file:'/models/animals/IBEX.3mf'},
-  {key:'WOLF', label:'Loup', file:'/models/animals/WOLF V3.3mf'},
-  {key:'SHEEP', label:'Mouton nez noir', file:'/models/animals/SHEEP V3.3mf'}
+  { key:'COW',   label:"Vache d'Hérens", file:'models/animals/Vache.stl',    colors: COLORS },
+  { key:'IBEX',  label:'Bouquetin',       file:'models/animals/Chamois.stl',  colors: COLORS },
+  { key:'WOLF',  label:'Loup',            file:'models/animals/Loup.stl',     colors: COLORS },
+  { key:'SHEEP', label:'Mouton nez noir', file:'models/animals/Nez-noir.stl', colors: COLORS },
 ];
-const buttonsEl = document.getElementById('modelButtons');
-let activeModel = null;
-let scene, camera, renderer, loader, modelGroup, clock;
+const assetRoot = window.assetRoot || '';
+let buttonsEl;
+let statusEl;
+let viewerCanvas;
+let viewerFallback;
+let scene, camera, renderer, modelGroup, clock, stlLoader;
+let currentMaterial = null;
+let swatchesEl = null;
 function createButton(name, index){
+  if(!buttonsEl) return null;
   const button = document.createElement('button');
   button.className = 'model-pill' + (index===0 ? ' active' : '');
   button.textContent = name;
@@ -206,33 +242,69 @@ function createButton(name, index){
   return button;
 }
 function initButtons(){
-  modelList.forEach((item, index)=>createButton(item.label, index));
+  if(!buttonsEl){
+    setStatus('Boutons indisponibles.');
+    return;
+  }
+  modelList.forEach((item, index) => createButton(item.label, index));
+}
+function setStatus(message){
+  if(statusEl) statusEl.textContent = message;
 }
 function initScene(){
+  if(typeof THREE === 'undefined'){
+    setStatus('Impossible de charger le rendu 3D. Vérifiez votre connexion ou ouvrez la page via un serveur.');
+    if(viewerCanvas){
+      viewerCanvas.style.background = '#ddd';
+    }
+    if(viewerFallback){
+      viewerFallback.classList.remove('hidden');
+    }
+    return;
+  }
   const canvas = document.getElementById('viewerCanvas');
+  if(viewerFallback){
+    viewerFallback.classList.add('hidden');
+  }
   renderer = new THREE.WebGLRenderer({canvas, alpha:true, antialias:true});
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
-  renderer.setClearColor(0x11070e,0);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.shadowMap.enabled = true;
+  renderer.setClearColor(0x1e1110, 1);
   scene = new THREE.Scene();
-  camera = new THREE.PerspectiveCamera(40, canvas.clientWidth/canvas.clientHeight, 0.1, 200);
-  camera.position.set(0, 0.8, 2.4);
-  const ambient = new THREE.HemisphereLight(0xf7d0dc,0x2c1720,1.2);
+  camera = new THREE.PerspectiveCamera(45, 1, 0.1, 200);
+  camera.position.set(0, 1.4, 3.5);
+  camera.lookAt(0, -0.15, 0);
+  const ambient = new THREE.HemisphereLight(0xf1d3d1, 0x2d1b1a, 0.9);
   scene.add(ambient);
-  const dir = new THREE.DirectionalLight(0xffffff, 0.9);
-  dir.position.set(2,4,3);
-  scene.add(dir);
+  const key = new THREE.DirectionalLight(0xffffff, 1.05);
+  key.position.set(3, 4, 3);
+  key.castShadow = true;
+  scene.add(key);
+  const fill = new THREE.DirectionalLight(0xffd4c4, 0.45);
+  fill.position.set(-2, 1.5, -2);
+  scene.add(fill);
+  const ground = new THREE.Mesh(
+    new THREE.PlaneGeometry(10, 10),
+    new THREE.ShadowMaterial({opacity:0.15})
+  );
+  ground.rotation.x = -Math.PI / 2;
+  ground.position.y = -0.75;
+  ground.receiveShadow = true;
+  scene.add(ground);
   modelGroup = new THREE.Group();
   scene.add(modelGroup);
-  loader = new THREE['3MFLoader']();
   clock = new THREE.Clock();
+  stlLoader = new THREE.STLLoader();
   window.addEventListener('resize', resizeViewer);
   resizeViewer();
   animate();
 }
 function resizeViewer(){
   const canvas = renderer.domElement;
-  const width = canvas.clientWidth;
-  const height = canvas.clientHeight;
+  const bounds = canvas.getBoundingClientRect();
+  const width = Math.max(bounds.width, 360);
+  const height = Math.max(bounds.height, 360);
   renderer.setSize(width, height, false);
   camera.aspect = width / height;
   camera.updateProjectionMatrix();
@@ -240,27 +312,170 @@ function resizeViewer(){
 function clearModel(){
   while(modelGroup.children.length) modelGroup.remove(modelGroup.children[0]);
 }
+function createPrimitive(type, color){
+  const material = new THREE.MeshStandardMaterial({color, roughness:0.48, metalness:0.12});
+  const group = new THREE.Group();
+  const buildLeg = (x, z) => {
+    const leg = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.5, 0.16), material);
+    leg.position.set(x, 0.25, z);
+    leg.castShadow = true;
+    leg.receiveShadow = true;
+    group.add(leg);
+  };
+  if(type === 'cow'){
+    const body = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.6, 0.7), material);
+    body.position.y = 0.45;
+    body.castShadow = true;
+    body.receiveShadow = true;
+    group.add(body);
+    const head = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.32, 0.48), material);
+    head.position.set(0.9, 0.5, 0);
+    head.castShadow = true;
+    head.receiveShadow = true;
+    group.add(head);
+    const horn = new THREE.Mesh(new THREE.ConeGeometry(0.07, 0.28, 8), material);
+    horn.rotation.set(Math.PI / 2, 0, 0);
+    horn.position.set(1.05, 0.68, 0.18);
+    group.add(horn);
+    const horn2 = horn.clone();
+    horn2.position.z = -0.18;
+    group.add(horn2);
+    for(const x of [-0.45, -0.45, 0.45, 0.45]){
+      buildLeg(x, x > 0 ? -0.18 : 0.18);
+    }
+  } else if(type === 'ibex'){
+    const body = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.45, 0.45), material);
+    body.position.y = 0.4;
+    body.castShadow = true;
+    body.receiveShadow = true;
+    group.add(body);
+    const head = new THREE.Mesh(new THREE.ConeGeometry(0.28, 0.55, 10), material);
+    head.rotation.set(0, 0, Math.PI);
+    head.position.set(0.9, 0.55, 0);
+    head.castShadow = true;
+    head.receiveShadow = true;
+    group.add(head);
+    const horn = new THREE.Mesh(new THREE.TorusGeometry(0.22, 0.06, 10, 40, Math.PI), material);
+    horn.rotation.set(Math.PI / 2, 0, Math.PI / 2.2);
+    horn.position.set(0.95, 0.78, 0);
+    group.add(horn);
+    const horn2 = horn.clone();
+    horn2.position.y = 0.78;
+    horn2.rotation.z = -Math.PI / 2.2;
+    group.add(horn2);
+    for(const x of [-0.45, 0.45]){
+      buildLeg(x, -0.16);
+      buildLeg(x, 0.16);
+    }
+  } else if(type === 'wolf'){
+    const body = new THREE.Mesh(new THREE.BoxGeometry(1.05, 0.42, 0.42), material);
+    body.position.y = 0.45;
+    body.castShadow = true;
+    body.receiveShadow = true;
+    group.add(body);
+    const head = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 0.5, 10), material);
+    head.rotation.set(0, 0, Math.PI / 2);
+    head.position.set(0.92, 0.5, 0);
+    head.castShadow = true;
+    head.receiveShadow = true;
+    group.add(head);
+    const tail = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.5, 10), material);
+    tail.rotation.set(0, 0, -Math.PI / 2);
+    tail.position.set(-0.95, 0.55, 0);
+    tail.castShadow = true;
+    tail.receiveShadow = true;
+    group.add(tail);
+    for(const x of [-0.35, 0.35]){
+      buildLeg(x, -0.16);
+      buildLeg(x, 0.16);
+    }
+  } else if(type === 'sheep'){
+    const wool = new THREE.Mesh(new THREE.SphereGeometry(0.55, 18, 18), material);
+    wool.position.y = 0.6;
+    wool.castShadow = true;
+    wool.receiveShadow = true;
+    group.add(wool);
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.2, 12, 12), material);
+    head.position.set(0.65, 0.5, 0);
+    head.castShadow = true;
+    head.receiveShadow = true;
+    group.add(head);
+    for(const x of [-0.35, 0.35]){
+      buildLeg(x, -0.2);
+      buildLeg(x, 0.2);
+    }
+  } else {
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.6, 0.7), material);
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    return mesh;
+  }
+  return group;
+}
+function applyVertexColors(geo, colors) {
+  const pos = geo.attributes.position;
+  const count = pos.count;
+  const colorArr = new Float32Array(count * 3);
+  let minZ = Infinity, maxZ = -Infinity;
+  for (let i = 0; i < count; i++) {
+    const z = pos.getZ(i);
+    if (z < minZ) minZ = z;
+    if (z > maxZ) maxZ = z;
+  }
+  const range = maxZ - minZ || 1;
+  const rgb = colors.map(hex => [
+    ((hex >> 16) & 0xff) / 255,
+    ((hex >> 8)  & 0xff) / 255,
+    ( hex        & 0xff) / 255,
+  ]);
+  for (let i = 0; i < count; i++) {
+    const t = (pos.getZ(i) - minZ) / range; // 0=bas, 1=haut
+    const zone = Math.min(3, Math.floor(t * 4));
+    colorArr[i * 3]     = rgb[zone][0];
+    colorArr[i * 3 + 1] = rgb[zone][1];
+    colorArr[i * 3 + 2] = rgb[zone][2];
+  }
+  geo.setAttribute('color', new THREE.BufferAttribute(colorArr, 3));
+}
 function selectModel(index){
   const buttons = buttonsEl.querySelectorAll('button');
-  buttons.forEach((btn,i)=>btn.classList.toggle('active', i===index));
-  loadModel(modelList[index].file);
+  buttons.forEach((btn,i) => btn.classList.toggle('active', i===index));
+  loadModel(index);
 }
-function loadModel(path){
-  if(!loader) return;
+function loadModel(index){
+  const model = modelList[index];
+  if(!model) return;
+  setStatus('Chargement du modèle 3D...');
   clearModel();
-  loader.load(path, object => {
-    const mesh = object.scene || object;
-    mesh.traverse(node=>{ if(node.isMesh){ node.material.side = THREE.DoubleSide; node.material.flatShading = false; } });
-    const box = new THREE.Box3().setFromObject(mesh);
+  const url = (assetRoot || '') + encodeURI(model.file);
+  stlLoader.load(url, geo => {
+    geo.center();
+    applyVertexColors(geo, model.colors);
+    const box  = new THREE.Box3().setFromBufferAttribute(geo.attributes.position);
     const size = box.getSize(new THREE.Vector3());
-    const center = box.getCenter(new THREE.Vector3());
-    mesh.position.sub(center);
-    const maxSize = Math.max(size.x, size.y, size.z);
-    const scale = 1.2 / maxSize;
+    // size.z = height of animal (Z-up print orientation); scale to 1.2 world units tall
+    const scale = 1.2 / size.z;
+    const mat = new THREE.MeshStandardMaterial({
+      vertexColors: true,
+      roughness: 0.55,
+      metalness: 0.08,
+    });
+    const mesh = new THREE.Mesh(geo, mat);
     mesh.scale.setScalar(scale);
+    mesh.rotation.x = -Math.PI / 2; // Z-up → Y-up
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    // Sit the model on the ground plane (y = -0.75)
+    mesh.position.y = -0.75 + (size.z / 2) * scale;
     modelGroup.add(mesh);
-  }, undefined, error=>{
-    console.warn('3MF load failed', error);
+    setStatus(`${model.label} prêt à l'impression`);
+  }, xhr => {
+    if(xhr.total) setStatus(`Téléchargement ${Math.round(xhr.loaded / xhr.total * 100)}%`);
+  }, err => {
+    console.warn('STL load failed', err);
+    setStatus('Impossible de charger le modèle 3D.');
+    const fallback = createPrimitive('box', 0xd5a6a0);
+    modelGroup.add(fallback);
   });
 }
 function animate(){
@@ -269,9 +484,21 @@ function animate(){
   if(modelGroup) modelGroup.rotation.y += delta * 0.3;
   renderer.render(scene, camera);
 }
-initButtons();
-initScene();
-selectModel(0);
+const startViewer = () => {
+  buttonsEl = document.getElementById('modelButtons');
+  statusEl = document.getElementById('viewerStatus');
+  viewerCanvas = document.getElementById('viewerCanvas');
+  viewerFallback = document.getElementById('viewerFallback');
+  swatchesEl = document.getElementById('colorSwatches');
+  initButtons();
+  initScene();
+  selectModel(0);
+};
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', startViewer);
+} else {
+  startViewer();
+}
 </script>
 </body>
 </html>
