@@ -158,6 +158,15 @@ html,body{min-height:100%;background:var(--bg);color:var(--ink);font-family:'DM 
     <span class="total-val" id="totalVal">55 CHF</span>
   </div>
   <button class="btn-share" onclick="shareConstellation()">↗ Partager ma constellation<span style="font-size:11px;opacity:.6;display:block;margin-top:2px">#MaConstellationKesk</span></button>
+  <button id="mirrorBtn" onclick="startMirrorCapture()"
+  style="padding:.62rem 1rem;border-radius:6px;
+         border:1.5px solid rgba(200,240,96,.3);background:transparent;
+         font-family:'DM Mono',monospace;font-size:.63rem;letter-spacing:.1em;
+         text-transform:uppercase;color:rgba(200,240,96,.7);cursor:pointer;transition:all .2s"
+  onmouseover="this.style.borderColor='rgba(200,240,96,.7)';this.style.color='#c8f060'"
+  onmouseout="this.style.borderColor='rgba(200,240,96,.3)';this.style.color='rgba(200,240,96,.7)'">
+  ✦ Télécharger l'animation
+</button>
   <button class="btn-commande" onclick="openModal()">Commander cette constellation →</button>
 
 <div style="display:none;position:fixed;inset:0;background:rgba(28,25,22,.6);z-index:300;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)" id="shareOverlay" onclick="if(event.target===this)closeShare()">
@@ -708,6 +717,49 @@ async function sendCapsule(){
       if(title && title.parentNode) title.parentNode.insertBefore(wrap, title.nextSibling);
     }).catch(()=>{});
 })();
+
+// ─── EFFET MIROIR (15) ───────────────────────────────────────
+function startMirrorCapture() {
+  const btn = document.getElementById('mirrorBtn');
+  const canvas = document.getElementById('skyCanvas');
+
+  if (!canvas || typeof canvas.captureStream !== 'function') {
+    alert('Votre navigateur ne supporte pas la capture vidéo. Essayez Chrome ou Firefox.');
+    return;
+  }
+
+  const mimeType = ['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm','video/mp4']
+    .find(t => MediaRecorder.isTypeSupported(t)) || 'video/webm';
+  const ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
+
+  btn.textContent = '⏺ Enregistrement…'; btn.disabled = true;
+
+  const stream = canvas.captureStream(30);
+  const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 4000000 });
+  const chunks = [];
+
+  recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+  recorder.onstop = () => {
+    const blob = new Blob(chunks, { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'kesk-constellation.' + ext;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 100);
+    btn.textContent = '✦ Télécharger l\'animation'; btn.disabled = false;
+  };
+
+  recorder.start();
+  let remaining = 5;
+  const tick = setInterval(() => {
+    remaining--;
+    btn.textContent = `⏺ ${remaining}s…`;
+    if (remaining <= 0) { clearInterval(tick); recorder.stop(); }
+  }, 1000);
+}
 
 </script>
 
