@@ -843,16 +843,15 @@ function isMobile(){return window.innerWidth < 600}
 
 function getPetalPositions(n, mobile){
   if(mobile){
-    const d = Math.min(155, window.innerWidth * 0.36);
-    const angles5 = [-72,-144,144,72,0];
-    const angles6 = [-60,-120,180,120,60,0];
-    const angles7 = [0,51,103,154,-154,-103,-51];
-    const angles = n<=5 ? angles5 : n<=6 ? angles6 : angles7;
-    return angles.slice(0,n).map(a=>({angle:a, dist:d}));
+    // d garanti : le bord de la carte (d + cardHalf=54px) reste dans l'écran
+    const d = Math.min(window.innerWidth / 2 - 58, 132);
+    // Angles partant du haut (-90°) pour éviter les extrêmes horizontaux
+    // qui clipperaient sur iPhone étroit
+    const step = 360 / n;
+    return Array.from({length:n},(_,i)=>({angle:-90+step*i, dist:d}));
   }
   const d = 200;
-  const offset = -90;
-  return Array.from({length:n},(_,i)=>({angle:offset+(360/n)*i, dist:d}));
+  return Array.from({length:n},(_,i)=>({angle:-90+(360/n)*i, dist:d}));
 }
 
 let menuOpen=false, currentModal=null, model3dUrl=null;

@@ -13,14 +13,14 @@ body{font-family:var(--sans);color:var(--ink);font-weight:300}
 .app{display:grid;grid-template-columns:320px 1fr;height:100vh;overflow:hidden}
 .panel{background:var(--surf);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;height:100vh}
 .ph{padding:.85rem 1.3rem .65rem;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;gap:10px}
-.pb{flex:1;overflow-y:auto}
+.pb{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y}
 .pb::-webkit-scrollbar{width:3px}
 .pb::-webkit-scrollbar-thumb{background:var(--border)}
 .sec{padding:.8rem 1.3rem;border-bottom:1px solid var(--border)}
 .sl{font-family:var(--mono);font-size:.53rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:.65rem;display:flex;align-items:center;gap:.5rem}
 .sl::after{content:'';flex:1;height:1px;background:var(--border)}
 .vp{position:relative;background:#ddd8d0;overflow:hidden;height:100vh}
-#c3{position:absolute;top:0;left:0;width:100%;height:100%;display:block}
+#c3{position:absolute;top:0;left:0;width:100%;height:100%;display:block;touch-action:none}
 .hud{position:absolute;top:.8rem;left:.8rem;display:flex;flex-direction:column;gap:.2rem;pointer-events:none}
 .ht{background:rgba(255,255,255,.88);backdrop-filter:blur(8px);border:1px solid rgba(0,0,0,.07);padding:.13rem .4rem;border-radius:3px;font-family:var(--mono);font-size:.55rem;color:var(--muted)}
 .ht.a{border-color:rgba(184,92,56,.3);color:var(--accent)}
@@ -82,9 +82,16 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:11px;heigh
 .mc{display:block;text-align:center;margin-top:6px;font-size:.67rem;color:var(--muted);cursor:pointer;background:none;border:none;font-family:var(--sans)}
 .er{font-size:.67rem;color:var(--accent);margin-top:4px;display:none}
 @media(max-width:700px){
-  .app{grid-template-columns:1fr;grid-template-rows:40vh 1fr}
-  .vp{order:-1;height:40vh}
-  .panel{height:60vh;border-right:none;border-top:1px solid var(--border)}
+  .app{grid-template-columns:1fr;grid-template-rows:45vh 1fr}
+  .vp{order:-1;height:45vh}
+  .panel{height:55vh;border-right:none;border-top:1px solid var(--border)}
+  /* Footer compact : boutons côte à côte */
+  .pf{padding:.45rem .9rem;flex-direction:row;flex-wrap:wrap;gap:.28rem;align-items:center}
+  .pf>.bx,.pf>.bg{flex:1;min-width:0;padding:.44rem .3rem;font-size:.62rem}
+  #mirrorColorRow{flex-basis:100%;order:-2;padding:0}
+  #mirrorBtn{flex-basis:100%;order:-1;margin-top:0;padding:.44rem}
+  /* Hint tactile */
+  .hint{font-size:.5rem}
 }
 </style>
 </head>
@@ -197,7 +204,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:11px;heigh
     <div class="ht a" id="hTx">Tapez votre texte →</div>
     <div class="ht" id="hDim"></div>
   </div>
-  <div class="hint">Glisser · Molette zoom</div>
+  <div class="hint" id="ctrlHint">Glisser · Molette zoom</div>
   <div class="spinner-ov" id="spinOv">
     <div class="spin"></div>
     <div class="sptxt" id="spinTx">Génération…</div>
@@ -318,10 +325,30 @@ function initThree(){
   canvas.addEventListener('mousedown',e=>{isDrag=true;mpx=e.clientX;mpy=e.clientY});
   window.addEventListener('mousemove',e=>{if(!isDrag)return;sph.theta-=(e.clientX-mpx)*.007;sph.phi=Math.max(.2,Math.min(1.5,sph.phi+(e.clientY-mpy)*.007));mpx=e.clientX;mpy=e.clientY;camUp()});
   window.addEventListener('mouseup',()=>isDrag=false);
-  canvas.addEventListener('touchstart',e=>{isDrag=true;mpx=e.touches[0].clientX;mpy=e.touches[0].clientY},{passive:true});
-  canvas.addEventListener('touchmove',e=>{if(!isDrag)return;sph.theta-=(e.touches[0].clientX-mpx)*.009;sph.phi=Math.max(.2,Math.min(1.5,sph.phi+(e.touches[0].clientY-mpy)*.009));mpx=e.touches[0].clientX;mpy=e.touches[0].clientY;camUp()},{passive:true});
-  canvas.addEventListener('touchend',()=>isDrag=false);
+  let pinchDist0=0;
+  canvas.addEventListener('touchstart',e=>{
+    if(e.touches.length===2){
+      pinchDist0=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+    } else {
+      isDrag=true;mpx=e.touches[0].clientX;mpy=e.touches[0].clientY;
+    }
+  },{passive:true});
+  canvas.addEventListener('touchmove',e=>{
+    if(e.touches.length===2){
+      const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+      sph.r=Math.max(80,Math.min(700,sph.r-(d-pinchDist0)*1.2));
+      pinchDist0=d;camUp();
+    } else if(isDrag){
+      sph.theta-=(e.touches[0].clientX-mpx)*.009;
+      sph.phi=Math.max(.2,Math.min(1.5,sph.phi+(e.touches[0].clientY-mpy)*.009));
+      mpx=e.touches[0].clientX;mpy=e.touches[0].clientY;camUp();
+    }
+  },{passive:true});
+  canvas.addEventListener('touchend',e=>{if(e.touches.length<2)isDrag=false});
   canvas.addEventListener('wheel',e=>{sph.r=Math.max(80,Math.min(700,sph.r+e.deltaY*.5));camUp();e.preventDefault()},{passive:false});
+  // Hint tactile dynamique
+  const _hint=document.getElementById('ctrlHint');
+  if(_hint&&('ontouchstart' in window||navigator.maxTouchPoints>0))_hint.textContent='Glisser · Pincer zoom';
   
   new ResizeObserver(()=>{
     const rw=vp.offsetWidth,rh=vp.offsetHeight;
