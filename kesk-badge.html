@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kesk · Mon Badge Valais</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0d0d0d;--surface:#161616;--border:#2a2a2a;--accent:#c8f060;--text:#e8e8e0;--muted:#666}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;gap:32px}
+h1{font-size:22px;font-weight:700;letter-spacing:-.3px}
+h1 span{color:var(--accent)}
+.subtitle{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+.badge-wrap{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;display:flex;flex-direction:column;align-items:center;gap:24px;max-width:560px;width:100%}
+.badge-preview{width:100%;max-width:480px}
+.badge-preview svg{width:100%;height:auto;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,.5)}
+.btn-row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.btn{padding:10px 24px;border-radius:8px;border:none;font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.btn-svg{background:var(--accent);color:#000;font-weight:700}
+.btn-svg:hover{background:#d4f570}
+.btn-png{background:transparent;border:1px solid var(--border);color:var(--muted)}
+.btn-png:hover{border-color:var(--accent);color:var(--accent)}
+.back{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);text-decoration:none;letter-spacing:.1em;opacity:.6;transition:opacity .2s}
+.back:hover{opacity:1}
+.canton-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.canton-btn{padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;transition:all .2s}
+.canton-btn.active,.canton-btn:hover{border-color:var(--accent);color:var(--accent)}
+</style>
+</head>
+<body>
+<div>
+  <h1>Mon Badge <span>Valais</span></h1>
+  <p class="subtitle">Créé à Saillon · Imprimé localement</p>
+</div>
+
+<div class="badge-wrap">
+  <div class="badge-preview" id="badgePreview"></div>
+  <div class="canton-row" id="cantonRow"></div>
+  <div class="btn-row">
+    <button class="btn btn-svg" onclick="downloadSVG()">Télécharger SVG</button>
+    <button class="btn btn-png" onclick="downloadPNG()">Télécharger PNG</button>
+  </div>
+</div>
+
+<a class="back" href="/">← Retour au hub</a>
+
+<script>
+const CANTONS = ['VS','VD','GE','BE','ZH','FR','NE','JU','GR','TI'];
+const params = new URLSearchParams(location.search);
+const configCode = params.get('config') || '';
+let selectedCanton = params.get('canton') || 'VS';
+
+const now = new Date();
+const dateStr = now.toLocaleDateString('fr-CH',{day:'numeric',month:'long',year:'numeric'});
+
+function buildSVG(code, canton) {
+  const codeText = code ? code.toUpperCase() : 'KESK · CH';
+  return `<svg id="badge-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 240" width="480" height="240">
+  <defs>
+    <linearGradient id="bg-grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#161616"/>
+      <stop offset="1" stop-color="#0d0d0d"/>
+    </linearGradient>
+  </defs>
+  <rect width="480" height="240" rx="16" fill="url(#bg-grad)"/>
+  <rect x="1.5" y="1.5" width="477" height="237" rx="15" fill="none" stroke="#c8f060" stroke-width="1.5"/>
+  <!-- K logo -->
+  <rect x="28" y="28" width="60" height="60" rx="10" fill="#c8f060"/>
+  <text x="58" y="69" font-family="Arial Black,Arial,sans-serif" font-size="38" fill="#000" text-anchor="middle" font-weight="900">K</text>
+  <!-- Texts -->
+  <text x="106" y="56" font-family="Arial,Helvetica,sans-serif" font-size="21" fill="#e8e8e0" font-weight="700">Conçu par moi</text>
+  <text x="106" y="78" font-family="Courier New,Courier,monospace" font-size="11" fill="#666666" letter-spacing="1.5">IMPRIMÉ À SAILLON · ${canton}</text>
+  <!-- Divider -->
+  <line x1="28" y1="108" x2="452" y2="108" stroke="#2a2a2a" stroke-width="1"/>
+  <!-- Config code -->
+  <text x="28" y="142" font-family="Courier New,Courier,monospace" font-size="22" fill="#c8f060" letter-spacing="3" font-weight="700">${codeText}</text>
+  <!-- Date -->
+  <text x="28" y="172" font-family="Courier New,Courier,monospace" font-size="11" fill="#555555" letter-spacing="1">${dateStr.toUpperCase()}</text>
+  <!-- Swiss cross -->
+  <rect x="430" y="22" width="18" height="6" rx="1" fill="#ff0000"/>
+  <rect x="436" y="16" width="6" height="18" rx="1" fill="#ff0000"/>
+  <!-- kesk.ch -->
+  <text x="452" y="220" font-family="Courier New,Courier,monospace" font-size="11" fill="#333333" text-anchor="end">kesk.ch</text>
+</svg>`;
+}
+
+function renderBadge() {
+  document.getElementById('badgePreview').innerHTML = buildSVG(configCode, selectedCanton);
+}
+
+function buildCantonButtons() {
+  const row = document.getElementById('cantonRow');
+  CANTONS.forEach(c => {
+    const btn = document.createElement('button');
+    btn.className = 'canton-btn' + (c === selectedCanton ? ' active' : '');
+    btn.textContent = c;
+    btn.onclick = () => {
+      selectedCanton = c;
+      document.querySelectorAll('.canton-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderBadge();
+    };
+    row.appendChild(btn);
+  });
+}
+
+function downloadSVG() {
+  const svg = document.getElementById('badge-svg');
+  const data = new XMLSerializer().serializeToString(svg);
+  const blob = new Blob([data], {type:'image/svg+xml'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'kesk-badge.svg'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function downloadPNG() {
+  const svg = document.getElementById('badge-svg');
+  const data = new XMLSerializer().serializeToString(svg);
+  const img = new Image();
+  img.onload = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 960; canvas.height = 480;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#0d0d0d';
+    ctx.fillRect(0,0,960,480);
+    ctx.drawImage(img,0,0,960,480);
+    const a = document.createElement('a');
+    a.download = 'kesk-badge.png';
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+  };
+  img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(data);
+}
+
+buildCantonButtons();
+renderBadge();
+</script>
+</body>
+</html>
