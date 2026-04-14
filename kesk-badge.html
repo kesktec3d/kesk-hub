@@ -49,13 +49,18 @@ h1 span{color:var(--accent)}
 const CANTONS = ['VS','VD','GE','BE','ZH','FR','NE','JU','GR','TI'];
 const params = new URLSearchParams(location.search);
 const configCode = params.get('config') || '';
-let selectedCanton = params.get('canton') || 'VS';
+const rawCanton = params.get('canton') || 'VS';
+let selectedCanton = CANTONS.includes(rawCanton) ? rawCanton : 'VS';
 
 const now = new Date();
 const dateStr = now.toLocaleDateString('fr-CH',{day:'numeric',month:'long',year:'numeric'});
 
+function sanitizeForSVG(str) {
+  return str.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
 function buildSVG(code, canton) {
-  const codeText = code ? code.toUpperCase() : 'KESK · CH';
+  const codeText = code ? sanitizeForSVG(code.toUpperCase()) : 'KESK · CH';
   return `<svg id="badge-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 240" width="480" height="240">
   <defs>
     <linearGradient id="bg-grad" x1="0" y1="0" x2="1" y2="1">
@@ -108,11 +113,15 @@ function buildCantonButtons() {
 function downloadSVG() {
   const svg = document.getElementById('badge-svg');
   const data = new XMLSerializer().serializeToString(svg);
-  const blob = new Blob([data], {type:'image/svg+xml'});
+  const blob = new Blob([data], { type: 'image/svg+xml' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url; a.download = 'kesk-badge.svg'; a.click();
-  URL.revokeObjectURL(url);
+  a.href = url;
+  a.download = 'kesk-badge.svg';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 100);
 }
 
 function downloadPNG() {
