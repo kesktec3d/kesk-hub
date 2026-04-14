@@ -2,7 +2,7 @@
 // Démarre à 200 kg le 2024-03-01, ajoute 200g–1.2kg toutes les 2–3 jours
 // La valeur est la même pour tous les utilisateurs à un instant donné (pas de DB)
 
-const START_DATE = new Date('2024-03-01T00:00:00Z');
+const START_DATE = new Date('2025-07-01T00:00:00Z');
 const START_KG   = 200;
 
 // LCG seeded PRNG — reproductible pour un index donné

@@ -400,7 +400,6 @@ iframe{flex:1;border:none;width:100%;background:var(--bg)}
   text-transform:uppercase;color:rgba(26,22,20,.55);z-index:10;pointer-events:none;
   animation:fade-up .5s ease .9s both;white-space:nowrap;
 }
-.footer-kg span{color:var(--terracotta);font-size:13px;font-weight:700;font-family:'Bebas Neue',sans-serif;letter-spacing:.06em}
 .footer-ent{
   position:fixed;bottom:14px;right:18px;
   font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.14em;
@@ -518,7 +517,7 @@ iframe{flex:1;border:none;width:100%;background:var(--bg)}
     <span id="lunarLabel">Édition Lunaire</span>
     <span id="lunarCountdown" style="opacity:.5;margin-left:4px"></span>
   </div>
-  <div class="footer-kg"><span id="impactNum">—</span> kg recyclés</div>
+  <div class="footer-kg" id="impactBadge">— kg de matière recyclée</div>
   <a href="/entreprises" class="footer-ent">Entreprises →</a>
 </div>
 
@@ -1429,22 +1428,20 @@ async function loadImpact(){
   try{
     const r=await fetch('/api/impact');
     const d=await r.json();
-    if(d.kg_total){
-      const el=document.getElementById('impactNum');
-      if(!el)return;
-      // Count-up animation
-      const target=d.kg_total;
-      const duration=1800;
-      const start=performance.now();
-      function tick(now){
-        const t=Math.min((now-start)/duration,1);
-        const ease=1-Math.pow(1-t,3);
-        const val=ease*target;
-        el.textContent=t<1?Math.round(val):target.toFixed(1);
-        if(t<1)requestAnimationFrame(tick);
-      }
-      requestAnimationFrame(tick);
+    const el=document.getElementById('impactBadge');
+    if(!el||!d.kg_total)return;
+    const target=d.kg_total;
+    const duration=1800;
+    const start=performance.now();
+    function tick(now){
+      const t=Math.min((now-start)/duration,1);
+      const ease=1-Math.pow(1-t,3);
+      const val=ease*target;
+      const display=t<1?Math.round(val)+'':target.toFixed(1);
+      el.textContent=display+' kg de matière recyclée · Projets clients';
+      if(t<1)requestAnimationFrame(tick);
     }
+    requestAnimationFrame(tick);
   }catch(e){}
 }
 
