@@ -748,7 +748,7 @@ function startMirrorCapture() {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    setTimeout(() => URL.revokeObjectURL(url), 100);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
     btn.textContent = '✦ Télécharger l\'animation'; btn.disabled = false;
   };
 
