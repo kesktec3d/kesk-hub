@@ -4,47 +4,119 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kesk · Galerie des Créations</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet"/>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#0d0d0d;--surface:#161616;--card:#1c1c1c;--border:#2a2a2a;--accent:#c8f060;--text:#e8e8e0;--muted:#666;--terracotta:#B85C38}
-body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh}
-header{padding:40px 32px 28px;border-bottom:1px solid var(--border);display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px}
-.brand{display:flex;align-items:center;gap:14px}
-.logo{width:36px;height:36px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;color:#000;flex-shrink:0}
-h1{font-size:22px;font-weight:700;letter-spacing:-.3px}
-h1 em{color:var(--accent);font-style:normal}
-.subtitle{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:4px}
-.filters{display:flex;gap:8px;flex-wrap:wrap}
-.f-btn{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;transition:all .2s}
-.f-btn.active,.f-btn:hover{border-color:var(--accent);color:var(--accent)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1px;background:var(--border);padding:0}
-.card{background:var(--card);padding:22px;display:flex;flex-direction:column;gap:12px;transition:background .15s;cursor:pointer}
-.card:hover{background:#212121}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0e0d0c;
+  --bg2:#161412;
+  --cream:#F7F3EE;
+  --cream2:#ede8e1;
+  --terracotta:#B85C38;
+  --muted:#5a5550;
+  --border:#2a2520;
+}
+html,body{background:var(--bg);color:var(--cream);font-family:'DM Sans',sans-serif;min-height:100vh}
+
+/* grain */
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:100;opacity:.5}
+
+header{
+  padding:36px 40px 28px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:flex-end;justify-content:space-between;
+  flex-wrap:wrap;gap:20px;
+  position:relative;z-index:1;
+}
+.brand{display:flex;flex-direction:column;gap:10px}
+.logo-link{display:flex;align-items:center;text-decoration:none;opacity:.9;transition:opacity .2s}
+.logo-link:hover{opacity:1}
+.page-title{font-family:'Playfair Display',serif;font-size:26px;font-weight:400;letter-spacing:-.3px;color:var(--cream);line-height:1.1}
+.page-title em{color:var(--terracotta);font-style:italic}
+.subtitle{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-top:2px}
+
+.filters{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.f-btn{
+  padding:5px 13px;border-radius:99px;
+  border:1px solid var(--border);background:transparent;
+  color:var(--muted);font-family:'DM Mono',monospace;font-size:10px;
+  letter-spacing:.08em;cursor:pointer;transition:all .2s
+}
+.f-btn.active{border-color:rgba(184,92,56,.5);color:var(--terracotta)}
+.f-btn:hover{border-color:rgba(184,92,56,.3);color:rgba(184,92,56,.7)}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+  gap:1px;background:var(--border);
+  position:relative;z-index:1;
+}
+.card{
+  background:var(--bg2);padding:24px 22px;
+  display:flex;flex-direction:column;gap:10px;
+  cursor:pointer;transition:background .18s;
+  text-decoration:none;color:inherit;
+}
+.card:hover{background:#1e1b19}
 .card-top{display:flex;align-items:center;justify-content:space-between}
-.card-type{font-size:20px;line-height:1}
+.card-type{font-size:22px;line-height:1}
 .card-date{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.08em}
-.card-code{font-family:'DM Mono',monospace;font-size:13px;font-weight:700;color:var(--accent);letter-spacing:.08em}
-.card-label{font-size:12px;color:rgba(232,232,224,.6);line-height:1.4}
-.card-cta{margin-top:auto;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--terracotta)}
-.empty{padding:80px 32px;text-align:center;color:var(--muted);font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase}
-.back{display:inline-flex;align-items:center;gap:6px;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);text-decoration:none;letter-spacing:.1em;padding:32px 32px 0;opacity:.6;transition:opacity .2s}
-.back:hover{opacity:1}
-footer{padding:28px 32px;border-top:1px solid var(--border);color:var(--muted);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.08em;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
-@media(max-width:600px){header{padding:28px 20px 20px}.filters{display:none}.grid{grid-template-columns:1fr 1fr}footer{padding:20px}}
+.card-code{font-family:'DM Mono',monospace;font-size:14px;font-weight:700;color:var(--terracotta);letter-spacing:.1em}
+.card-label{font-family:'DM Sans',sans-serif;font-size:12px;color:rgba(247,243,238,.45);line-height:1.4;font-weight:300}
+.card-cta{
+  margin-top:auto;
+  font-family:'DM Mono',monospace;font-size:9px;
+  letter-spacing:.14em;text-transform:uppercase;
+  color:rgba(247,243,238,.2);transition:color .2s;
+}
+.card:hover .card-cta{color:rgba(184,92,56,.7)}
+
+.empty{
+  padding:100px 40px;text-align:center;
+  color:var(--muted);font-family:'DM Mono',monospace;
+  font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+  position:relative;z-index:1;
+}
+
+footer{
+  padding:28px 40px;border-top:1px solid var(--border);
+  color:var(--muted);font-family:'DM Mono',monospace;
+  font-size:10px;letter-spacing:.08em;
+  display:flex;justify-content:space-between;align-items:center;
+  flex-wrap:wrap;gap:8px;
+  position:relative;z-index:1;
+}
+footer a{color:var(--muted);text-decoration:none;transition:color .2s}
+footer a:hover{color:rgba(247,243,238,.6)}
+
+@media(max-width:640px){
+  header{padding:24px 20px 20px}
+  .filters{display:none}
+  .grid{grid-template-columns:1fr 1fr}
+  footer{padding:20px}
+}
 </style>
 </head>
 <body>
+
 <header>
-  <div>
-    <div class="brand">
-      <div class="logo">K</div>
-      <div>
-        <h1>Galerie des <em>Créations</em></h1>
-        <p class="subtitle">Configurations partagées · Anonymes · Cliquables</p>
-      </div>
+  <div class="brand">
+    <a class="logo-link" href="/" title="Retour au hub">
+      <svg viewBox="0 0 595.28 287.23" style="height:22px;width:auto" xmlns="http://www.w3.org/2000/svg">
+        <path fill="#F7F3EE" d="M209.66,181.94l-17.63-36.98c-.09-.19-.17-.38-.25-.57-28.81.04-59.17.08-90.81.13v42.57c0,6.61,5.36,11.97,11.97,11.97h21.7c6.61,0,11.97-5.36,11.97-11.97v-40.1l.31-.16,16.69,44.46c1.75,4.67,6.21,7.77,11.2,7.77h24.05c8.8,0,14.59-9.18,10.8-17.12ZM192.17,134.38l14.65-28.8c4.06-7.97-1.73-17.4-10.66-17.4h-22.35c-4.87,0-9.25,2.95-11.09,7.47l-15.8,38.93-.31-.15v-34.28c0-6.61-5.36-11.97-11.97-11.97h-21.7c-6.61,0-11.97,5.36-11.97,11.97v43.15c30.14-.15,60.2-.4,90.22-.77-.65-2.72-.32-5.61.98-8.15Z"/>
+        <path fill="#F7F3EE" d="M510.28,88.18h-22.35c-4.87,0-9.25,2.95-11.09,7.47l-15.8,38.93-.31-.15v-34.28c0-6.61-5.36-11.97-11.97-11.97h-21.7c-6.61,0-11.96,5.36-11.96,11.97v37.72c28.14-.84,56.27-1.76,84.4-2.78.82-.03,4.56.41,7.07-1.88.27-.25.5-.51.71-.77l1.25-2.46,12.42-24.4c4.05-7.97-1.74-17.4-10.67-17.4ZM523.78,181.94l-12.47-26.15h0c-1.91-2.82-4.95-6.41-9.6-8.95-6.63-3.62-13.19-3.28-15.02-3.22-4.53.15-29.93.27-71.59.38v43.09c0,6.61,5.35,11.97,11.96,11.97h21.7c6.61,0,11.97-5.36,11.97-11.97v-40.1l.31-.16,16.69,44.46c1.75,4.67,6.21,7.77,11.2,7.77h24.05c8.8,0,14.59-9.18,10.8-17.12Z"/>
+        <path fill="#F7F3EE" d="M299.14,163.83h-24.42c-1.65,0-2.99-1.33-2.99-2.98v-.31c0-1.65,1.34-2.99,2.99-2.99h15.69c4.91,0,8.89-3.98,8.89-8.89v-4.43c-22.79.03-47.27.07-73.21.11v45.82c0,4.92,3.99,8.9,8.9,8.9h64.15c4.91,0,8.89-3.98,8.89-8.9v-17.44c0-4.91-3.98-8.89-8.89-8.89ZM296.99,88.18h-62c-4.91,0-8.9,3.98-8.9,8.89v45c24.4-.37,48.79-.8,73.21-1.3v-.66c0-4.92-3.98-8.9-8.89-8.9h-15.69c-.82,0-1.57-.33-2.11-.87-.55-.54-.88-1.28-.88-2.11,0-1.65,1.34-2.99,2.99-2.99h22.27c4.91,0,8.89-3.98,8.89-8.89v-19.28c0-4.91-3.98-8.89-8.89-8.89Z"/>
+        <path fill="#F7F3EE" d="M399.79,144.04c-21.94.05-47.54.1-76.29.15.86,1,1.78,1.93,2.76,2.8,11.33,9.95,26.79,11.64,32.16,13.01,1.98.46,3.36,1.38,3.36,3.53,0,1.83-1.07,3.67-5.66,3.67-3.71,0-10.08-1.11-17.58-3.8-9.21-3.3-18.87,3.71-18.87,13.49v5.32c0,6.11,3.87,11.58,9.68,13.48,9.82,3.23,21.57,5.05,31.82,5.05,29.1,0,46.25-14.85,46.25-36.14,0-8.24-2.51-15-7.63-20.56ZM391.51,91.3c-9.17-2.97-20.16-4.81-29.88-4.81-28.02,0-45.18,15.16-45.18,37.37,0,6.75,1.58,12.11,4.2,16.45l72.47-1.82c-10.49-6.7-23.49-8.33-27.66-9.58-1.84-.61-3.52-1.53-3.52-3.82,0-1.69,1.22-3.37,5.66-3.37,3.16,0,8.74.81,15.56,2.77,9.01,2.59,17.98-4.26,17.98-13.64v-6.09c0-6.08-3.84-11.58-9.63-13.46Z"/>
+        <path fill="#F7F3EE" d="M100.97,143.3v1.22c-11.39.02-19.73.26-21.52.41-.74.06-1.33.09-2.11.32-.8.23-1.13.47-2.05.69-.31.07-.94.22-1.51.21-1.48-.02-3.46-1.08-3.47-2.31,0-1.23,1.98-2.28,3.47-2.31.67-.02,1.28.16,1.5.23,1.01.31,1.31.75,2.22,1.12.73.31,1.33.35,2.06.41,1.72.13,10.05.12,21.41.01Z"/>
+      </svg>
+    </a>
+    <div>
+      <h1 class="page-title">Galerie des <em>Créations</em></h1>
+      <p class="subtitle">Configurations partagées · Anonymes · Saillon, Valais</p>
     </div>
   </div>
+
   <div class="filters" id="filters">
     <button class="f-btn active" data-filter="all">Toutes</button>
     <button class="f-btn" data-filter="vase">Vase</button>
@@ -58,20 +130,19 @@ footer{padding:28px 32px;border-top:1px solid var(--border);color:var(--muted);f
 <div id="grid" class="grid"></div>
 <div id="empty" class="empty" style="display:none">Aucune création encore · Soyez le premier ✦</div>
 
-<a class="back" href="/">← Retour au hub</a>
-
 <footer>
-  <span>Kesk Studio · kesk.ch · Saillon, Valais</span>
-  <span id="count" style="opacity:.4"></span>
+  <a href="/">← Retour au hub</a>
+  <span>kesk.ch · Saillon, Valais</span>
+  <span id="count" style="opacity:.35"></span>
 </footer>
 
 <script>
 const TYPE_META = {
-  vase:          { emoji:'🌿', label:'Vase personnalisé',      base:'https://kesk-hub.vercel.app/vase' },
-  uv:            { emoji:'🖼',  label:'Tableau UV',             base:'https://kesk-hub.vercel.app/uv' },
-  texte:         { emoji:'✍',  label:'Texte 3D',               base:'https://kesk-hub.vercel.app/texte' },
-  constellation: { emoji:'🌌', label:'Constellation & Date',   base:'https://kesk-hub.vercel.app/constellation' },
-  onde:          { emoji:'🎵', label:'Son & Onde',             base:'https://kesk-hub.vercel.app/onde' },
+  vase:          { emoji:'🌿', label:'Vase personnalisé' },
+  uv:            { emoji:'🖼',  label:'Tableau UV' },
+  texte:         { emoji:'✍',  label:'Texte 3D' },
+  constellation: { emoji:'🌌', label:'Constellation & Date' },
+  onde:          { emoji:'🎵', label:'Son & Onde' },
 };
 
 let allItems = [];
@@ -83,7 +154,8 @@ async function load() {
     const d = await r.json();
     allItems = d.items || [];
     render();
-    document.getElementById('count').textContent = allItems.length + ' créations';
+    const n = allItems.length;
+    document.getElementById('count').textContent = n ? n + ' création' + (n > 1 ? 's' : '') : '';
   } catch(e) {
     document.getElementById('empty').style.display = 'block';
   }
@@ -105,9 +177,9 @@ function render() {
   grid.innerHTML = filtered.map(item => {
     const type = item.config?.type || 'vase';
     const meta = TYPE_META[type] || TYPE_META.vase;
-    const date = new Date(item.created_at).toLocaleDateString('fr-CH', {day:'numeric',month:'short'});
-    const href = `/?config=${item.code}`;
-    return `<div class="card" onclick="location.href='${href}'">
+    const date = new Date(item.created_at).toLocaleDateString('fr-CH', {day:'numeric', month:'short'});
+    const href = '/?config=' + item.code;
+    return `<a class="card" href="${href}">
       <div class="card-top">
         <span class="card-type">${meta.emoji}</span>
         <span class="card-date">${date}</span>
@@ -115,7 +187,7 @@ function render() {
       <div class="card-code">${item.code}</div>
       <div class="card-label">${meta.label}</div>
       <div class="card-cta">Recréer →</div>
-    </div>`;
+    </a>`;
   }).join('');
 }
 
