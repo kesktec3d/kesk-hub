@@ -24,7 +24,9 @@ export default async function handler(req, res) {
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify([
         ['SET', key, value],
-        ['EXPIRE', key, 63072000]
+        ['EXPIRE', key, 63072000],
+        ['ZADD', 'gallery:codes', Date.now(), code],
+        ['ZREMRANGEBYRANK', 'gallery:codes', 0, -201]
       ])
     });
     const data = await r.json();
