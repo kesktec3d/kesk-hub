@@ -268,6 +268,15 @@ if(window.self!==window.top){
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5,3 19,12 5,21"/></svg>
       Générer le modèle 3D
     </button>
+    <button id="mirrorBtn" onclick="startMirrorCapture()"
+  style="display:none;margin-top:8px;width:100%;padding:.62rem;border-radius:6px;
+         border:1.5px solid rgba(200,240,96,.3);background:transparent;
+         font-family:'DM Mono',monospace;font-size:.63rem;letter-spacing:.1em;
+         text-transform:uppercase;color:rgba(200,240,96,.7);cursor:pointer;transition:all .2s"
+  onmouseover="this.style.borderColor='rgba(200,240,96,.7)';this.style.color='#c8f060'"
+  onmouseout="this.style.borderColor='rgba(200,240,96,.3)';this.style.color='rgba(200,240,96,.7)'">
+  ✦ Télécharger l'animation
+</button>
     <button class="bx" id="bx" onclick="doExport()" disabled>
       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       Export STL · mm
@@ -405,7 +414,7 @@ function initThree(){
   const vp=document.getElementById('vp');
   const c=document.getElementById('c3');
   c.width=vp.clientWidth;c.height=vp.clientHeight;
-  ren=new THREE.WebGLRenderer({canvas:c,antialias:true});
+  ren=new THREE.WebGLRenderer({canvas:c,antialias:true,preserveDrawingBuffer:true});
   ren.setPixelRatio(Math.min(devicePixelRatio,2));
   ren.setSize(vp.clientWidth,vp.clientHeight,false);
   ren.shadowMap.enabled=true;ren.shadowMap.type=THREE.PCFSoftShadowMap;
@@ -1016,6 +1025,7 @@ function generate(){
       setProg(100);setTimeout(()=>setProg(0),400);
       setS('ok',`Paroi ${WALL}mm · ${Math.ceil(P.height/P.lh)} couches`);
       document.getElementById('bx').disabled=false;
+      document.getElementById('mirrorBtn').style.display='block';
     }catch(e){setS('err','Erreur: '+e.message);console.error(e)}
     document.getElementById('bg').disabled=false;
   },30);
@@ -1445,6 +1455,49 @@ async function sendCapsule(){
       if(title && title.parentNode) title.parentNode.insertBefore(wrap, title.nextSibling);
     }).catch(()=>{});
 })();
+
+// ─── EFFET MIROIR (15) ───────────────────────────────────────
+function startMirrorCapture() {
+  const btn = document.getElementById('mirrorBtn');
+  const canvas = document.getElementById('c3');
+
+  if (!canvas || typeof canvas.captureStream !== 'function') {
+    alert('Votre navigateur ne supporte pas la capture vidéo. Essayez Chrome ou Firefox.');
+    return;
+  }
+
+  const mimeType = ['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm','video/mp4']
+    .find(t => MediaRecorder.isTypeSupported(t)) || 'video/webm';
+  const ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
+
+  btn.textContent = '⏺ Enregistrement…'; btn.disabled = true;
+
+  const stream = canvas.captureStream(30);
+  const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 4000000 });
+  const chunks = [];
+
+  recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+  recorder.onstop = () => {
+    const blob = new Blob(chunks, { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'kesk-creation.' + ext;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 100);
+    btn.textContent = '✦ Télécharger l\'animation'; btn.disabled = false;
+  };
+
+  recorder.start();
+  let remaining = 5;
+  const tick = setInterval(() => {
+    remaining--;
+    btn.textContent = `⏺ ${remaining}s…`;
+    if (remaining <= 0) { clearInterval(tick); recorder.stop(); }
+  }, 1000);
+}
 
 </script>
 
