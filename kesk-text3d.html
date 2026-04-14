@@ -172,6 +172,15 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:11px;heigh
   </div>
 
   <div class="pf">
+    <button id="mirrorBtn" onclick="startMirrorCapture()"
+  style="display:none;margin-top:8px;width:100%;padding:.62rem;border-radius:6px;
+         border:1.5px solid rgba(200,240,96,.3);background:transparent;
+         font-family:'DM Mono',monospace;font-size:.63rem;letter-spacing:.1em;
+         text-transform:uppercase;color:rgba(200,240,96,.7);cursor:pointer;transition:all .2s"
+  onmouseover="this.style.borderColor='rgba(200,240,96,.7)';this.style.color='#c8f060'"
+  onmouseout="this.style.borderColor='rgba(200,240,96,.3)';this.style.color='rgba(200,240,96,.7)'">
+  ✦ Télécharger l'animation
+</button>
     <button class="bx" id="btnSTL" onclick="exportSTL()" disabled>⬇ Export STL fusionné</button>
     <button class="bg" id="btnDev" onclick="openDev()" disabled>✉ Demande de devis</button>
   </div>
@@ -276,7 +285,7 @@ function initThree(){
   const vp=document.getElementById('vp');
   const w=vp.offsetWidth,h=vp.offsetHeight;
   
-  renderer=new T.WebGLRenderer({canvas,antialias:true});
+  renderer=new T.WebGLRenderer({canvas,antialias:true,preserveDrawingBuffer:true});
   renderer.setPixelRatio(Math.min(devicePixelRatio,2));
   renderer.setSize(w,h);
   renderer.shadowMap.enabled=true;
@@ -570,7 +579,7 @@ function doBuild(){
 }
 
 function clearScene(){if(group)group.clear();mergedPositions=null;mergedIndices=null;enableBtns(false);}
-function enableBtns(v){document.getElementById('btnSTL').disabled=!v;document.getElementById('btnDev').disabled=!v;}
+function enableBtns(v){document.getElementById('btnSTL').disabled=!v;document.getElementById('btnDev').disabled=!v;if(v)document.getElementById('mirrorBtn').style.display='block';}
 function showSpin(t){document.getElementById('spinTx').textContent=t;document.getElementById('spinOv').classList.add('on');}
 function hideSpinr(){document.getElementById('spinOv').classList.remove('on');}
 
@@ -866,6 +875,49 @@ function showLore(text) {
 function hideLore() {
   const el = document.getElementById('nameLore');
   if(el) el.style.opacity = '0';
+}
+
+// ─── EFFET MIROIR (15) ───────────────────────────────────────
+function startMirrorCapture() {
+  const btn = document.getElementById('mirrorBtn');
+  const canvas = document.getElementById('c3');
+
+  if (!canvas || typeof canvas.captureStream !== 'function') {
+    alert('Votre navigateur ne supporte pas la capture vidéo. Essayez Chrome ou Firefox.');
+    return;
+  }
+
+  const mimeType = ['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm','video/mp4']
+    .find(t => MediaRecorder.isTypeSupported(t)) || 'video/webm';
+  const ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
+
+  btn.textContent = '⏺ Enregistrement…'; btn.disabled = true;
+
+  const stream = canvas.captureStream(30);
+  const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 4000000 });
+  const chunks = [];
+
+  recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+  recorder.onstop = () => {
+    const blob = new Blob(chunks, { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'kesk-creation.' + ext;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 100);
+    btn.textContent = '✦ Télécharger l\'animation'; btn.disabled = false;
+  };
+
+  recorder.start();
+  let remaining = 5;
+  const tick = setInterval(() => {
+    remaining--;
+    btn.textContent = `⏺ ${remaining}s…`;
+    if (remaining <= 0) { clearInterval(tick); recorder.stop(); }
+  }, 1000);
 }
 
 </script>
