@@ -377,10 +377,10 @@ iframe{flex:1;border:none;width:100%;background:var(--bg)}
 
 /* ── MOBILE ── */
 @media(max-width:480px){
-  .petal{width:118px}
-  .petal-card{padding:12px 14px;min-height:82px}
-  .p-name{font-size:12px}
-  .p-desc{font-size:9px}
+  .petal{width:94px}
+  .petal-card{padding:10px 11px;min-height:78px}
+  .p-name{font-size:11px}
+  .p-desc{font-size:8.5px}
   .tagline-wrap{top:24px;font-size:9px}
   .hint{bottom:44px;font-size:9px}
   .k-btn{width:80px;height:80px}
@@ -881,7 +881,7 @@ function openMenu(){
 
     const el=document.createElement('div');
     el.className='petal';
-    el.style.cssText=`top:50%;left:50%;width:${mobile?108:138}px;position:absolute;opacity:0;pointer-events:none;transform:translate(calc(-50% + ${tx}px),calc(-50% + ${ty}px)) scale(0)`;
+    el.style.cssText=`top:50%;left:50%;width:${mobile?94:138}px;position:absolute;opacity:0;pointer-events:none;transform:translate(calc(-50% + ${tx}px),calc(-50% + ${ty}px)) scale(0)`;
 
     const isAi=p.active==='3d';
     const cardClass=p.active===true?'active-card':isAi?'ai-card':'soon-card';
