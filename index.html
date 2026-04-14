@@ -209,8 +209,9 @@ body::before{
 
 /* ── BACKDROP ── */
 .backdrop{
-  position:fixed;inset:0;background:rgba(14,13,12,.75);
-  backdrop-filter:blur(3px);opacity:0;pointer-events:none;
+  position:fixed;inset:0;
+  background:radial-gradient(ellipse at 50% 50%,rgba(184,92,56,.07) 0%,rgba(14,13,12,.88) 55%,rgba(14,13,12,.96) 100%);
+  backdrop-filter:blur(6px);opacity:0;pointer-events:none;
   transition:opacity .4s;z-index:4;
 }
 .backdrop.show{opacity:1;pointer-events:auto}
@@ -229,9 +230,10 @@ body::before{
   display:flex;flex-direction:column;gap:5px;min-height:96px;
 }
 .petal-card:hover{transform:scale(1.05);box-shadow:0 14px 48px rgba(0,0,0,.5)}
-.petal-card:active{transform:scale(.97)}
-.petal-card.soon-card{background:var(--bg2);border:1px solid var(--border)}
-.petal-card.ai-card{background:#1c1a2e;border:1px solid #3a3460}
+.petal-card:active{transform:scale(.96)!important;box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.petal-card.active-card{border-top:2px solid var(--terracotta)}
+.petal-card.soon-card{background:var(--bg2);border:1px solid var(--border);border-top:2px solid var(--border)}
+.petal-card.ai-card{background:#1c1a2e;border:1px solid #3a3460;border-top:2px solid #7c6fd4}
 
 .p-tag{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:var(--terracotta)}
 .soon-card .p-tag{color:var(--muted)}
@@ -377,10 +379,9 @@ iframe{flex:1;border:none;width:100%;background:var(--bg)}
 
 /* ── MOBILE ── */
 @media(max-width:480px){
-  .petal{width:94px}
-  .petal-card{padding:10px 11px;min-height:78px}
-  .p-name{font-size:11px}
-  .p-desc{font-size:8.5px}
+  .petal-card{padding:12px 14px;min-height:82px}
+  .p-name{font-size:12px}
+  .p-desc{font-size:9px}
   .tagline-wrap{top:24px;font-size:9px}
   .hint{bottom:44px;font-size:9px}
   .k-btn{width:80px;height:80px}
@@ -843,15 +844,25 @@ function isMobile(){return window.innerWidth < 600}
 
 function getPetalPositions(n, mobile){
   if(mobile){
-    // d garanti : le bord de la carte (d + cardHalf=54px) reste dans l'écran
-    const d = Math.min(window.innerWidth / 2 - 58, 132);
-    // Angles partant du haut (-90°) pour éviter les extrêmes horizontaux
-    // qui clipperaient sur iPhone étroit
-    const step = 360 / n;
-    return Array.from({length:n},(_,i)=>({angle:-90+step*i, dist:d}));
+    const GAP=10, cardH=88;
+    const cardW=Math.floor((window.innerWidth-44)/2);
+    const rowH=cardH+GAP;
+    const nRows=Math.ceil(n/2);
+    const totalH=nRows*cardH+(nRows-1)*GAP;
+    const colX=[-(cardW/2+GAP/2), +(cardW/2+GAP/2)];
+    const Y_OFFSET=-24;
+    return Array.from({length:n},(_,i)=>{
+      const row=Math.floor(i/2), col=i%2;
+      const isLastOdd=(n%2===1)&&(i===n-1);
+      return {
+        tx: isLastOdd?0:colX[col],
+        ty: -totalH/2+cardH/2+row*rowH+Y_OFFSET,
+        cardW, row, col
+      };
+    });
   }
-  const d = 200;
-  return Array.from({length:n},(_,i)=>({angle:-90+(360/n)*i, dist:d}));
+  const d=200;
+  return Array.from({length:n},(_,i)=>({angle:-90+(360/n)*i, dist:d, cardW:138}));
 }
 
 let menuOpen=false, currentModal=null, model3dUrl=null;
@@ -875,13 +886,21 @@ function openMenu(){
 
   PETALS.forEach((p,i)=>{
     const pos=positions[i];
-    const rad=pos.angle*Math.PI/180;
-    const tx=Math.cos(rad)*pos.dist;
-    const ty=Math.sin(rad)*pos.dist;
+    let tx, ty, cardW;
+    if(mobile){
+      tx=pos.tx; ty=pos.ty; cardW=pos.cardW;
+    } else {
+      const rad=pos.angle*Math.PI/180;
+      tx=Math.cos(rad)*pos.dist;
+      ty=Math.sin(rad)*pos.dist;
+      cardW=pos.cardW||138;
+    }
 
+    const rot=((Math.random()*10-5).toFixed(1));
     const el=document.createElement('div');
     el.className='petal';
-    el.style.cssText=`top:50%;left:50%;width:${mobile?94:138}px;position:absolute;opacity:0;pointer-events:none;transform:translate(calc(-50% + ${tx}px),calc(-50% + ${ty}px)) scale(0)`;
+    // Burst depuis le centre (bouton K) : toutes les cartes partent de (0,0)
+    el.style.cssText=`top:50%;left:50%;width:${cardW}px;position:absolute;opacity:0;pointer-events:none;transform:translate(-50%,-50%) scale(0.25) rotate(${rot}deg)`;
 
     const isAi=p.active==='3d';
     const cardClass=p.active===true?'active-card':isAi?'ai-card':'soon-card';
@@ -893,12 +912,14 @@ function openMenu(){
     el.appendChild(card);
     container.appendChild(el);
 
+    // Wave stagger diagonal : top-left → bottom-right sur mobile, linéaire sur desktop
+    const stagger=mobile ? 18+(pos.row||0)*50+(pos.col||0)*25 : 20+i*65;
     setTimeout(()=>{
-      el.style.transition=`transform .55s cubic-bezier(.34,1.56,.64,1), opacity .35s ease`;
-      el.style.transform=`translate(calc(-50% + ${tx}px),calc(-50% + ${ty}px)) scale(1)`;
+      el.style.transition=`transform .52s cubic-bezier(.34,1.56,.64,1), opacity .3s ease`;
+      el.style.transform=`translate(calc(-50% + ${tx}px),calc(-50% + ${ty}px)) scale(1) rotate(0deg)`;
       el.style.opacity='1';
       el.style.pointerEvents='auto';
-    }, 20+i*65);
+    }, stagger);
   });
 }
 
@@ -913,13 +934,18 @@ function closeMenu(){
   document.getElementById('surpriseBtn').classList.remove('hide');
   document.getElementById('giftBtn').classList.remove('hide');
 
+  const mob=isMobile();
   document.querySelectorAll('.petal').forEach(el=>{
-    const t=el.style.transform;
-    el.style.transition='transform .28s cubic-bezier(.55,.055,.675,.19), opacity .2s ease';
-    el.style.transform=t.replace('scale(1)','scale(0)');
+    el.style.transition='transform .22s cubic-bezier(.55,.055,.675,.19), opacity .18s ease';
+    if(mob){
+      // Collapse vers le bouton K (centre)
+      el.style.transform='translate(-50%,-50%) scale(0.2)';
+    } else {
+      el.style.transform=el.style.transform.replace(/scale\([^)]+\)/,'scale(0)');
+    }
     el.style.opacity='0';
   });
-  setTimeout(()=>document.getElementById('petals').innerHTML='',320);
+  setTimeout(()=>document.getElementById('petals').innerHTML='',280);
 }
 
 function handlePetal(p){
