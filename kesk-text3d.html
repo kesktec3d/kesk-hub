@@ -545,12 +545,10 @@ function buildBase(tw){
   }
 
   // Extruder avec bevel : top+bottom caps reçoivent le chanfrein/rayon
-  // depth = bh-es (corps principal), bevel es de chaque côté → total = bh+es
-  // Après rotation -X : l'extrusion devient l'axe Y
-  // On décale de -es pour que le bevel du bas passe sous le sol (caché par le plancher)
-  // → bevel du bas : Y=-es..0 (caché), corps : Y=0..bh-es, bevel du haut : Y=bh-es..bh ✓
+  // bevel est consommé DANS la depth (pas au-delà) → depth=bh donne Y=[0,bh] après rotation
+  // bevel du bas : Z=0..es (dans la depth), bevel du haut : Z=bh-es..bh → top à Y=bh = base du texte ✓
   const geo=new T.ExtrudeGeometry(shape,{
-    depth:Math.max(0.1,bh-es),
+    depth:Math.max(0.1,bh),
     bevelEnabled:true,
     bevelThickness:es,
     bevelSize:es,
@@ -558,7 +556,6 @@ function buildBase(tw){
     curveSegments:SEG
   });
   geo.applyMatrix4(new T.Matrix4().makeRotationX(-Math.PI/2));
-  geo.translate(0,-es,0);
 
   const m=new T.Mesh(geo,baseMat);
   m.castShadow=true;m.receiveShadow=true;
