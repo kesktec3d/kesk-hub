@@ -519,7 +519,7 @@ iframe{flex:1;border:none;width:100%;background:var(--bg)}
   </div>
 </div>
 
-<div class="footer-kg" id="impactBadge">— kg de matière recyclée · Projets clients</div>
+<div class="footer-kg" id="impactBadge">— kg de matière recyclée en Projets clients</div>
 <a href="/entreprises" class="footer-ent">Entreprises →</a>
 
 <!-- MODAL CADEAU -->
@@ -1453,7 +1453,7 @@ async function loadImpact(){
 
   // Affichage immédiat avec calcul local
   const localKg = computeImpactKg();
-  el.textContent = localKg.toFixed(1)+' kg de matière recyclée · Projets clients';
+  el.textContent = localKg.toFixed(1)+' kg de matière recyclée en Projets clients';
 
   // Tente l'API pour une valeur éventuellement plus précise
   try{
@@ -1468,7 +1468,7 @@ async function loadImpact(){
       const ease=1-Math.pow(1-t,3);
       const val=ease*target;
       const display=t<1?Math.round(val)+'':target.toFixed(1);
-      el.textContent=display+' kg de matière recyclée · Projets clients';
+      el.textContent=display+' kg de matière recyclée en Projets clients';
       if(t<1)requestAnimationFrame(tick);
     }
     requestAnimationFrame(tick);
