@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kesk · Galerie des Créations</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0d0d0d;--surface:#161616;--card:#1c1c1c;--border:#2a2a2a;--accent:#c8f060;--text:#e8e8e0;--muted:#666;--terracotta:#B85C38}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh}
+header{padding:40px 32px 28px;border-bottom:1px solid var(--border);display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px}
+.brand{display:flex;align-items:center;gap:14px}
+.logo{width:36px;height:36px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;color:#000;flex-shrink:0}
+h1{font-size:22px;font-weight:700;letter-spacing:-.3px}
+h1 em{color:var(--accent);font-style:normal}
+.subtitle{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+.filters{display:flex;gap:8px;flex-wrap:wrap}
+.f-btn{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;transition:all .2s}
+.f-btn.active,.f-btn:hover{border-color:var(--accent);color:var(--accent)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1px;background:var(--border);padding:0}
+.card{background:var(--card);padding:22px;display:flex;flex-direction:column;gap:12px;transition:background .15s;cursor:pointer}
+.card:hover{background:#212121}
+.card-top{display:flex;align-items:center;justify-content:space-between}
+.card-type{font-size:20px;line-height:1}
+.card-date{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.08em}
+.card-code{font-family:'DM Mono',monospace;font-size:13px;font-weight:700;color:var(--accent);letter-spacing:.08em}
+.card-label{font-size:12px;color:rgba(232,232,224,.6);line-height:1.4}
+.card-cta{margin-top:auto;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--terracotta)}
+.empty{padding:80px 32px;text-align:center;color:var(--muted);font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase}
+.back{display:inline-flex;align-items:center;gap:6px;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);text-decoration:none;letter-spacing:.1em;padding:32px 32px 0;opacity:.6;transition:opacity .2s}
+.back:hover{opacity:1}
+footer{padding:28px 32px;border-top:1px solid var(--border);color:var(--muted);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.08em;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+@media(max-width:600px){header{padding:28px 20px 20px}.filters{display:none}.grid{grid-template-columns:1fr 1fr}footer{padding:20px}}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <div class="brand">
+      <div class="logo">K</div>
+      <div>
+        <h1>Galerie des <em>Créations</em></h1>
+        <p class="subtitle">Configurations partagées · Anonymes · Cliquables</p>
+      </div>
+    </div>
+  </div>
+  <div class="filters" id="filters">
+    <button class="f-btn active" data-filter="all">Toutes</button>
+    <button class="f-btn" data-filter="vase">Vase</button>
+    <button class="f-btn" data-filter="uv">UV</button>
+    <button class="f-btn" data-filter="texte">Texte 3D</button>
+    <button class="f-btn" data-filter="constellation">Constellation</button>
+    <button class="f-btn" data-filter="onde">Onde</button>
+  </div>
+</header>
+
+<div id="grid" class="grid"></div>
+<div id="empty" class="empty" style="display:none">Aucune création encore · Soyez le premier ✦</div>
+
+<a class="back" href="/">← Retour au hub</a>
+
+<footer>
+  <span>Kesk Studio · kesk.ch · Saillon, Valais</span>
+  <span id="count" style="opacity:.4"></span>
+</footer>
+
+<script>
+const TYPE_META = {
+  vase:          { emoji:'🌿', label:'Vase personnalisé',      base:'https://kesk-hub.vercel.app/vase' },
+  uv:            { emoji:'🖼',  label:'Tableau UV',             base:'https://kesk-hub.vercel.app/uv' },
+  texte:         { emoji:'✍',  label:'Texte 3D',               base:'https://kesk-hub.vercel.app/texte' },
+  constellation: { emoji:'🌌', label:'Constellation & Date',   base:'https://kesk-hub.vercel.app/constellation' },
+  onde:          { emoji:'🎵', label:'Son & Onde',             base:'https://kesk-hub.vercel.app/onde' },
+};
+
+let allItems = [];
+let activeFilter = 'all';
+
+async function load() {
+  try {
+    const r = await fetch('/api/gallery');
+    const d = await r.json();
+    allItems = d.items || [];
+    render();
+    document.getElementById('count').textContent = allItems.length + ' créations';
+  } catch(e) {
+    document.getElementById('empty').style.display = 'block';
+  }
+}
+
+function render() {
+  const grid = document.getElementById('grid');
+  const filtered = activeFilter === 'all'
+    ? allItems
+    : allItems.filter(item => item.config?.type === activeFilter);
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '';
+    document.getElementById('empty').style.display = 'block';
+    return;
+  }
+  document.getElementById('empty').style.display = 'none';
+
+  grid.innerHTML = filtered.map(item => {
+    const type = item.config?.type || 'vase';
+    const meta = TYPE_META[type] || TYPE_META.vase;
+    const date = new Date(item.created_at).toLocaleDateString('fr-CH', {day:'numeric',month:'short'});
+    const href = `/?config=${item.code}`;
+    return `<div class="card" onclick="location.href='${href}'">
+      <div class="card-top">
+        <span class="card-type">${meta.emoji}</span>
+        <span class="card-date">${date}</span>
+      </div>
+      <div class="card-code">${item.code}</div>
+      <div class="card-label">${meta.label}</div>
+      <div class="card-cta">Recréer →</div>
+    </div>`;
+  }).join('');
+}
+
+document.getElementById('filters').addEventListener('click', e => {
+  const btn = e.target.closest('.f-btn');
+  if (!btn) return;
+  activeFilter = btn.dataset.filter;
+  document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+});
+
+load();
+</script>
+</body>
+</html>
