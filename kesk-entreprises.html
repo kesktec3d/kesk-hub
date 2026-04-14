@@ -3,7 +3,12 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>Kesk · Goodies valaisans pour entreprises</title>
+<title>Goodies 3D pour entreprises · Kesk Studio — Saillon, Valais</title>
+<meta name="description" content="Kesk Studio crée des goodies 3D personnalisés pour entreprises : animaux valaisans colorés, cadeaux clients et objets publicitaires. Fabriqués à Saillon, Valais. Devis en 48h." />
+<meta property="og:title" content="Goodies 3D pour entreprises · Kesk Studio Valais" />
+<meta property="og:description" content="Cadeaux clients, souvenirs de marque et objets publicitaires 3D imprimés en Valais. Personnalisables, ultra colorés, livrés sous 3 semaines." />
+<meta property="og:type" content="website" />
+<link rel="canonical" href="https://kesk.ch/entreprises" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400&family=Bebas+Neue&display=swap" rel="stylesheet" />
 <style>
@@ -18,7 +23,7 @@ a{text-decoration:none;color:inherit}
 .background-splodge{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 25% 25%, rgba(210,95,115,.16) 0%, transparent 24%),radial-gradient(circle at 85% 10%, rgba(255,184,160,.22) 0%, transparent 20%),radial-gradient(circle at 12% 82%, rgba(141,83,148,.12) 0%, transparent 16%)}
 .particles{position:absolute;inset:0;pointer-events:none}
 .particles span{position:absolute;width:10px;height:10px;border-radius:999px;background:rgba(210,95,115,.18);box-shadow:0 0 0 2px rgba(255,255,255,.18)}
-.header{position:relative;z-index:2;padding:28px 40px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.header{position:sticky;top:0;z-index:20;padding:20px 40px;display:flex;align-items:center;justify-content:space-between;gap:24px;background:rgba(255,248,242,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}
 .brand{font-family:'Bebas Neue',sans-serif;font-size:34px;letter-spacing:-.08em;color:var(--ink)}
 .nav{display:flex;gap:24px;font-family:'DM Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.2em;color:var(--ink);}
 .nav a:hover{color:var(--terracotta)}
@@ -29,7 +34,8 @@ a{text-decoration:none;color:inherit}
 .hero-actions{display:flex;flex-wrap:wrap;gap:16px}
 .btn-primary{display:inline-flex;align-items:center;justify-content:center;padding:16px 34px;border-radius:999px;background:var(--ink);color:#fff;box-shadow:0 24px 55px -35px rgba(31,11,22,.35);transition:transform .2s ease,background .2s ease}
 .btn-primary:hover{transform:translateY(-2px);background:#47323a}
-.btn-secondary{display:inline-flex;align-items:center;justify-content:center;padding:16px 34px;border-radius:999px;background:rgba(255,255,255,.92);color:var(--ink);box-shadow:0 18px 45px -30px rgba(31,11,22,.12)}
+.btn-secondary{display:inline-flex;align-items:center;justify-content:center;padding:16px 34px;border-radius:999px;background:rgba(255,255,255,.92);color:var(--ink);border:1.5px solid var(--border);box-shadow:0 18px 45px -30px rgba(31,11,22,.12);transition:transform .2s ease,border-color .2s ease}
+.btn-secondary:hover{transform:translateY(-2px);border-color:var(--ink)}
 .hero-visual{display:grid;place-items:center;min-height:520px}
 .hero-card{position:relative;width:100%;padding:40px;border-radius:42px;background:linear-gradient(180deg,rgba(255,255,255,.95),#fff);border:1px solid rgba(209,165,170,.35);box-shadow:0 40px 80px -45px rgba(31,17,17,.08);overflow:hidden}
 .hero-card::before{content:'';position:absolute;left:-30px;top:-30px;width:220px;height:220px;border-radius:50%;background:rgba(210,95,115,.11)}
@@ -44,7 +50,9 @@ a{text-decoration:none;color:inherit}
 .section-title{font-family:'Bebas Neue',sans-serif;font-size:44px;line-height:1.05;margin-bottom:18px;color:var(--ink)}
 .section-copy{max-width:680px;font-size:17px;line-height:1.85;color:var(--muted);margin-bottom:40px}
 .grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
-.card{padding:32px;border-radius:32px;background:#fff;border:1px solid rgba(209,165,170,.16);box-shadow:0 28px 60px rgba(31,17,17,.06)}
+.card{padding:32px;border-radius:32px;background:#fff;border:1px solid rgba(209,165,170,.16);box-shadow:0 28px 60px rgba(31,17,17,.06);transition:transform .2s ease,box-shadow .2s ease}
+.card.clickable{cursor:pointer}
+.card.clickable:hover{transform:translateY(-3px);box-shadow:0 36px 70px rgba(31,17,17,.1)}
 .card h3{font-size:20px;margin-bottom:14px;color:var(--ink)}
 .card p{font-size:15px;line-height:1.95;color:var(--muted)}
 .badge{display:inline-flex;align-items:center;gap:10px;padding:8px 14px;border-radius:999px;font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.2em;background:rgba(192,56,24,.08);color:var(--terracotta);margin-bottom:18px}
@@ -79,11 +87,88 @@ a{text-decoration:none;color:inherit}
 .pricing-table th{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);background:rgba(255,255,255,.95)}
 .pricing-table tr{border-bottom:1px solid rgba(209,165,170,.16)}
 .pricing-table td:last-child{text-align:right;color:var(--terracotta);font-weight:600}
-.cta-block{padding:64px 64px 72px;border-radius:42px;background:var(--ink);color:#fff;text-align:center;box-shadow:0 60px 120px -70px rgba(31,17,17,.45);margin-top:40px}
-.cta-block h2{font-family:'Bebas Neue',sans-serif;font-size:42px;line-height:1.05;margin-bottom:18px}
+.cta-block{padding:64px 64px 72px;text-align:center}
+.cta-block h2{font-family:'Bebas Neue',sans-serif;font-size:52px;line-height:1;margin-bottom:18px;color:#fff}
 .cta-block p{font-size:18px;line-height:1.8;color:rgba(255,255,255,.8);max-width:760px;margin:0 auto 28px}
-.footer{padding:44px 40px;text-align:center;font-size:13px;color:#6d514b}
-@media (max-width:1100px){.hero{grid-template-columns:1fr;min-height:auto;}.preview-panel{grid-template-columns:1fr}.grid-3{grid-template-columns:1fr}.quote-grid{grid-template-columns:1fr}.hero-copy h1{font-size:3.8rem}.header{flex-wrap:wrap;justify-content:center}.hero-card{padding:28px}} 
+.footer{padding:44px 40px;text-align:center;font-size:13px;color:rgba(255,255,255,.5);background:#0e0d0c}
+.footer a{color:rgba(255,255,255,.7)}
+.footer a:hover{color:#F07060}
+
+/* ══ SECTION COLORS ══ */
+#hero{background:#F07060;overflow:hidden}
+#hero .hero-copy h1{color:#fff}
+#hero .hero-copy p{color:rgba(255,255,255,.85)}
+#hero .btn-primary{background:#fff;color:var(--ink);box-shadow:0 24px 55px -20px rgba(0,0,0,.25)}
+#hero .btn-primary:hover{background:#FFF8F2}
+#hero .btn-secondary{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.35)}
+#hero .btn-secondary:hover{background:rgba(255,255,255,.22);border-color:#fff;transform:translateY(-2px)}
+#hero .hero-card{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.2);box-shadow:none}
+#hero .hero-card::before{background:rgba(255,255,255,.08)}
+#hero .hero-card::after{background:rgba(255,255,255,.06)}
+#hero .hero-badge{background:rgba(255,255,255,.2);color:#fff}
+#hero .hero-block{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.15);box-shadow:none}
+#hero .hero-block strong{color:#fff}
+#hero .hero-block span{color:rgba(255,255,255,.75)}
+#viewer{background:#1A1614}
+#viewer .section-title{color:#fff}
+#viewer .section-copy{color:rgba(255,255,255,.6)}
+#viewer .viewer-card{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.08)}
+#viewer .viewer-overlay{background:linear-gradient(180deg,transparent 0%,rgba(26,22,20,.7) 100%)}
+#viewer .model-pill{background:rgba(255,255,255,.07);color:rgba(255,255,255,.75);border-color:rgba(255,255,255,.1)}
+#viewer .model-pill.active{background:#F07060;color:#fff;border-color:transparent}
+#viewer .model-pill:hover{background:rgba(255,255,255,.14)}
+#viewer .viewer-status{color:rgba(255,255,255,.4)}
+#viewer .footnote{color:rgba(255,255,255,.35)}
+#viewer .card{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.08)}
+#viewer .card h3{color:#fff}
+#viewer .card p{color:rgba(255,255,255,.55)}
+#viewer .badge{background:rgba(240,112,96,.15);color:#F07060}
+#viewer .card.clickable:hover{background:rgba(255,255,255,.1)}
+#projets{background:#FDDDD5}
+#pricing{background:#F07060}
+#pricing .section-title{color:#fff}
+#pricing .section-copy{color:rgba(255,255,255,.8)}
+#pricing .pricing-table th{color:rgba(255,255,255,.55);background:rgba(255,255,255,.08)}
+#pricing .pricing-table td{color:#fff}
+#pricing .pricing-table tr{border-color:rgba(255,255,255,.12)}
+#pricing .pricing-table td:last-child{color:#FDDDD5;font-weight:700}
+#pricing .footnote{color:rgba(255,255,255,.55)}
+#contact{background:#1A1614}
+
+/* ══ HERO BLOBS ══ */
+.hero-blob{position:absolute;border-radius:50%;background:rgba(255,255,255,.18);pointer-events:none;animation:blob-drift 7s ease-in-out infinite alternate}
+.hero-blob-a{width:340px;height:280px;top:-100px;left:-80px;animation-duration:8s}
+.hero-blob-b{width:260px;height:300px;bottom:-60px;right:-70px;animation-delay:-3s;animation-duration:9s}
+.hero-blob-c{width:160px;height:160px;top:40%;left:6%;animation-delay:-1.5s;animation-duration:6s;background:rgba(255,255,255,.1)}
+@keyframes blob-drift{0%{transform:translate(0,0) scale(1)}100%{transform:translate(14px,20px) scale(1.05)}}
+
+/* ══ QUOTE MODAL ══ */
+.qmodal{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .25s}
+.qmodal.open{opacity:1;pointer-events:all}
+.qmodal-backdrop{position:absolute;inset:0;background:rgba(26,22,20,.55);backdrop-filter:blur(6px)}
+.qmodal-box{position:relative;width:100%;max-width:540px;background:#fff;border-radius:28px;padding:44px;box-shadow:0 40px 80px rgba(0,0,0,.25);transform:translateY(16px) scale(.97);transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
+.qmodal.open .qmodal-box{transform:translateY(0) scale(1)}
+.qmodal-close{position:absolute;top:18px;right:18px;width:36px;height:36px;border-radius:50%;background:rgba(26,22,20,.07);border:none;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink);transition:background .2s}
+.qmodal-close:hover{background:rgba(26,22,20,.14)}
+.qmodal-title{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:.02em;color:var(--ink);margin-bottom:6px}
+.qmodal-sub{font-size:13px;color:var(--muted);margin-bottom:28px}
+.qform-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.qform-field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+.qform-field label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.qform-field input,.qform-field select,.qform-field textarea{padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font:inherit;font-size:14px;color:var(--ink);background:#FAFAFA;transition:border-color .18s;outline:none}
+.qform-field input:focus,.qform-field select:focus,.qform-field textarea:focus{border-color:var(--terracotta);background:#fff}
+.qform-field textarea{resize:vertical;min-height:90px}
+.qform-submit{width:100%;padding:16px;border:none;border-radius:999px;background:#F07060;color:#fff;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;transition:background .2s,transform .2s;margin-top:6px}
+.qform-submit:hover{background:#E25A46;transform:translateY(-2px)}
+.qform-submit:disabled{opacity:.5;cursor:default;transform:none}
+.qform-success{text-align:center;padding:20px 0}
+.qform-success-icon{font-size:48px;margin-bottom:16px}
+.qform-success h3{font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--ink);margin-bottom:8px}
+.qform-success p{color:var(--muted);font-size:14px;line-height:1.7}
+.qform-ref{font-family:'DM Mono',monospace;font-size:11px;color:var(--terracotta);margin-top:10px;letter-spacing:.1em}
+
+@media (max-width:1100px){.hero{grid-template-columns:1fr;min-height:auto}.preview-panel{grid-template-columns:1fr}.grid-3{grid-template-columns:1fr}.quote-grid{grid-template-columns:1fr}.hero-copy h1{font-size:3.8rem}.header{flex-wrap:wrap;justify-content:center}.hero-card{padding:28px}}
+@media (max-width:720px){.header{padding:24px 20px}.hero{padding:64px 20px}.hero-copy h1{font-size:3rem}.hero-card{min-height:320px}.model-pill{font-size:10px;padding:8px 14px}.cta-block{padding:44px 28px}.qmodal-box{padding:28px}.qform-row{grid-template-columns:1fr}}
 @media (max-width:720px){.header{padding:24px 20px}.hero{padding:64px 20px}.hero-copy h1{font-size:3rem}.hero-card{min-height:320px}.model-pill{font-size:13px;padding:10px 16px}.cta-block{padding:44px 28px}} 
 </style>
 </head>
@@ -117,21 +202,24 @@ a{text-decoration:none;color:inherit}
   </header>
   <main>
     <section class="hero" id="hero">
+      <div class="hero-blob hero-blob-a"></div>
+      <div class="hero-blob hero-blob-b"></div>
+      <div class="hero-blob hero-blob-c"></div>
       <div class="hero-copy">
-        <h1>Goodies valaisans qui claquent pour les entreprises</h1>
-        <p>Des objets corporate jouets, souvenirs ou cadeaux clients, fabriqués à Saillon avec la patte Kesk : ultra colorés, tactile et 100 % personnalisable.</p>
+        <h1>Des goodies 3D qui font parler votre marque en Valais</h1>
+        <p>Cadeaux clients, souvenirs de marque, objets publicitaires — imprimés en 3D dans notre studio de Saillon. Personnalisés à vos couleurs, livrés sous 3 semaines.</p>
         <div class="hero-actions">
-          <a href="#contact" class="btn-primary">Demander un devis</a>
-          <a href="#viewer" class="btn-secondary">Voir les modèles</a>
+          <button onclick="openQuoteModal()" class="btn-primary">Obtenir un devis gratuit</button>
+          <a href="#viewer" class="btn-secondary">Voir les modèles 3D</a>
         </div>
       </div>
       <div class="hero-visual">
         <div class="hero-card">
           <div class="hero-illustration">
-            <div class="hero-badge">Goodies x Entreprises</div>
+            <div class="hero-badge">Studio · Saillon VS</div>
             <div class="hero-block">
-              <strong>Collections colorées</strong>
-              <span>Une vitrine tactile pour votre marque, pensée pour les boutiques, les banques, les hôtels et les événements locaux.</span>
+              <strong>Unique en Valais</strong>
+              <span>Des animaux valaisans emblématiques imprimés en 3D, aux couleurs de votre marque — pour boutiques, banques, hôtels et événements d'entreprise.</span>
             </div>
           </div>
         </div>
@@ -139,19 +227,19 @@ a{text-decoration:none;color:inherit}
     </section>
     <section class="section" id="why">
       <div class="section-inner">
-        <div class="section-title">Un style qui parle tout de suite</div>
-        <p class="section-copy">C'est la page pour les marques, les banques et les boutiques touristiques qui veulent envoyer un message fort. Goodies 3D, animaux valaisans colorés, éditions limitées signées Kesk.</p>
+        <h2 class="section-title">Pourquoi les entreprises choisissent Kesk</h2>
+        <p class="section-copy">Artisanat local, personnalisation totale, exécution rapide. Chaque commande est produite dans notre atelier de Saillon avec les couleurs et le logo de votre entreprise.</p>
         <div class="grid-3">
-          <div class="card"><span class="badge">100% lokal</span><h3>Fabriqué à Saillon</h3><p>Chaque pièce est produite dans notre studio valaisan, avec du filament, de la résine et une touche de design à la main.</p></div>
-          <div class="card"><span class="badge">Custom</span><h3>Couleurs et logos</h3><p>Vos goodies peuvent porter vos couleurs, votre signature, ou une édition spéciale pour votre campagne.</p></div>
-          <div class="card"><span class="badge">Rapide</span><h3>Devis sous 48h</h3><p>On répond vite, on produit vite, et on livre en Suisse romande sans complication.</p></div>
+          <div class="card"><span class="badge">100% Valais</span><h3>Fabriqué à Saillon</h3><p>Impression 3D, finition et conditionnement dans notre studio valaisan. Aucune sous-traitance, qualité maîtrisée de bout en bout.</p></div>
+          <div class="card"><span class="badge">Sur mesure</span><h3>Vos couleurs, votre logo</h3><p>Couleurs Pantone, logo en relief, édition numérotée — on traduit votre charte graphique en objet tangible et mémorable.</p></div>
+          <div class="card"><span class="badge">Rapide</span><h3>Devis en 48h, livraison en 3 semaines</h3><p>On répond vite, on produit vite. Livraison en Suisse romande avec suivi, sans complication logistique.</p></div>
         </div>
       </div>
     </section>
     <section class="section" id="viewer">
       <div class="section-inner">
-        <div class="section-title">Modèles disponibles</div>
-        <p class="section-copy">Sélectionnez un animal pour voir le rendu 3D en direct. Les modèles tournent automatiquement, et chaque objet peut être produit en grand format ou en édition goodies.</p>
+        <h2 class="section-title">Vos animaux valaisans en 3D</h2>
+        <p class="section-copy">Sélectionnez un animal pour visualiser le rendu 3D. Chaque modèle est disponible dans les couleurs de votre charte graphique, en édition standard ou grand format.</p>
         <div class="preview-panel">
           <div class="viewer-card">
             <div id="viewerContainer">
@@ -167,52 +255,125 @@ a{text-decoration:none;color:inherit}
             <div class="viewer-meta" id="modelButtons"></div>
             <div class="color-swatches" id="colorSwatches"></div>
             <div class="viewer-status" id="viewerStatus">Chargement du modèle...</div>
-            <p class="viewer-copy">Le modèle charge directement depuis nos archives 3D. Si le chien manque encore, il arrivera bientôt comme version bonus.</p>
+
             <p class="footnote">Modèles actuels : Vache d'Hérens, Bouquetin, Loup, Mouton nez noir. Ajout du chien dès réception.</p>
           </div>
           <div>
-            <div class="card"><h3>Vache d'Hérens</h3><p>Best-seller corporate pour banques, hôtels et boutiques.</p></div>
-            <div class="card" style="margin-top:24px"><h3>Bouquetin</h3><p>Silhouette dynamique et attitude fière, parfait en cadeaux clients.</p></div>
-            <div class="card" style="margin-top:24px"><h3>Loup</h3><p>Objet joueur et fort, idéal pour communication lifestyle et tourisme.</p></div>
-            <div class="card" style="margin-top:24px"><h3>Mouton nez noir</h3><p>Produit local fort, excellent pour boutiques régionales et éditions limitées.</p></div>
+            <div class="card clickable" onclick="selectModel(0)"><span class="badge">Best-seller</span><h3>Vache d'Hérens</h3><p>L'icône valaisanne. Incontournable pour banques, hôtels et boutiques de souvenirs.</p></div>
+            <div class="card clickable" onclick="selectModel(1)" style="margin-top:24px"><span class="badge">Altitude</span><h3>Bouquetin</h3><p>Silhouette puissante et identité montagnarde forte. Parfait en cadeau client premium.</p></div>
+            <div class="card clickable" onclick="selectModel(2)" style="margin-top:24px"><span class="badge">Caractère</span><h3>Loup</h3><p>Audacieux et mémorable. Idéal pour les marques lifestyle, le tourisme et les événements.</p></div>
+            <div class="card clickable" onclick="selectModel(3)" style="margin-top:24px"><span class="badge">Terroir</span><h3>Mouton nez noir</h3><p>Produit régional fort, très demandé pour boutiques locales et éditions limitées numérotées.</p></div>
           </div>
         </div>
       </div>
     </section>
     <section class="section" id="projets">
       <div class="section-inner">
-        <div class="section-title">Réalisations</div>
+        <h2 class="section-title">Ils nous font confiance</h2>
+        <p class="section-copy">Des entreprises valaisannes et suisses romandes qui ont choisi Kesk pour leurs goodies et cadeaux d'entreprise.</p>
         <div class="quote-grid">
-          <div class="quote"><h4>Raiffeisen</h4><p>Animaux articulés personnalisés pour événement client. Design local, impact visible en vitrine.</p></div>
-          <div class="quote"><h4>Barryland</h4><p>Tirelires St Bernard multicolores pour boutique. Version premium, couleur sur mesure, packaging prêt-à-offrir.</p></div>
-          <div class="quote"><h4>Rouvinez</h4><p>Moutons nez noirs en production. Projet 100% régional, sur un thème de terroir léger et engageant.</p></div>
+          <div class="quote"><span class="badge">Banque · Événement</span><h4>Raiffeisen</h4><p>Animaux valaisans articulés personnalisés aux couleurs Raiffeisen pour un événement client régional. Fort impact de mémorisation en vitrine et en mains.</p></div>
+          <div class="quote"><span class="badge">Boutique · Premium</span><h4>Barryland</h4><p>Tirelires Saint-Bernard multicolores pour la boutique officielle. Version premium avec couleur sur mesure et packaging prêt-à-offrir.</p></div>
+          <div class="quote"><span class="badge">Terroir · Série limitée</span><h4>Rouvinez Vins</h4><p>Moutons nez noirs en édition limitée pour leur cave valaisanne. Projet 100% régional, très bien reçu par leur clientèle.</p></div>
         </div>
       </div>
     </section>
     <section class="section" id="pricing">
       <div class="section-inner">
-        <div class="section-title">Tarifs sur volume</div>
-        <p class="section-copy">Formules simples, remises volume claires, options de finition sur demande.</p>
+        <h2 class="section-title">Tarifs sur volume</h2>
+        <p class="section-copy">Prix dégressifs, sans frais cachés. Chaque commande inclut la conception couleur, l'impression et le contrôle qualité. Options de finition et packaging disponibles sur demande.</p>
         <table class="pricing-table">
-          <thead><tr><th>Quantité</th><th>Prix unitaire</th></tr></thead>
+          <thead><tr><th>Quantité</th><th>Prix unitaire HT</th></tr></thead>
           <tbody>
-            <tr><td>1-50 pièces</td><td>18 CHF</td></tr>
-            <tr><td>51-200 pièces</td><td>14 CHF</td></tr>
-            <tr><td>201-500 pièces</td><td>11 CHF</td></tr>
-            <tr><td>501+ pièces</td><td>Tarif négocié</td></tr>
+            <tr><td>1–50 pièces</td><td>18 CHF</td></tr>
+            <tr><td>51–200 pièces</td><td>14 CHF</td></tr>
+            <tr><td>201–500 pièces</td><td>11 CHF</td></tr>
+            <tr><td>500+ pièces</td><td>3 CHF</td></tr>
           </tbody>
         </table>
+        <p class="footnote" style="margin-top:20px">Délai de production : 2–3 semaines · Livraison Suisse romande · Devis gratuit en 48h</p>
       </div>
     </section>
     <section class="section" id="contact">
       <div class="section-inner cta-block">
-        <h2>Prêt à lancer votre collection de goodies ?</h2>
-        <p>On prépare un dossier avec votre brief, on vous montre le rendu initial en 48h et on produit les premiers exemplaires sous 2-3 semaines.</p>
-        <a href="mailto:contact@kesk.ch?subject=Devis%20goodies%20entreprise" class="btn-primary">Envoyer une demande</a>
+        <h2>Votre goodie valaisan, livré en 3 semaines</h2>
+        <p>Envoyez-nous votre brief — on vous revient avec un rendu couleur en 48h, sans engagement. Production et livraison en Suisse romande.</p>
+        <button onclick="openQuoteModal()" class="btn-primary">Demander un devis gratuit</button>
       </div>
     </section>
   </main>
-  <footer class="footer">Kesk Studio - Saillon, Valais - <a href="https://kesk.ch">kesk.ch</a></footer>
+  <!-- Quote Modal -->
+  <div class="qmodal" id="quoteModal" role="dialog" aria-modal="true" aria-label="Demande de devis">
+    <div class="qmodal-backdrop" onclick="closeQuoteModal()"></div>
+    <div class="qmodal-box">
+      <button class="qmodal-close" onclick="closeQuoteModal()" aria-label="Fermer">✕</button>
+      <div id="quoteFormContent">
+        <div class="qmodal-title">Votre devis gratuit</div>
+        <div class="qmodal-sub">Réponse sous 48h avec un rendu couleur personnalisé.</div>
+        <form onsubmit="submitQuote(event)">
+          <div class="qform-row">
+            <div class="qform-field">
+              <label for="q-name">Nom *</label>
+              <input id="q-name" name="name" type="text" placeholder="Jean Dupont" required />
+            </div>
+            <div class="qform-field">
+              <label for="q-company">Entreprise</label>
+              <input id="q-company" name="company" type="text" placeholder="Mon Entreprise SA" />
+            </div>
+          </div>
+          <div class="qform-row">
+            <div class="qform-field">
+              <label for="q-email">Email *</label>
+              <input id="q-email" name="email" type="email" placeholder="jean@exemple.ch" required />
+            </div>
+            <div class="qform-field">
+              <label for="q-phone">Téléphone</label>
+              <input id="q-phone" name="phone" type="tel" placeholder="+41 79 000 00 00" />
+            </div>
+          </div>
+          <div class="qform-row">
+            <div class="qform-field">
+              <label for="q-animal">Animal souhaité</label>
+              <select id="q-animal" name="animal">
+                <option value="">— Choisir un modèle —</option>
+                <option value="Vache d'Hérens">Vache d'Hérens</option>
+                <option value="Bouquetin">Bouquetin</option>
+                <option value="Loup">Loup</option>
+                <option value="Mouton nez noir">Mouton nez noir</option>
+                <option value="Plusieurs modèles">Plusieurs modèles</option>
+              </select>
+            </div>
+            <div class="qform-field">
+              <label for="q-quantity">Quantité estimée</label>
+              <select id="q-quantity" name="quantity">
+                <option value="">— Volume —</option>
+                <option value="1–50">1–50 pièces</option>
+                <option value="51–200">51–200 pièces</option>
+                <option value="201–500">201–500 pièces</option>
+                <option value="500+">500+ pièces</option>
+              </select>
+            </div>
+          </div>
+          <div class="qform-field">
+            <label for="q-message">Message ou brief (optionnel)</label>
+            <textarea id="q-message" name="message" placeholder="Couleurs souhaitées, délai, occasion…"></textarea>
+          </div>
+          <button type="submit" class="qform-submit" id="quoteSubmitBtn">Envoyer ma demande de devis</button>
+        </form>
+      </div>
+      <div id="quoteSuccess" class="qform-success" style="display:none">
+        <div class="qform-success-icon">✓</div>
+        <h3>Demande envoyée !</h3>
+        <p>Nous vous recontactons sous <strong>48h ouvrables</strong> avec un rendu couleur personnalisé.</p>
+        <div class="qform-ref" id="quoteRef"></div>
+      </div>
+    </div>
+  </div>
+  <footer class="footer">
+    <p style="margin-bottom:6px"><strong>Kesk Studio</strong> — Saillon, Valais, Suisse</p>
+    <p style="margin-bottom:6px"><a href="mailto:contact@kesk.ch">contact@kesk.ch</a> · <a href="https://kesk.ch">kesk.ch</a></p>
+    <p style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;opacity:.5;margin-top:12px">Goodies 3D · Cadeaux d'entreprise · Impression locale · Valais</p>
+  </footer>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/STLLoader.js"></script>
@@ -232,6 +393,7 @@ let viewerFallback;
 let scene, camera, renderer, modelGroup, clock, stlLoader;
 let currentMaterial = null;
 let swatchesEl = null;
+let currentModel = 0;
 function createButton(name, index){
   if(!buttonsEl) return null;
   const button = document.createElement('button');
@@ -438,6 +600,7 @@ function applyVertexColors(geo, colors) {
   geo.setAttribute('color', new THREE.BufferAttribute(colorArr, 3));
 }
 function selectModel(index){
+  currentModel = index;
   const buttons = buttonsEl.querySelectorAll('button');
   buttons.forEach((btn,i) => btn.classList.toggle('active', i===index));
   loadModel(index);
@@ -498,6 +661,63 @@ if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', startViewer);
 } else {
   startViewer();
+}
+
+// ── Quote Modal ────────────────────────────────────────────────────────────────
+function openQuoteModal() {
+  const modal = document.getElementById('quoteModal');
+  if (!modal) return;
+  // Pre-select animal matching current 3D model
+  const animalSelect = document.getElementById('q-animal');
+  if (animalSelect && typeof currentModel !== 'undefined' && modelList[currentModel]) {
+    animalSelect.value = modelList[currentModel].label;
+  }
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeQuoteModal() {
+  const modal = document.getElementById('quoteModal');
+  if (!modal) return;
+  modal.classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeQuoteModal(); });
+
+async function submitQuote(e) {
+  e.preventDefault();
+  const btn = document.getElementById('quoteSubmitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Envoi en cours…';
+  const body = {
+    name:     document.getElementById('q-name').value.trim(),
+    company:  document.getElementById('q-company').value.trim(),
+    email:    document.getElementById('q-email').value.trim(),
+    phone:    document.getElementById('q-phone').value.trim(),
+    animal:   document.getElementById('q-animal').value,
+    quantity: document.getElementById('q-quantity').value,
+    message:  document.getElementById('q-message').value.trim(),
+  };
+  try {
+    const res = await fetch('/api/entreprise-quote', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      document.getElementById('quoteFormContent').style.display = 'none';
+      document.getElementById('quoteSuccess').style.display = 'block';
+      if (data.ref) document.getElementById('quoteRef').textContent = 'Référence : ' + data.ref;
+    } else {
+      btn.disabled = false;
+      btn.textContent = 'Envoyer ma demande de devis';
+      alert('Une erreur est survenue. Veuillez réessayer ou écrire à hello@kesk.ch.');
+    }
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = 'Envoyer ma demande de devis';
+    alert('Connexion impossible. Veuillez réessayer ou écrire à hello@kesk.ch.');
+  }
 }
 </script>
 </body>
