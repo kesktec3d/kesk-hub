@@ -398,8 +398,9 @@ iframe{flex:1;border:none;width:100%;background:var(--bg)}
   position:fixed;bottom:120px;left:20px;
   font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.1em;
   text-transform:uppercase;color:rgba(255,255,255,.88);z-index:20;pointer-events:none;
-  white-space:nowrap;opacity:1;
+  white-space:nowrap;opacity:1;transition:opacity .3s ease;
 }
+.footer-kg.hide{opacity:0}
 .footer-ent{
   position:fixed;bottom:14px;right:18px;
   font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.14em;
@@ -917,6 +918,7 @@ function openMenu(){
   document.getElementById('shareBtn').classList.add('hide');
   document.getElementById('surpriseBtn').classList.add('hide');
   document.getElementById('giftBtn').classList.add('hide');
+  document.getElementById('impactBadge').classList.add('hide');
   const container=document.getElementById('petals');
   container.innerHTML='';
   isMobile() ? _openMobile(container) : _openDesktop(container);
@@ -1022,6 +1024,7 @@ function closeMenu(){
   document.getElementById('shareBtn').classList.remove('hide');
   document.getElementById('surpriseBtn').classList.remove('hide');
   document.getElementById('giftBtn').classList.remove('hide');
+  document.getElementById('impactBadge').classList.remove('hide');
 
   const mob=isMobile();
   document.querySelectorAll('.petal').forEach(el=>{
