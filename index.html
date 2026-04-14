@@ -395,10 +395,10 @@ iframe{flex:1;border:none;width:100%;background:var(--bg)}
 /* ── FOOTER ── */
 .footer-fixed{display:none} /* remplacé par footer-kg + footer-ent */
 .footer-kg{
-  position:fixed;bottom:72px;left:20px;
+  position:fixed;bottom:90px;left:20px;
   font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.1em;
-  text-transform:uppercase;color:rgba(26,22,20,.55);z-index:10;pointer-events:none;
-  animation:fade-up .5s ease .9s both;white-space:nowrap;
+  text-transform:uppercase;color:rgba(26,22,20,.55);z-index:20;pointer-events:none;
+  white-space:nowrap;opacity:1;
 }
 .footer-ent{
   position:fixed;bottom:14px;right:18px;
@@ -1424,14 +1424,43 @@ function openGiftResult(){
 }
 
 // ─── LABEL VALAIS RECYCLÉ (07) ───────────────────────────────
+function computeImpactKg(){
+  // Même algo que l'API — déterministe, pas de DB nécessaire
+  const START = new Date('2025-07-01T00:00:00Z').getTime();
+  const elapsedDays = (Date.now() - START) / 86400000;
+  if(elapsedDays <= 0) return 200;
+  function seeded(n){
+    let s=(n*2654435761)>>>0; s^=s>>>16;
+    s=(s*2246822519)>>>0; s^=s>>>13;
+    s=(s*3266489917)>>>0; s^=s>>>16;
+    return (s>>>0)/0xFFFFFFFF;
+  }
+  let kg=200, day=0, i=0;
+  while(day<elapsedDays){
+    const len=2+seeded(i*2);
+    const inc=0.2+seeded(i*2+1);
+    day+=len;
+    if(day<=elapsedDays) kg+=inc;
+    i++;
+  }
+  return Math.round(kg*10)/10;
+}
+
 async function loadImpact(){
+  const el=document.getElementById('impactBadge');
+  if(!el) return;
+
+  // Affichage immédiat avec calcul local
+  const localKg = computeImpactKg();
+  el.textContent = localKg.toFixed(1)+' kg de matière recyclée · Projets clients';
+
+  // Tente l'API pour une valeur éventuellement plus précise
   try{
     const r=await fetch('/api/impact');
     const d=await r.json();
-    const el=document.getElementById('impactBadge');
-    if(!el||!d.kg_total)return;
+    if(!d.kg_total) return;
     const target=d.kg_total;
-    const duration=1800;
+    const duration=1600;
     const start=performance.now();
     function tick(now){
       const t=Math.min((now-start)/duration,1);
