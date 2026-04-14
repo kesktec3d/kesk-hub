@@ -393,6 +393,28 @@ iframe{flex:1;border:none;width:100%;background:var(--bg)}
   .k-wrap{margin-left:0}
   .stage{overflow:hidden}
 }
+/* ── LUNAR BADGE ── */
+#lunarBadge{
+  position:fixed;bottom:60px;left:16px;
+  display:none;align-items:center;gap:8px;
+  padding:6px 14px 6px 10px;
+  background:rgba(14,13,12,.9);
+  border:1px solid var(--lunar-color,#c8f060);
+  border-radius:99px;cursor:default;
+  font-family:'DM Mono',monospace;font-size:10px;
+  color:rgba(247,243,238,.75);letter-spacing:.06em;
+  z-index:20;backdrop-filter:blur(8px);
+  animation:lunar-pulse 4s ease-in-out infinite;
+}
+.lunar-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--lunar-color,#c8f060);
+  flex-shrink:0;
+}
+@keyframes lunar-pulse{
+  0%,100%{box-shadow:0 0 0 0 transparent}
+  50%{box-shadow:0 0 10px 2px var(--lunar-color,rgba(200,240,96,.3))}
+}
 </style>
 </head>
 <body>
@@ -442,6 +464,11 @@ iframe{flex:1;border:none;width:100%;background:var(--bg)}
   <!-- BOUTON CADEAU -->
   <button class="gift-btn" id="giftBtn" onclick="openGift()" title="Je cherche un cadeau">🎁</button>
 
+  <div id="lunarBadge">
+    <div class="lunar-dot" id="lunarDot"></div>
+    <span id="lunarLabel">Édition Lunaire</span>
+    <span id="lunarCountdown" style="opacity:.5;margin-left:4px"></span>
+  </div>
   <div class="footer-fixed">kesk.ch · Saillon, Valais &nbsp;·&nbsp; <span id="impactNum" style="color:rgba(184,92,56,.6)">—</span> kg recyclés</div>
 </div>
 
@@ -656,7 +683,41 @@ async function loadConfigFromURL() {
 }
 
 // Appel au démarrage
-window.addEventListener('load', () => { setTimeout(loadConfigFromURL, 1200); loadImpact(); });
+// ─── ÉDITION LUNAIRE (01) ────────────────────────────────────
+async function initLunar() {
+  try {
+    const r = await fetch('/api/lunar');
+    const d = await r.json();
+    if (!d.active) return;
+
+    const badge = document.getElementById('lunarBadge');
+    const dot = document.getElementById('lunarDot');
+    const label = document.getElementById('lunarLabel');
+    const countdown = document.getElementById('lunarCountdown');
+
+    badge.style.setProperty('--lunar-color', d.hex || '#c8f060');
+    dot.style.background = d.hex || '#c8f060';
+    label.textContent = d.name || 'Édition Lunaire';
+    badge.style.display = 'flex';
+
+    function updateCountdown() {
+      const until = new Date(d.active_until);
+      const diff = until - new Date();
+      if (diff <= 0) { countdown.textContent = ''; return; }
+      const days = Math.floor(diff / 86400000);
+      const hours = Math.floor((diff % 86400000) / 3600000);
+      countdown.textContent = days > 0 ? `· J-${days}` : `· ${hours}h`;
+    }
+    updateCountdown();
+    setInterval(updateCountdown, 60000);
+  } catch(e) {}
+}
+
+window.addEventListener('load', () => {
+  setTimeout(loadConfigFromURL, 1200);
+  loadImpact();
+  initLunar();
+});
 
 // ─── ROUE MYSTÈRE ────────────────────────────────────────────
 const SURPRISE_PRESETS = [
