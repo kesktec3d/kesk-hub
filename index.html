@@ -516,9 +516,42 @@ iframe{flex:1;border:none;width:100%;background:var(--bg)}
         <div class="modal-sub" id="giftDesc">—</div>
         <button class="modal-btn" id="giftCTA" onclick="openGiftResult()" style="margin-top:16px">Configurer ce cadeau →</button>
         <button onclick="resetGift()" style="display:block;margin:10px auto 0;background:none;border:none;color:var(--muted,#9a948c);font-size:12px;cursor:pointer">Recommencer</button>
+        <div id="giftLinkSection" style="margin-top:16px;border-top:1px solid rgba(247,243,238,.1);padding-top:16px">
+          <p style="font-size:12px;color:#9a948c;margin-bottom:10px;line-height:1.5">
+            Offrir ce cadeau à quelqu'un ?<br>Créez un lien qu'ils pourront ouvrir.
+          </p>
+          <input id="giftFromName" class="modal-input" placeholder="Votre prénom (optionnel)" style="margin-bottom:8px;font-size:13px"/>
+          <textarea id="giftMessage" class="modal-input" rows="2"
+            placeholder="Un petit mot… (optionnel)"
+            style="resize:none;font-size:13px;line-height:1.5;margin-bottom:10px"></textarea>
+          <button class="modal-btn" id="giftLinkBtn" onclick="createGiftLink()" style="background:#1c1916;color:var(--cream);border:1px solid rgba(247,243,238,.2)">
+            🎁 Créer le lien cadeau
+          </button>
+          <div id="giftLinkResult" style="display:none;margin-top:10px">
+            <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.1em;color:#9a948c;margin-bottom:6px;text-transform:uppercase">Lien prêt à partager</div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <input id="giftLinkUrl" class="modal-input" readonly style="font-size:11px;font-family:'DM Mono',monospace;margin:0;flex:1;cursor:pointer" onclick="this.select()"/>
+              <button class="modal-btn" id="giftCopyBtn" onclick="copyGiftLink()" style="flex-shrink:0;width:auto;padding:12px 16px">Copier</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
     <button onclick="closeGift()" style="display:block;margin:16px auto 0;background:none;border:none;color:var(--muted,#9a948c);font-size:13px;cursor:pointer">Annuler</button>
+  </div>
+</div>
+
+<!-- GIFT REVEAL OVERLAY -->
+<div id="giftRevealOverlay" style="display:none;position:fixed;inset:0;background:rgba(14,13,12,.92);z-index:400;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--cream);border-radius:20px;padding:36px 32px;max-width:380px;width:100%;text-align:center;box-shadow:0 24px 80px rgba(0,0,0,.55);color:var(--ink)">
+    <div id="giftRevealEmoji" style="font-size:48px;margin-bottom:12px">🎁</div>
+    <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--terracotta);margin-bottom:8px">Vous avez reçu un cadeau</div>
+    <div id="giftRevealLabel" style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;line-height:1.2;margin-bottom:8px">—</div>
+    <div id="giftRevealFrom" style="font-size:13px;color:#6a6460;margin-bottom:6px"></div>
+    <div id="giftRevealMessage" style="font-size:13px;color:#6a6460;font-style:italic;margin-bottom:24px;line-height:1.6"></div>
+    <button onclick="openGiftReveal()" style="width:100%;padding:13px;background:var(--ink);color:var(--cream);border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:background .2s">
+      Voir ma création →
+    </button>
   </div>
 </div>
 
@@ -717,6 +750,7 @@ window.addEventListener('load', () => {
   setTimeout(loadConfigFromURL, 1200);
   loadImpact();
   initLunar();
+  loadGiftFromURL();
 });
 
 // ─── ROUE MYSTÈRE ────────────────────────────────────────────
@@ -1432,6 +1466,74 @@ function applySaisonTheme() {
 }
 
 applySaisonTheme();
+
+// ─── CARTE CADEAU VIVANTE (12) ───────────────────────────────
+let pendingGiftUrl = null;
+
+async function createGiftLink() {
+  const btn = document.getElementById('giftLinkBtn');
+  btn.textContent = 'Création…'; btn.disabled = true;
+  try {
+    const r = await fetch('/api/save-gift', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        dest: giftState.dest || '',
+        occasion: giftState.occasion || '',
+        budget: giftState.budget || '',
+        configurateur_url: giftResultUrl || '',
+        emoji: document.getElementById('giftEmoji')?.textContent || '🎁',
+        label: document.getElementById('giftReco')?.textContent || '',
+        from_name: document.getElementById('giftFromName').value.trim(),
+        message: document.getElementById('giftMessage').value.trim()
+      })
+    });
+    const d = await r.json();
+    if (!d.code) throw new Error('Erreur serveur');
+    const link = window.location.origin + '/?gift=' + d.code;
+    document.getElementById('giftLinkUrl').value = link;
+    document.getElementById('giftLinkResult').style.display = 'block';
+    btn.textContent = '✓ Lien créé';
+  } catch(e) {
+    btn.textContent = '🎁 Créer le lien cadeau'; btn.disabled = false;
+  }
+}
+
+function copyGiftLink() {
+  const input = document.getElementById('giftLinkUrl');
+  navigator.clipboard.writeText(input.value).then(() => {
+    const btn = document.getElementById('giftCopyBtn');
+    btn.textContent = 'Copié ✓';
+    setTimeout(() => btn.textContent = 'Copier', 2000);
+  }).catch(() => { input.select(); document.execCommand('copy'); });
+}
+
+async function loadGiftFromURL() {
+  const params = new URLSearchParams(location.search);
+  const code = params.get('gift');
+  if (!code) return;
+
+  try {
+    const r = await fetch('/api/load-gift?code=' + code.toUpperCase());
+    const d = await r.json();
+    if (!d.gift) return;
+    const g = d.gift;
+
+    document.getElementById('giftRevealEmoji').textContent = g.emoji || '🎁';
+    document.getElementById('giftRevealLabel').textContent = g.label || 'Création Kesk';
+    document.getElementById('giftRevealFrom').textContent = g.from_name ? `De la part de ${g.from_name}` : '';
+    document.getElementById('giftRevealMessage').textContent = g.message || '';
+    pendingGiftUrl = g.configurateur_url;
+
+    const overlay = document.getElementById('giftRevealOverlay');
+    overlay.style.display = 'flex';
+  } catch(e) {}
+}
+
+function openGiftReveal() {
+  document.getElementById('giftRevealOverlay').style.display = 'none';
+  if (pendingGiftUrl) openIframe(pendingGiftUrl);
+}
 
 </script>
 </body>
