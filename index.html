@@ -156,7 +156,7 @@ body::before{
 
 /* ── SHARE BTN ── */
 .share-btn{
-  position:fixed;bottom:136px;right:20px;
+  position:fixed;bottom:88px;right:20px;
   width:44px;height:44px;border-radius:50%;
   background:rgba(255,255,255,.45);border:1px solid rgba(255,255,255,.7);
   display:flex;align-items:center;justify-content:center;
@@ -169,7 +169,7 @@ body::before{
 
 /* ── GIFT BTN ── */
 .gift-btn{
-  position:fixed;bottom:88px;right:20px;
+  position:fixed;bottom:142px;right:20px;
   width:44px;height:44px;border-radius:50%;
   background:rgba(255,255,255,.45);
   border:1px solid rgba(255,255,255,.7);
@@ -401,16 +401,19 @@ iframe{flex:1;border:none;width:100%;background:var(--bg)}
   white-space:nowrap;opacity:1;transition:opacity .3s ease;
 }
 .footer-kg.hide{opacity:0}
-.footer-ent{
-  position:fixed;bottom:14px;right:18px;
-  font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.14em;
-  text-transform:uppercase;color:rgba(26,22,20,.75);text-decoration:none;
-  padding:5px 14px;border:1px solid rgba(26,22,20,.25);border-radius:99px;
-  background:rgba(255,255,255,.38);backdrop-filter:blur(6px);
-  transition:all .2s;z-index:10;
-  animation:fade-up .5s ease 1s both;
+/* ── BOUTON B2B ── */
+.b2b-btn{
+  position:fixed;bottom:196px;right:20px;
+  width:44px;height:44px;border-radius:50%;
+  background:rgba(255,255,255,.45);border:1px solid rgba(255,255,255,.7);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .2s;z-index:10;
+  text-decoration:none;backdrop-filter:blur(6px);
+  font-family:'DM Mono',monospace;font-size:8px;font-weight:700;
+  letter-spacing:.06em;color:rgba(26,22,20,.8);text-transform:uppercase;
 }
-.footer-ent:hover{background:rgba(255,255,255,.7);border-color:rgba(26,22,20,.5)}
+.b2b-btn:hover{background:rgba(255,255,255,.75)}
+.b2b-btn.hide{opacity:0;pointer-events:none}
 
 /* ── PETAL FLOAT ANIMATION ── */
 @keyframes petalFloat{
@@ -433,8 +436,9 @@ iframe{flex:1;border:none;width:100%;background:var(--bg)}
   .footer-kg span{font-size:12px}
   .footer-ent{font-size:9px;padding:4px 11px;bottom:12px;right:14px}
   .surprise-btn{bottom:82px}
-  .share-btn{bottom:140px;right:14px;width:44px;height:44px}
-  .gift-btn{bottom:88px;right:14px;width:44px;height:44px}
+  .b2b-btn{bottom:196px;right:14px}
+  .gift-btn{bottom:142px;right:14px;width:44px;height:44px}
+  .share-btn{bottom:88px;right:14px;width:44px;height:44px}
   .k-wrap{margin-left:0}
   .stage{overflow:hidden}
 }
@@ -510,7 +514,8 @@ iframe{flex:1;border:none;width:100%;background:var(--bg)}
     <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
   </button>
 
-  <!-- BOUTON CADEAU -->
+  <!-- BOUTONS DROITE : B2B / Cadeau / Share (colonne verticale) -->
+  <a href="/entreprises" class="b2b-btn" id="b2bBtn" title="Offres entreprises">B2B</a>
   <button class="gift-btn" id="giftBtn" onclick="openGift()" title="Je cherche un cadeau">🎁</button>
 
   <div id="lunarBadge">
@@ -521,7 +526,6 @@ iframe{flex:1;border:none;width:100%;background:var(--bg)}
 </div>
 
 <div class="footer-kg" id="impactBadge">— kg de matière recyclée en Projets clients</div>
-<a href="/entreprises" class="footer-ent">Entreprises →</a>
 
 <!-- MODAL CADEAU -->
 <div class="modal-overlay" id="giftOverlay" style="display:none;z-index:300" onclick="if(event.target===this)closeGift()">
@@ -918,6 +922,7 @@ function openMenu(){
   document.getElementById('shareBtn').classList.add('hide');
   document.getElementById('surpriseBtn').classList.add('hide');
   document.getElementById('giftBtn').classList.add('hide');
+  document.getElementById('b2bBtn').classList.add('hide');
   document.getElementById('impactBadge').classList.add('hide');
   const container=document.getElementById('petals');
   container.innerHTML='';
@@ -1024,6 +1029,7 @@ function closeMenu(){
   document.getElementById('shareBtn').classList.remove('hide');
   document.getElementById('surpriseBtn').classList.remove('hide');
   document.getElementById('giftBtn').classList.remove('hide');
+  document.getElementById('b2bBtn').classList.remove('hide');
   document.getElementById('impactBadge').classList.remove('hide');
 
   const mob=isMobile();
