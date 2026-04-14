@@ -557,6 +557,15 @@ iframe{flex:1;border:none;width:100%;background:var(--bg)}
       </a>
     </div>
     <button class="iframe-back" onclick="closeIframe()">Retour</button>
+    <a id="badgeLink" href="/badge" target="_blank"
+       style="display:none;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.08em;
+              text-transform:uppercase;color:rgba(200,240,96,.7);text-decoration:none;
+              border:1px solid rgba(200,240,96,.3);padding:5px 12px;border-radius:20px;
+              transition:all .2s"
+       onmouseover="this.style.color='#c8f060';this.style.borderColor='rgba(200,240,96,.7)'"
+       onmouseout="this.style.color='rgba(200,240,96,.7)';this.style.borderColor='rgba(200,240,96,.3)'">
+      ✦ Mon badge
+    </a>
   </div>
   <iframe id="mainIframe" src="" title="Configurateur Kesk" allow="microphone; clipboard-write" allowusermedia></iframe>
 </div>
@@ -581,6 +590,11 @@ async function saveConfig(configObj) {
       const url = new URL(window.location);
       url.searchParams.set('config', d.code);
       history.replaceState({}, '', url);
+      const badgeLink = document.getElementById('badgeLink');
+      if (badgeLink) {
+        badgeLink.href = '/badge?config=' + d.code;
+        badgeLink.style.display = 'inline-flex';
+      }
       // Retourner le code au configurateur via postMessage
       document.getElementById('mainIframe').contentWindow.postMessage({ type:'config-code', code: d.code }, '*');
     }
@@ -808,6 +822,8 @@ function openIframe(url){
 function closeIframe(){
   iframeOpen=false;
   document.getElementById('iframeOverlay').classList.remove('visible');
+  const badgeLink = document.getElementById('badgeLink');
+  if (badgeLink) badgeLink.style.display = 'none';
   setTimeout(()=>document.getElementById('mainIframe').src='',400);
 }
 
