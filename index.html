@@ -4,6 +4,14 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <title>Kesk · Créateur sur mesure</title>
+<meta name="description" content="Créez des objets personnalisés uniques : vases 3D, tableaux UV, texte 3D, constellations, ondes sonores. Fabriqué à Saillon, Valais."/>
+<meta property="og:type" content="website"/>
+<meta property="og:title" content="Kesk · Créateur sur mesure"/>
+<meta property="og:description" content="Vases 3D, tableaux UV, texte 3D, constellations & ondes. Fabrication sur mesure à Saillon, Valais."/>
+<meta property="og:url" content="https://kesk.ch/"/>
+<meta property="og:image" content="https://kesk.ch/og-image.jpg"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -124,20 +132,9 @@ body::before{
 .gift-choice:hover{border-color:rgba(184,92,56,.5);background:rgba(184,92,56,.08);color:#B85C38}
 
 /* ── SHARE BTN ── */
-.surprise-btn{
-  position:fixed;bottom:82px;left:50%;transform:translateX(-50%);
-  background:transparent;border:1px solid rgba(247,243,238,0.2);
-  color:rgba(247,243,238,0.5);font-family:'DM Sans',sans-serif;
-  font-size:12px;letter-spacing:.08em;padding:7px 18px;border-radius:99px;
-  cursor:pointer;transition:all .3s;z-index:10;white-space:nowrap;
-}
-.surprise-btn:hover{border-color:rgba(184,92,56,.6);color:var(--terracotta)}
-.surprise-btn.hide{opacity:0;pointer-events:none}
-
-
 .share-btn{
   position:fixed;bottom:136px;right:20px;
-  width:36px;height:36px;border-radius:50%;
+  width:44px;height:44px;border-radius:50%;
   background:var(--bg2);border:1px solid var(--border);
   display:flex;align-items:center;justify-content:center;
   cursor:pointer;transition:all .2s;
@@ -149,11 +146,11 @@ body::before{
 
 /* ── GIFT BTN ── */
 .gift-btn{
-  position:fixed;bottom:90px;right:20px;
-  width:38px;height:38px;border-radius:50%;
+  position:fixed;bottom:88px;right:20px;
+  width:44px;height:44px;border-radius:50%;
   background:rgba(247,243,238,.08);
   border:1px solid rgba(247,243,238,.15);
-  font-size:17px;cursor:pointer;
+  font-size:18px;cursor:pointer;
   display:flex;align-items:center;justify-content:center;
   transition:all .25s;z-index:10;
 }
@@ -162,7 +159,7 @@ body::before{
 
 /* ── IMPACT BADGE ── */
 .impact-badge{
-  position:fixed;bottom:38px;left:16px;
+  position:fixed;bottom:20px;left:16px;
   font-family:'DM Mono',monospace;font-size:9px;
   letter-spacing:.06em;text-transform:uppercase;
   color:rgba(247,243,238,.22);
@@ -232,7 +229,8 @@ body::before{
 .petal-card:hover{transform:scale(1.05);box-shadow:0 14px 48px rgba(0,0,0,.5)}
 .petal-card:active{transform:scale(.96)!important;box-shadow:0 4px 20px rgba(0,0,0,.3)}
 .petal-card.active-card{border-top:2px solid var(--terracotta)}
-.petal-card.soon-card{background:var(--bg2);border:1px solid var(--border);border-top:2px solid var(--border)}
+.petal-card.soon-card{background:var(--bg2);border:1px solid var(--border);border-top:2px solid var(--border);opacity:.6;cursor:default}
+.petal-card.soon-card:hover{transform:none;box-shadow:0 8px 32px rgba(0,0,0,.4)}
 .petal-card.ai-card{background:#1c1a2e;border:1px solid #3a3460;border-top:2px solid #7c6fd4}
 
 .p-tag{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:var(--terracotta)}
@@ -330,6 +328,7 @@ body::before{
   animation:spin .8s linear infinite;margin:0 auto 12px;
 }
 @keyframes spin{to{transform:rotate(360deg)}}
+@keyframes sp{to{transform:rotate(360deg)}}
 .prompt-status{font-size:12px;color:var(--muted);font-family:'DM Mono',monospace}
 .prompt-dl-btn{
   width:100%;margin-top:10px;padding:11px;
@@ -373,7 +372,7 @@ iframe{flex:1;border:none;width:100%;background:var(--bg)}
 .footer-fixed{
   position:fixed;bottom:20px;left:16px;right:16px;text-align:center;
   font-family:'DM Mono',monospace;font-size:11px;
-  letter-spacing:.12em;color:#ffffff;opacity:.25;
+  letter-spacing:.12em;color:#ffffff;opacity:.45;
   text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 
@@ -395,14 +394,14 @@ iframe{flex:1;border:none;width:100%;background:var(--bg)}
   .k-ring{width:98px;height:98px}
   .k-ring.r2{width:144px;height:144px}
   .surprise-btn{bottom:82px}
-  .share-btn{bottom:136px;right:16px}
-  .gift-btn{bottom:90px;right:16px}
+  .share-btn{bottom:140px;right:14px;width:44px;height:44px}
+  .gift-btn{bottom:88px;right:14px;width:44px;height:44px}
   .k-wrap{margin-left:0}
   .stage{overflow:hidden}
 }
 /* ── LUNAR BADGE ── */
 #lunarBadge{
-  position:fixed;bottom:60px;left:16px;
+  position:fixed;bottom:42px;left:16px;
   display:none;align-items:center;gap:8px;
   padding:6px 14px 6px 10px;
   background:rgba(14,13,12,.9);
@@ -460,7 +459,7 @@ iframe{flex:1;border:none;width:100%;background:var(--bg)}
     </button>
   </div>
 
-  <div class="hint" id="hint">— Appuyez pour créer —</div>
+  <div class="hint" id="hint"></div>
   <button class="surprise-btn" id="surpriseBtn" onclick="surprendsMode()">✦ Surprends-moi</button>
 
   <!-- SHARE -->
@@ -785,6 +784,12 @@ async function initLunar() {
 }
 
 window.addEventListener('load', () => {
+  // Hint adapté au device
+  document.getElementById('hint').textContent =
+    ('ontouchstart' in window || navigator.maxTouchPoints > 0)
+      ? '— Appuyez pour créer —'
+      : '— Cliquez pour créer —';
+
   setTimeout(loadConfigFromURL, 1200);
   loadImpact();
   initLunar();
