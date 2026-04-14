@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>Kesk · Goodies personnalisés pour entreprises</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0e0d0c;
+  --bg2:#161412;
+  --cream:#F7F3EE;
+  --cream2:#ede8e1;
+  --terracotta:#B85C38;
+  --ink:#0e0d0c;
+  --muted:#5a5550;
+  --border:#2a2520;
+  --radius:14px;
+}
+
+html,body{
+  background:var(--bg);
+  color:var(--cream);
+  font-family:'DM Sans',sans-serif;
+  line-height:1.6;
+}
+
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:1000;opacity:.5;
+}
+
+/* HEADER */
+header{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:24px 48px;
+  border-bottom:1px solid var(--border);
+  background:var(--bg2);
+}
+
+.logo{
+  font-family:'Playfair Display',serif;font-size:24px;font-weight:700;
+  color:var(--cream);text-decoration:none;
+}
+
+nav a{
+  color:var(--muted);text-decoration:none;margin:0 24px;
+  transition:color 0.3s;
+}
+
+nav a:hover{color:var(--cream);}
+
+/* HERO */
+.hero{
+  padding:80px 48px;text-align:center;
+  border-bottom:1px solid var(--border);
+}
+
+.hero h1{
+  font-family:'Playfair Display',serif;font-size:56px;font-weight:700;
+  line-height:1.2;margin-bottom:16px;
+}
+
+.hero p{
+  font-size:18px;color:var(--muted);max-width:600px;margin:0 auto 48px;
+}
+
+.btn-primary{
+  display:inline-block;
+  background:var(--terracotta);color:var(--cream);
+  padding:14px 32px;border-radius:var(--radius);
+  text-decoration:none;font-weight:500;
+  border:none;cursor:pointer;
+  transition:background 0.3s;
+}
+
+.btn-primary:hover{background:rgba(184,92,56,0.8);}
+
+/* SECTIONS */
+.section{
+  padding:80px 48px;
+  border-bottom:1px solid var(--border);
+  max-width:1200px;margin:0 auto;
+}
+
+.section h2{
+  font-family:'Playfair Display',serif;font-size:36px;font-weight:700;
+  margin-bottom:48px;text-align:center;
+}
+
+/* WHY US */
+.why-cards{
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:32px;
+}
+
+.why-card{
+  padding:32px;background:var(--bg2);border-radius:var(--radius);
+  border-left:3px solid var(--terracotta);
+}
+
+.why-card h3{font-size:18px;margin-bottom:12px;}
+.why-card p{font-size:14px;color:var(--muted);line-height:1.8;}
+
+/* PORTFOLIO */
+.portfolio{
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:32px;
+}
+
+.portfolio-card{
+  padding:24px;background:var(--bg2);border-radius:var(--radius);
+  text-align:center;border:1px solid var(--border);
+}
+
+.portfolio-logo{
+  font-size:32px;margin-bottom:12px;color:var(--terracotta);
+}
+
+.portfolio-card h3{font-size:18px;margin-bottom:8px;}
+.portfolio-card p{font-size:13px;color:var(--muted);}
+
+/* PRODUCTS */
+.products-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:24px;
+}
+
+.product-card{
+  padding:28px;background:var(--bg2);border-radius:var(--radius);
+  border:1px solid var(--border);
+  text-align:center;
+}
+
+.product-emoji{
+  font-size:48px;margin-bottom:12px;
+}
+
+.product-card h3{font-size:16px;margin-bottom:8px;}
+.product-card p{font-size:13px;color:var(--muted);margin-bottom:12px;}
+.product-price{font-family:'DM Mono',monospace;color:var(--terracotta);font-weight:500;}
+
+/* PRICING */
+.pricing-table{
+  max-width:600px;margin:0 auto;border-collapse:collapse;
+}
+
+.pricing-table tr{border-bottom:1px solid var(--border);}
+.pricing-table td{padding:16px;text-align:left;}
+.pricing-table td:last-child{text-align:right;color:var(--terracotta);}
+.pricing-table th{background:var(--bg2);padding:16px;text-align:left;}
+
+/* CTA SECTION */
+.cta{
+  background:linear-gradient(135deg,var(--terracotta),rgba(184,92,56,0.6));
+  padding:80px 48px;text-align:center;
+  border-radius:var(--radius);
+}
+
+.cta h2{color:var(--cream);margin-bottom:24px;}
+.cta p{color:var(--cream);margin-bottom:32px;font-size:16px;}
+
+/* FOOTER */
+footer{
+  padding:48px;text-align:center;
+  border-top:1px solid var(--border);
+  color:var(--muted);
+}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  header{padding:16px 24px;}
+  .hero{padding:48px 24px;}
+  .hero h1{font-size:32px;}
+  .section{padding:48px 24px;}
+  .why-cards,.portfolio,.products-grid{grid-template-columns:1fr;}
+  nav{display:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <a href="/" class="logo">Kesk Studio</a>
+  <nav>
+    <a href="/">Hub</a>
+    <a href="#produits">Produits</a>
+    <a href="#contact">Contact</a>
+  </nav>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>Goodies personnalisés pour entreprises</h1>
+  <p>Objets uniques fabriqués artisanalement à Saillon. De la vache d'Hérens au mouton nez noir, créez des souvenirs inoubliables avec votre identité.</p>
+  <a href="#contact" class="btn-primary">Demander un devis →</a>
+</div>
+
+<!-- POURQUOI KESK -->
+<div class="section">
+  <h2>Pourquoi Kesk pour votre entreprise ?</h2>
+  <div class="why-cards">
+    <div class="why-card">
+      <h3>🇨🇭 Artisanal suisse</h3>
+      <p>Fabriqué 100% à Saillon, Valais. Chaque pièce raconte une histoire locale authentique.</p>
+    </div>
+    <div class="why-card">
+      <h3>🎨 Personnalisation illimitée</h3>
+      <p>Logo, couleurs, messages. Vos goodies à votre image, sans compromis.</p>
+    </div>
+    <div class="why-card">
+      <h3>⚡ Production rapide</h3>
+      <p>Devis sous 48h. Production 2-3 semaines. Livraison Suisse romande incluse.</p>
+    </div>
+  </div>
+</div>
+
+<!-- PORTFOLIO -->
+<div class="section">
+  <h2>Nos réalisations</h2>
+  <div class="portfolio">
+    <div class="portfolio-card">
+      <div class="portfolio-logo">🏦</div>
+      <h3>Raiffeisen Valais</h3>
+      <p>Animaux articulés personnalisés pour événements corporate</p>
+    </div>
+    <div class="portfolio-card">
+      <div class="portfolio-logo">🎠</div>
+      <h3>Barryland</h3>
+      <p>Tirelires chien St Bernard pour boutique souvenir</p>
+    </div>
+    <div class="portfolio-card">
+      <div class="portfolio-logo">🧀</div>
+      <h3>Rouvinez</h3>
+      <p>Moutons nez noirs personnalisés</p>
+    </div>
+  </div>
+</div>
+
+<!-- PRODUITS -->
+<div class="section" id="produits">
+  <h2>Catalogue produits</h2>
+  <div class="products-grid">
+    <div class="product-card">
+      <div class="product-emoji">🐄</div>
+      <h3>Vache d'Hérens</h3>
+      <p>Articulation complète, multicolore</p>
+      <div class="product-price">À partir de 18 CHF</div>
+    </div>
+    <div class="product-card">
+      <div class="product-emoji">🐐</div>
+      <h3>Bouquetin</h3>
+      <p>Détails fins, cornes sculptées</p>
+      <div class="product-price">À partir de 17 CHF</div>
+    </div>
+    <div class="product-card">
+      <div class="product-emoji">🐺</div>
+      <h3>Loup des Alpes</h3>
+      <p>Articulé, posture dynamique</p>
+      <div class="product-price">À partir de 19 CHF</div>
+    </div>
+    <div class="product-card">
+      <div class="product-emoji">🐕</div>
+      <h3>Tirelire St Bernard</h3>
+      <p>Détails réalistes, ouverture intérieure</p>
+      <div class="product-price">À partir de 25 CHF</div>
+    </div>
+    <div class="product-card">
+      <div class="product-emoji">🐑</div>
+      <h3>Mouton Nez Noir</h3>
+      <p>Pelage texturé, cornes sculptées</p>
+      <div class="product-price">À partir de 22 CHF</div>
+    </div>
+    <div class="product-card">
+      <div class="product-emoji">🦁</div>
+      <h3>Autres animaux</h3>
+      <p>Chamois, marmotte, aigles sur demande</p>
+      <div class="product-price">À partir de 16 CHF</div>
+    </div>
+  </div>
+</div>
+
+<!-- TARIFS -->
+<div class="section">
+  <h2>Tarifs selon quantité</h2>
+  <table class="pricing-table">
+    <thead>
+      <tr>
+        <th>Quantité</th>
+        <th>Prix unitaire (exemple vache Hérens)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1-50 pièces</td>
+        <td>18 CHF</td>
+      </tr>
+      <tr>
+        <td>51-200 pièces</td>
+        <td>14 CHF (-22%)</td>
+      </tr>
+      <tr>
+        <td>201-500 pièces</td>
+        <td>11 CHF (-39%)</td>
+      </tr>
+      <tr>
+        <td>501+ pièces</td>
+        <td>Tarif négocié</td>
+      </tr>
+    </tbody>
+  </table>
+  <p style="text-align:center;margin-top:24px;color:var(--muted);font-size:14px;">
+    Personnalisation + emballage personnalisé inclus. Livraison Suisse romande gratuite.
+  </p>
+</div>
+
+<!-- CTA -->
+<div class="section">
+  <div class="cta">
+    <h2>Prêt à personnaliser vos goodies ?</h2>
+    <p>Contactez-nous pour un devis personnalisé. Réponse sous 48h.</p>
+    <a href="mailto:contact@kesk.ch?subject=Devis%20goodies%20entreprise" class="btn-primary">Demander un devis →</a>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <p>Kesk Studio · Saillon, Valais · <a href="https://kesk.ch" style="color:var(--terracotta);text-decoration:none;">kesk.ch</a></p>
+  <p style="margin-top:12px;font-size:13px;">Tél. <a href="tel:+41" style="color:var(--terracotta);text-decoration:none;">sur demande</a> · 
+  <a href="mailto:contact@kesk.ch" style="color:var(--terracotta);text-decoration:none;">contact@kesk.ch</a></p>
+</footer>
+
+</body>
+</html>

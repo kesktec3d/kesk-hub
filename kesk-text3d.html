@@ -798,7 +798,7 @@ async function sendCapsule(){
       wrap.style.cssText = "text-align:center;padding:6px 0 2px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted,#9a948c);letter-spacing:.06em";
       const parts = [];
       if(d.total_created > 0) parts.push(d.total_created + ' créations');
-      else parts.push('Première création aujourd'hui ?');
+      else parts.push("Première création aujourd'hui ?");
       if(d.active_now > 1) parts.push(d.active_now + ' personnes configurent maintenant');
       wrap.textContent = parts.join(' · ');
       // Insérer sous le titre de la page

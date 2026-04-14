@@ -12,6 +12,7 @@
     { "src": "/constellation", "dest": "/kesk-constellation.html" },
     { "src": "/galerie", "dest": "/kesk-galerie.html" },
     { "src": "/badge", "dest": "/kesk-badge.html" },
+    { "src": "/entreprises", "dest": "/kesk-entreprises.html" },
     { "src": "/(.*\\.html)", "dest": "/$1" },
     { "src": "/(.*)", "dest": "/index.html" }
   ],
