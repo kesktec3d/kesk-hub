@@ -13,20 +13,23 @@
 <meta name="twitter:card" content="summary_large_image"/>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&family=Bebas+Neue&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0e0d0c;
-  --bg2:#161412;
-  --cream:#F7F3EE;
-  --cream2:#ede8e1;
-  --terracotta:#B85C38;
-  --ink:#0e0d0c;
-  --muted:#5a5550;
-  --border:#2a2520;
+  --bg:#F07060;
+  --bg2:#E25A46;
+  --pink-pale:#FDDDD5;
+  --blue:#C0E8F8;
+  --peach:#F5A878;
+  --cream:#FFFFFF;
+  --cream2:#FFF8F2;
+  --terracotta:#C03818;
+  --ink:#1A1614;
+  --muted:#7A5048;
+  --border:rgba(26,22,20,.14);
   --radius:14px;
 }
 
@@ -43,9 +46,45 @@ html,body{
 /* GRAIN */
 body::before{
   content:'';position:fixed;inset:0;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-  pointer-events:none;z-index:1000;opacity:.5;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:1000;opacity:.3;
 }
+
+/* ── HERO TITLE ── */
+.hero-title{
+  position:fixed;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  pointer-events:none;z-index:1;
+  transition:opacity .45s ease, transform .45s ease;
+}
+.hero-title.hide{opacity:0;transform:scale(.96)}
+.hero-big{
+  display:block;
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(88px,20vw,172px);
+  color:rgba(255,255,255,.18);
+  line-height:.85;
+  letter-spacing:.04em;
+  text-align:center;
+}
+
+/* ── BLOBS DÉCORATIFS ── */
+.deco-blob{
+  position:fixed;border-radius:50%;
+  background:rgba(255,255,255,.22);
+  pointer-events:none;z-index:0;
+  animation:blob-drift 7s ease-in-out infinite alternate;
+}
+.blob-a{width:380px;height:310px;top:-100px;left:-80px;animation-duration:8s}
+.blob-b{width:280px;height:330px;bottom:40px;right:-90px;animation-delay:-3s;animation-duration:9s}
+.blob-c{width:180px;height:180px;top:38%;left:8%;animation-delay:-1.5s;animation-duration:6s;background:rgba(255,255,255,.14)}
+@keyframes blob-drift{
+  0%{transform:translate(0,0) scale(1)}
+  100%{transform:translate(12px,18px) scale(1.04)}
+}
+
+/* ── PARTICLE CANVAS ── */
+#particleCanvas{position:fixed;inset:0;z-index:0;pointer-events:none}
 
 /* STAGE */
 .stage{
@@ -74,12 +113,13 @@ body::before{
 .footer-fixed{animation:fade-up .5s ease .9s both}
 .surprise-btn{
   position:fixed;bottom:82px;left:50%;transform:translateX(-50%);
-  background:transparent;border:1px solid rgba(247,243,238,0.2);
-  color:rgba(247,243,238,0.5);font-family:'DM Sans',sans-serif;
+  background:rgba(255,255,255,.35);border:1px solid rgba(255,255,255,.6);
+  color:rgba(26,22,20,.75);font-family:'DM Sans',sans-serif;
   font-size:12px;letter-spacing:.08em;padding:7px 18px;border-radius:99px;
   cursor:pointer;transition:all .3s;z-index:10;white-space:nowrap;
+  backdrop-filter:blur(6px);
 }
-.surprise-btn:hover{border-color:rgba(184,92,56,.6);color:var(--terracotta)}
+.surprise-btn:hover{background:rgba(255,255,255,.6);border-color:#fff;color:var(--ink)}
 .surprise-btn.hide{opacity:0;pointer-events:none}
 
 
@@ -103,10 +143,10 @@ body::before{
 .circular-text-wrap text{
   font-family:'DM Mono',monospace;
   font-size:11.5px;
-  fill:#ffffff;
+  fill:rgba(26,22,20,.5);
   letter-spacing:.18em;
   text-transform:uppercase;
-  opacity:.55;
+  opacity:1;
 }
 
 /* ── HINT ── */
@@ -115,7 +155,7 @@ body::before{
   text-align:center;
   font-family:'DM Mono',monospace;
   font-size:13px;letter-spacing:.2em;text-transform:uppercase;
-  color:#ffffff;opacity:.7;transition:opacity .5s;
+  color:rgba(26,22,20,.6);opacity:1;transition:opacity .5s;
   white-space:nowrap;
 }
 .hint.hide{opacity:0}
@@ -135,26 +175,27 @@ body::before{
 .share-btn{
   position:fixed;bottom:136px;right:20px;
   width:44px;height:44px;border-radius:50%;
-  background:var(--bg2);border:1px solid var(--border);
+  background:rgba(255,255,255,.45);border:1px solid rgba(255,255,255,.7);
   display:flex;align-items:center;justify-content:center;
   cursor:pointer;transition:all .2s;
-  opacity:.7;
+  backdrop-filter:blur(6px);
 }
-.share-btn:hover{opacity:1;border-color:var(--muted);transform:scale(1.08)}
-.share-btn svg{width:15px;height:15px;stroke:var(--muted);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.share-btn:hover{background:rgba(255,255,255,.75);transform:scale(1.08)}
+.share-btn svg{width:15px;height:15px;stroke:rgba(26,22,20,.7);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .share-btn.hide{opacity:0;pointer-events:none}
 
 /* ── GIFT BTN ── */
 .gift-btn{
   position:fixed;bottom:88px;right:20px;
   width:44px;height:44px;border-radius:50%;
-  background:rgba(247,243,238,.08);
-  border:1px solid rgba(247,243,238,.15);
+  background:rgba(255,255,255,.45);
+  border:1px solid rgba(255,255,255,.7);
   font-size:18px;cursor:pointer;
   display:flex;align-items:center;justify-content:center;
   transition:all .25s;z-index:10;
+  backdrop-filter:blur(6px);
 }
-.gift-btn:hover{background:rgba(184,92,56,.2);border-color:rgba(184,92,56,.4)}
+.gift-btn:hover{background:rgba(255,255,255,.75)}
 .gift-btn.hide{opacity:0;pointer-events:none}
 
 /* ── IMPACT BADGE ── */
@@ -162,7 +203,7 @@ body::before{
   position:fixed;bottom:20px;left:16px;
   font-family:'DM Mono',monospace;font-size:9px;
   letter-spacing:.06em;text-transform:uppercase;
-  color:rgba(247,243,238,.22);
+  color:rgba(26,22,20,.35);
   white-space:nowrap;pointer-events:none;text-align:left;
 }
 
@@ -174,10 +215,10 @@ body::before{
 }
 .k-ring{
   position:absolute;width:112px;height:112px;border-radius:50%;
-  border:1px solid var(--border);opacity:.6;
+  border:1px solid rgba(255,255,255,.45);opacity:.8;
 }
 .k-ring.r2{
-  width:164px;height:164px;opacity:.25;
+  width:164px;height:164px;opacity:.35;
   animation:pulse-ring 3s ease-in-out infinite;
 }
 @keyframes pulse-ring{
@@ -186,17 +227,17 @@ body::before{
 }
 .k-btn{
   position:relative;width:90px;height:90px;border-radius:50%;
-  background:var(--cream);border:none;cursor:pointer;
+  background:var(--ink);border:none;cursor:pointer;
   display:flex;align-items:center;justify-content:center;
   transition:all .5s cubic-bezier(.34,1.56,.64,1);
   z-index:2;
+  box-shadow:0 6px 28px rgba(26,22,20,.35);
 }
-.k-btn:hover{transform:scale(1.06);box-shadow:0 0 40px rgba(247,243,238,.08)}
-.k-btn.open{transform:scale(.92);background:var(--terracotta);box-shadow:0 0 60px rgba(184,92,56,.25)}
+.k-btn:hover{transform:scale(1.06);box-shadow:0 0 40px rgba(26,22,20,.3)}
+.k-btn.open{transform:scale(.92);background:var(--terracotta);box-shadow:0 0 60px rgba(192,56,24,.4)}
 .k-logo-svg{width:68px;height:68px;transition:opacity .3s}
-.k-logo-svg path{fill:var(--ink);transition:fill .3s}
+.k-logo-svg path{fill:var(--cream)!important;transition:fill .3s}
 .k-btn.open .k-logo-svg{opacity:0}
-.k-btn.open .k-logo-svg path{fill:var(--cream)!important}
 .k-close{
   position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
   opacity:0;transition:opacity .3s;
@@ -207,8 +248,8 @@ body::before{
 /* ── BACKDROP ── */
 .backdrop{
   position:fixed;inset:0;
-  background:radial-gradient(ellipse at 50% 50%,rgba(184,92,56,.07) 0%,rgba(14,13,12,.88) 55%,rgba(14,13,12,.96) 100%);
-  backdrop-filter:blur(6px);opacity:0;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 50%,rgba(240,112,96,.15) 0%,rgba(26,12,8,.86) 55%,rgba(20,8,4,.95) 100%);
+  backdrop-filter:blur(8px);opacity:0;pointer-events:none;
   transition:opacity .4s;z-index:4;
 }
 .backdrop.show{opacity:1;pointer-events:auto}
@@ -229,7 +270,7 @@ body::before{
 .petal-card:hover{transform:scale(1.05);box-shadow:0 14px 48px rgba(0,0,0,.5)}
 .petal-card:active{transform:scale(.96)!important;box-shadow:0 4px 20px rgba(0,0,0,.3)}
 .petal-card.active-card{border-top:2px solid var(--terracotta)}
-.petal-card.soon-card{background:var(--bg2);border:1px solid var(--border);border-top:2px solid var(--border);opacity:.6;cursor:default}
+.petal-card.soon-card{background:#F0E0DA;border:1px solid rgba(0,0,0,.1);border-top:2px solid rgba(0,0,0,.15);opacity:.55;cursor:default}
 .petal-card.soon-card:hover{transform:none;box-shadow:0 8px 32px rgba(0,0,0,.4)}
 .petal-card.ai-card{background:#1c1a2e;border:1px solid #3a3460;border-top:2px solid #7c6fd4}
 
@@ -372,7 +413,7 @@ iframe{flex:1;border:none;width:100%;background:var(--bg)}
 .footer-fixed{
   position:fixed;bottom:20px;left:16px;right:16px;text-align:center;
   font-family:'DM Mono',monospace;font-size:11px;
-  letter-spacing:.12em;color:#ffffff;opacity:.45;
+  letter-spacing:.12em;color:rgba(26,22,20,.5);opacity:1;
   text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 
@@ -388,11 +429,12 @@ iframe{flex:1;border:none;width:100%;background:var(--bg)}
   .p-name{font-size:12px}
   .p-desc{font-size:9px}
   .tagline-wrap{top:24px;font-size:9px}
-  .hint{bottom:44px;font-size:9px}
+  .hint{bottom:44px;font-size:9px;color:rgba(26,22,20,.55)}
   .k-btn{width:80px;height:80px}
   .k-logo-svg{width:62px;height:62px}
   .k-ring{width:98px;height:98px}
   .k-ring.r2{width:144px;height:144px}
+  .hero-big{font-size:clamp(60px,22vw,100px)}
   .surprise-btn{bottom:82px}
   .share-btn{bottom:140px;right:14px;width:44px;height:44px}
   .gift-btn{bottom:88px;right:14px;width:44px;height:44px}
@@ -404,7 +446,7 @@ iframe{flex:1;border:none;width:100%;background:var(--bg)}
   position:fixed;bottom:42px;left:16px;
   display:none;align-items:center;gap:8px;
   padding:6px 14px 6px 10px;
-  background:rgba(14,13,12,.9);
+  background:rgba(26,14,10,.85);
   border:1px solid var(--lunar-color,#c8f060);
   border-radius:99px;cursor:default;
   font-family:'DM Mono',monospace;font-size:10px;
@@ -424,8 +466,18 @@ iframe{flex:1;border:none;width:100%;background:var(--bg)}
 </style>
 </head>
 <body>
+<canvas id="particleCanvas"></canvas>
+<div class="deco-blob blob-a"></div>
+<div class="deco-blob blob-b"></div>
+<div class="deco-blob blob-c"></div>
+
 <div class="stage" id="stage">
 
+  <!-- HERO TITLE -->
+  <div class="hero-title" id="heroTitle">
+    <span class="hero-big">SUR</span>
+    <span class="hero-big">MESURE</span>
+  </div>
 
   <!-- TEXTE CIRCULAIRE centré sur l'écran -->
   <div class="circular-text-wrap" id="circularTextWrap">
@@ -477,9 +529,9 @@ iframe{flex:1;border:none;width:100%;background:var(--bg)}
   </div>
   <div class="footer-fixed">
     kesk.ch · Saillon, Valais &nbsp;·&nbsp; 
-    <span id="impactNum" style="color:rgba(184,92,56,.6)">—</span> kg recyclés
-    &nbsp;·&nbsp; 
-    <a href="/entreprises" style="color:rgba(184,92,56,.7);text-decoration:none;transition:color .2s" onmouseover="this.style.color='#B85C38'" onmouseout="this.style.color='rgba(184,92,56,.7)'">Entreprises</a>
+    <span id="impactNum" style="color:rgba(192,56,24,.75)">—</span> kg recyclés
+    &nbsp;·&nbsp;
+    <a href="/entreprises" style="color:rgba(192,56,24,.75);text-decoration:none;transition:color .2s" onmouseover="this.style.color='#C03818'" onmouseout="this.style.color='rgba(192,56,24,.75)'">Entreprises</a>
   </div>
 </div>
 
@@ -878,6 +930,7 @@ function openMenu(){
   document.getElementById('shareBtn').classList.add('hide');
   document.getElementById('surpriseBtn').classList.add('hide');
   document.getElementById('giftBtn').classList.add('hide');
+  document.getElementById('heroTitle').classList.add('hide');
   const container=document.getElementById('petals');
   container.innerHTML='';
   isMobile() ? _openMobile(container) : _openDesktop(container);
@@ -983,6 +1036,7 @@ function closeMenu(){
   document.getElementById('shareBtn').classList.remove('hide');
   document.getElementById('surpriseBtn').classList.remove('hide');
   document.getElementById('giftBtn').classList.remove('hide');
+  document.getElementById('heroTitle').classList.remove('hide');
 
   const mob=isMobile();
   document.querySelectorAll('.petal').forEach(el=>{
@@ -1665,6 +1719,58 @@ function initDuoMode() {
     setTimeout(() => banner.style.display = 'none', 600);
   }, 5000);
 }
+
+// ── PARTICULES FLOTTANTES ────────────────────────────────────
+(function(){
+  const canvas = document.getElementById('particleCanvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let W, H, particles = [];
+
+  function resize(){
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  const COLORS = [
+    '255,255,255',   // blanc
+    '255,230,215',   // crème rose
+    '192,232,248',   // bleu pâle
+    '245,168,120',   // pêche
+  ];
+
+  function mkParticle(scatter){
+    return {
+      x: Math.random() * (W||400),
+      y: scatter ? Math.random() * (H||800) : (H||800) + 8,
+      r: 1.2 + Math.random() * 2.8,
+      speed: 0.28 + Math.random() * 0.55,
+      drift: (Math.random() - 0.5) * 0.22,
+      alpha: 0.08 + Math.random() * 0.22,
+      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+    };
+  }
+
+  resize();
+  window.addEventListener('resize', resize);
+
+  for(let i = 0; i < 90; i++) particles.push(mkParticle(true));
+
+  function loop(){
+    ctx.clearRect(0, 0, W, H);
+    for(let p of particles){
+      p.y -= p.speed;
+      p.x += p.drift;
+      if(p.y < -8){ Object.assign(p, mkParticle(false)); }
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(${p.color},${p.alpha})`;
+      ctx.fill();
+    }
+    requestAnimationFrame(loop);
+  }
+  loop();
+})();
 
 </script>
 </body>
