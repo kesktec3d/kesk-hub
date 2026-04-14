@@ -893,12 +893,23 @@ function startMirrorCapture() {
 
   btn.textContent = '⏺ Enregistrement…'; btn.disabled = true;
 
-  const stream = canvas.captureStream(30);
-  const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 4000000 });
+  let stream, recorder;
+  try {
+    stream = canvas.captureStream(30);
+    recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 4000000 });
+  } catch (err) {
+    btn.textContent = '✦ Télécharger l\'animation'; btn.disabled = false;
+    alert('Impossible de démarrer la capture. Essayez Chrome ou Firefox.');
+    return;
+  }
   const chunks = [];
 
   recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
   recorder.onstop = () => {
+    if (chunks.length === 0) {
+      btn.textContent = '✦ Télécharger l\'animation'; btn.disabled = false;
+      return;
+    }
     const blob = new Blob(chunks, { type: mimeType });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -908,6 +919,7 @@ function startMirrorCapture() {
     a.click();
     document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(url), 1000);
+    stream.getTracks().forEach(t => t.stop());
     btn.textContent = '✦ Télécharger l\'animation'; btn.disabled = false;
   };
 
